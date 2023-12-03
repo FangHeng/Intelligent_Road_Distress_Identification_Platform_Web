@@ -1,0 +1,20 @@
+.custom-upload .ant-upload-list-item .ant-upload-list-item-done{
+    width: 200px !important;
+    height: 200px !important;
+}
+
+.custom-upload .ant-upload-list-item-container {
+    width: 190px !important;
+    height: 190px !important;
+    margin: 16px !important;
+}
+
+.custom-upload .ant-upload-select{
+    width: 190px !important;
+    height: 190px !important;
+    margin: 16px !important;
+}
+
+
+
+

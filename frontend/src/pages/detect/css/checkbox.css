@@ -1,0 +1,18 @@
+.large-font-checkbox .ant-checkbox-wrapper {
+    font-size: 16px;
+}
+
+/* 增大所有文本的默认大小 */
+.card-content {
+    font-size: 16px;
+}
+
+/* 特定于阈值的样式 */
+.threshold-label {
+    font-weight: bold;
+}
+
+/* 增大特定 Checkbox 的字体大小 */
+.large-font-checkbox-item {
+    font-size: 16px;
+}
