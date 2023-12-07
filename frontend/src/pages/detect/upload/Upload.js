@@ -48,6 +48,7 @@ const ImageUploadPage = () => {
                 fileList={fileList}
                 beforeUpload={beforeUpload}
                 onChange={handleChange}
+                multiple={true}
             >
                 {fileList.length >= 16 ? null : uploadButton}
             </Upload>

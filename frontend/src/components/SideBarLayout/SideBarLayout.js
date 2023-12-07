@@ -11,27 +11,30 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHouse, faArrowRightFromBracket, faGears, faCircleInfo, faChartColumn, faCube } from '@fortawesome/free-solid-svg-icons';
 import {
     LineOutlined, ExportOutlined, FileSearchOutlined, AlertOutlined
-} from "@ant-design/icons"; // 引入需要的图标
+} from "@ant-design/icons";
+import { observer } from 'mobx-react-lite'
+import {userStore} from '../../store/userStore'
 
 const { Text } = Typography
-const { Header, Sider, Content, Footer } = Layout
-const SideBarLayout = () => {
+const { Sider, Content, Footer } = Layout
+
+const SideBarLayout = observer(() => {
     const [collapsed, setCollapsed] = useState(false)
     const navigate = useNavigate()
     const {
         token: { colorBgContainer },
     } = theme.useToken()
 
-    // 在每次页面加载之前先验证是否登录
     useEffect(() => {
-        const isLogin = atob(getCookie('isLogin')) //解码
-        if (isLogin) {
-            console.log('登陆成功')
-        } else {
-            message.error('访问失败，请先登录！')
-            navigate('/')
+        userStore.fetchUserInfo();
+        const {loginHint} = userStore
+        if (loginHint.status === 'success'){
+            message.success('登陆成功！')
         }
     }, [])
+
+    // 使用 userStore 中的用户数据
+    const { username, avatar } = userStore.userInfo;
 
     return (
         <Layout style={{ width: '100vw', height: '100vh', overflow: 'initial'}}>
@@ -92,6 +95,10 @@ const SideBarLayout = () => {
                                     label: '个人信息',
                                 },
                                 {
+                                    key: '/pages/settings/ModelSelect',
+                                    label: '模型选择',
+                                },
+                                {
                                     key: '/pages/settings/SubordinateUserRegistration',
                                     label: '下属用户注册',
                                 },
@@ -135,10 +142,8 @@ const SideBarLayout = () => {
                 <div style={{ position: 'absolute', bottom: 0, width: '100%', alignItems:'center' }}>
                     <Divider></Divider>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent:'center', marginBottom:'10px' }}>
-                        <Avatar size={40} src={MaleAvatar}></Avatar>
-                        {/* 可以替换上面的 'U' 为用户的名字首字母或添加 src 属性来使用用户的图片 */}
-                        {/* 根据侧边栏是否折叠来显示用户名 */}
-                        {!collapsed && <Text style={{ marginLeft: '10px', color: 'rgba(0, 0, 0, 0.65)' }}>Jing Cheng</Text>}
+                        <Avatar size={40} src={avatar || MaleAvatar} />
+                        {!collapsed && <Text style={{ marginLeft: '10px', color: 'rgba(0, 0, 0, 0.65)' }}>{username}</Text>}
                     </div>
                 </div>
 
@@ -146,8 +151,8 @@ const SideBarLayout = () => {
             <Layout style={{ overflow: 'auto' }}>
                 <Content
                     style={{
-                        margin: '0px 16px',
-                        padding: 30,
+                        margin: '0px 8px',
+                        padding: 24,
                         minHeight: 280,
                         // background: colorBgContainer,
                     }}
@@ -173,5 +178,6 @@ const SideBarLayout = () => {
             </Layout>
         </Layout>
     )
-}
+})
+
 export default SideBarLayout

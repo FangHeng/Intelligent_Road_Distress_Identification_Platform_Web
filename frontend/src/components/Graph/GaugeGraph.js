@@ -1,44 +1,37 @@
-
-import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
 import { Gauge } from '@ant-design/plots';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import {Card} from "antd";
 
 const DemoGauge = () => {
     const config = {
-        percent: 0.75,
-        range: {
-            ticks: [0, 1 / 3, 2 / 3, 1],
-            color: ['#F4664A', '#FAAD14', '#30BF78'],
+        width: 720,
+        height: 720,
+        autoFit: true,
+        data: {
+            target: 159,
+            total: 400,
+            name: 'score',
+            thresholds: [100, 200, 400],
         },
-        indicator: {
-            pointer: {
-                style: {
-                    stroke: '#D0D0D0',
-                },
-            },
-            pin: {
-                style: {
-                    stroke: '#D0D0D0',
-                },
+        legend: false,
+        scale: {
+            color: {
+                range: ['#F4664A', '#FAAD14', 'green'],
             },
         },
-        statistic: {
-            content: {
-                style: {
-                    fontSize: '36px',
-                    lineHeight: '36px',
-                },
-            },
+        style: {
+            textContent: (target, total) => `得分：${target}\n占比：${(target / total) * 100}%`,
         },
     };
     return (
-        <Card title="Card 2">
-        <Gauge {...config} style={{
-            height: '300px',
-        }}/>
+        <Card title="Gauge Chart" style={{ width: '100%' }}>
+            <Gauge {...config}
+                containerStyle={{width: '100%', height: '40vh'}}
+            />
         </Card>
-)
+        )
+
 };
 
 export default DemoGauge;

@@ -98,7 +98,7 @@ const Visualize = () => {
     return (
         <Row gutter={24}>
             <Col span={18}>
-                <Card title={cardTitle} style={{ height: '90vh', overflow: 'auto' }} >
+                <Card title={cardTitle} style={{ height: '95vh', overflow: 'auto' }} >
                         {viewMode === 'grid' ? gridView : listView}
                 </Card>
             </Col>
@@ -134,7 +134,7 @@ const Visualize = () => {
             </Modal>
 
             <Col span={6}>
-                <Card title="调参面板" style={{ height: '90vh' }}>
+                <Card title="调参面板" style={{ height: '95vh' }}>
                     <div className="threshold-label">阈值:<DecimalStep /></div>
                     {/*<Select defaultValue="upload" style={{ width: '100%', marginTop: '20px' }}>*/}
                     {/*    <Option value="upload">Upload Data</Option>*/}

@@ -49,7 +49,7 @@ const Detect = () => {
     return (
         <Row gutter={24}>
             <Col span={18}>
-                <Card title="历史记录" style={{ height: '90vh', overflow: 'auto' }} >
+                <Card title="历史记录" style={{ height: '95vh', overflow: 'auto' }} >
                     <List
                         size="large"
                         bordered
@@ -68,7 +68,7 @@ const Detect = () => {
                 </Card>
             </Col>
             <Col span={6}>
-                <Card title="调参面板" style={{ height: '90vh' }}>
+                <Card title="调参面板" style={{ height: '95vh' }}>
                     <div className="threshold-label">阈值:<DecimalStep /></div>
                     <div style={{ marginTop: '5px'}} className="threshold-label">预测展示：</div>
                     <Select defaultValue="all" style={{ width: '100%', marginTop: '20px' }}>

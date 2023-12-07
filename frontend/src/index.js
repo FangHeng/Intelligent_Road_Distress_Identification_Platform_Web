@@ -5,9 +5,8 @@ import 'antd/dist/reset.css';
 import zhCN from 'antd/lib/locale/zh_CN';
 import {ConfigProvider} from 'antd';
 import {HashRouter, Routes, Route} from 'react-router-dom';
-import LoginPage from './pages/Login/login';
+import Login from './pages/Login/login';
 import SideBarLayout from './components/SideBarLayout/SideBarLayout';
-
 import Home from "./pages/home/home";
 import SubordinateUserRegistration from "./pages/settings/SubordinateUserRegistration";
 import UserSetting from "./pages/settings/UserSetting";
@@ -17,14 +16,14 @@ import Detect from "./pages/detect/Detect";
 import Tabs from "./pages/detect/upload/Tabs";
 import QA from "./pages/QA/QA";
 import ReleaseNotes from "./pages/releasenotes/ReleaseNotes";
+import ModelSelect from "./pages/settings/ModelSelect";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <HashRouter>
-
         <ConfigProvider locale={zhCN}>
             <Routes>
-                <Route path='' element={<LoginPage/>}/>
+                <Route path='' element={<Login/>}/>
                 <Route path="/qa" element={<QA/>}/>
                 <Route path="/release-notes" element={<ReleaseNotes/>}/>
                 <Route path="/pages/" element={<SideBarLayout/>}>
@@ -36,9 +35,8 @@ root.render(
                     {/*这是设置*/}
                     <Route path="/pages/settings/UserSetting" element={<UserSetting/>}/>
                     <Route path="/pages/settings/SubordinateUserRegistration" element={<SubordinateUserRegistration/>}/>
+                    <Route path="/pages/settings/ModelSelect" element={<ModelSelect/>}/>
                     <Route path="/pages/about" element={<About/>}/>
-
-
                 </Route>
             </Routes>
 

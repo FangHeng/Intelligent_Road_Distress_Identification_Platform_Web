@@ -18,7 +18,7 @@ const items = [
 const Image2Image =()=>{
     return (
         <div style={{
-            marginTop: '-30px',
+            marginTop: '-20px',
         }}>
             <Tabs defaultActiveKey="1" items={items} />
         </div>

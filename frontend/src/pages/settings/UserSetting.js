@@ -1,79 +1,134 @@
-import React, {useState} from 'react';
+import React, {useEffect} from 'react';
 import {
     Card,
     Form,
     Input,
     Button,
-    Radio,
-    Descriptions,
     Space,
     Row,
     Col,
     Upload,
     Tag,
     Avatar,
-    Divider, Dropdown
+    Select,
+    message,
 } from 'antd';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBolt, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
-import {EditOutlined, } from "@ant-design/icons";
-import MaleAvatar from '../../assets/Male.png'
+import {EditOutlined,} from "@ant-design/icons";
+import {userStore} from '../../store/userStore'
+import { observer } from 'mobx-react-lite'
 
-const UserSetting = () => {
-    const [preferredModel, setPreferredModel] = useState('default');
-    const [selectedSubModel, setSelectedSubModel] = useState('');
-    const [loading, setLoading] = useState(false);
 
-    // 用于根据selectedSubModel的值映射相应的显示标签
-    const advancedModelLabels = {
-        'wsplin_ip': 'wsplin_ip',
-        'wsplin_sp': 'wsplin_sp',
-        'PicT': 'PicT'
+const {Option} = Select;
+const formItemLayout = {
+    labelCol: {
+        xs: {span: 24},
+        sm: {span: 2},
+    },
+    wrapperCol: {
+        xs: {span: 24},
+        sm: {span: 16},
+    },
+};
+
+const tailFormItemLayout = {
+    wrapperCol: {
+        xs: {
+            span: 24,
+            offset: 0,
+        },
+        sm: {
+            span: 16,
+            offset: 8,
+        },
+    },
+};
+
+
+
+const UserSetting = observer(() => {
+    const {userInfo, infoChangeHint} = userStore;
+
+    useEffect(() => {
+        form.setFieldsValue({
+            email: userInfo.email,
+            phone: userInfo.phone,
+            password: userInfo.password,
+            confirm: userInfo.password,
+            nickname: userInfo.username,
+            gender: userInfo.gender,
+            company: userInfo.companyName,
+            numberCode: userInfo.numberCode,
+        });
+    }, [userInfo]);
+
+    const [form] = Form.useForm();
+    const onFinish = (values) => {
+        console.log('Received values of form: ', values);
+    //     对mobx中的数据进行更新，并更新到数据库中
+        userStore.updateUserInfo(values);
+        console.log(infoChangeHint)
+        if (infoChangeHint.status === 'success'){
+            message.success(infoChangeHint.message)
+        }else{
+            message.error(infoChangeHint.message)
+        }
+
     };
 
-    const handleModelChange = e => {
-        setPreferredModel(e.target.value);
-        // 如果选择默认模型，重置子模型选择
-        if (e.target.value === 'default') {
-            setSelectedSubModel(null);
+    const handleUpload = async ({ file }) => {
+        try{
+            // 创建一个 FormData 对象来存储文件
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            // 上传文件到服务器
+            const response = await fetch('http://your-backend-url/api/upload-avatar', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // 假设服务器返回的数据中包含了新的头像的 URL
+                userStore.updateUserInfo({ avatar: data.avatar });
+                if (infoChangeHint.status === 'success'){
+                    message.success(infoChangeHint.message)
+                }else{
+                    message.error(infoChangeHint.message)
+                }
+            } else {
+                message.error('头像更新失败！')
+                console.error('Failed to upload file.');
+            }
+        }catch (error) {
+            message.error('头像更新失败！')
+            console.log(error)
         }
     };
 
-    const handleSubModelChange = ({ key }) => {
-        setSelectedSubModel(key);
-        // 当选择子模型时，自动切换到高级模型
-        setPreferredModel('advanced');
-    };
-
-    const advancedOptions = [
-        { key: 'wsplin_ip', label: 'wsplin_ip' },
-        { key: 'wsplin_sp', label: 'wsplin_sp' },
-        { key: 'PicT', label: 'PicT' }
-    ];
-
-    const selectedSubModelLabel = advancedModelLabels[selectedSubModel] || '高级模型';
-
-    // 假设这是用户的标签
-    const userTags = ['管理员'];
-
-    const dummyRequest = ({ file, onSuccess }) => {
-        // 模拟上传过程
-        setTimeout(() => {
-            onSuccess("ok");
-        }, 0);
-    };
+    const prefixSelector = (
+        <Form.Item name="prefix" noStyle>
+            <Select
+                style={{
+                    width: 70,
+                }}
+            >
+                <Option value="86">+86</Option>
+                <Option value="87">+87</Option>
+            </Select>
+        </Form.Item>
+    );
 
     const uploadButton = (
         <div>
-            <Avatar size={128} src={MaleAvatar} />
-            <div style={{ position: 'absolute', right: 0, top: 0 }}>
+            <Avatar size={128} src={userInfo.avatar}/>
+            <div style={{position: 'absolute', right: 0, top: 0}}>
                 <Upload
                     accept="image/*"
                     showUploadList={false}
-                    customRequest={dummyRequest}
-                    // beforeUpload={beforeUpload} // 实际项目中您需要实现这个函数
+                    onChange={handleUpload}
                 >
-                    <Button shape="circle" icon={<EditOutlined />} />
+                    <Button shape="circle" icon={<EditOutlined/>}/>
                 </Upload>
             </div>
         </div>
@@ -90,81 +145,164 @@ const UserSetting = () => {
         >
             <Card title="用户信息设置">
                 <Row gutter={24}>
-                    <Col span={6}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent:'center', }}>
-                            <Col span={8} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <Col span={7}>
+                        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center',}}>
+                            <Col span={8} style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
                                 {uploadButton}
-                                <h5>JingCheng</h5>
-                                <h5>123@qq.com</h5>
-                                {userTags.map(tag => (
-                                    <Tag key={tag} color='success'>{tag}</Tag>
-                                ))}
+                                <h5>{userInfo.username}</h5>
+                                <h5>{userInfo.jobNumber}</h5>
+                                <Tag key={userInfo.userLevel} color='processing' bordered={false}>{userInfo.userLevel}</Tag>
                             </Col>
                         </div>
                     </Col>
-                    <Divider type="vertical" style={{ height: '100%', margin: '20px 0' }} />
-                    <Col span={17}>
+
+                    <Col span={16}>
                         <Form
+                            {...formItemLayout}
+                            form={form}
                             name="userSetting"
-                            // onFinish={handleFinish} // 处理表单提交的函数
+                            onFinish={onFinish}
+                            initialValues={{
+                                prefix: '86',
+                            }}
+                            scrollToFirstError
                         >
-                            <Form.Item
-                                name="username"
-                                rules={[{ required: true, message: '请输入您的用户名！' }]}
-                            >
-                                <Input placeholder="用户名" />
+                            <Form.Item name="email" label="邮箱" rules={[
+                                {
+                                    type: 'email',
+                                    message: '输入的电子邮件无效！',
+                                },
+                                {
+                                    required: true,
+                                    message: '请输入您的电子邮件！',
+                                },
+                            ]}>
+                                <Input/>
                             </Form.Item>
+
+
                             <Form.Item
-                                name="email"
-                                rules={[{ required: true, message: '请输入您的邮箱！' }]}
+                                name="phone"
+                                label="电话号码"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: '请输入您的电话号码！',
+                                    },
+                                ]}
                             >
-                                <Input placeholder="邮箱" />
+                                <Input
+                                    addonBefore={prefixSelector}
+                                    style={{
+                                        width: '100%',
+                                    }}
+                                />
                             </Form.Item>
+
+
+                            <Form.Item name="password" label="密码" rules={[
+                                {
+                                    required: true,
+                                    message: '请输入您的密码！',
+                                },
+                            ]}
+                                       hasFeedback>
+                                <Input.Password/>
+                            </Form.Item>
+
+
                             <Form.Item
-                                name="password"
-                                rules={[{ required: true, message: '请输入您的密码！' }]}
+                                name="confirm"
+                                label="确认密码"
+                                dependencies={['password']}
+                                hasFeedback
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: '请确认您的密码!',
+                                    },
+                                    ({getFieldValue}) => ({
+                                        validator(_, value) {
+                                            if (!value || getFieldValue('password') === value) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('您输入的新密码不匹配！'));
+                                        },
+                                    }),
+                                ]}
                             >
-                                <Input.Password placeholder="密码" />
+                                <Input.Password/>
                             </Form.Item>
-                            <Form.Item>
+
+
+                            <Form.Item
+                                name="nickname"
+                                label="昵称"
+                                tooltip="你希望别人怎么称呼你？"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: '请输入您的昵称！',
+                                        whitespace: true,
+                                    },
+                                ]}
+                            >
+                                <Input/>
+                            </Form.Item>
+
+
+                            <Form.Item
+                                name="gender"
+                                label="性别"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: '请选择性别！',
+                                    },
+                                ]}
+                            >
+                                <Select placeholder="请选择性别">
+                                    <Option value="male">男</Option>
+                                    <Option value="female">女</Option>
+                                    <Option value="other">其他</Option>
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item name="company" label="公司" rules={[
+                                {
+                                    required: true,
+                                    message: '请输入您的公司！',
+                                },
+                            ]}>
+                                <Input/>
+                            </Form.Item>
+
+
+                            <Form.Item name="numberCode" label="工号位数" rules={[
+                                {
+                                    required: true,
+                                    message: '请输入您的公司工号位数！',
+                                },
+                            ]}>
+                                <Input/>
+                            </Form.Item>
+
+                            <Form.Item {...tailFormItemLayout}>
                                 <Button type="primary" htmlType="submit">
-                                    提交
+                                    确认
                                 </Button>
                             </Form.Item>
                         </Form>
                     </Col>
                 </Row>
             </Card>
-
-            <Card title="首选模型设置" style={{ width: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Radio.Group onChange={handleModelChange} value={preferredModel} size="large">
-                        <Radio.Button value="default">
-                            <FontAwesomeIcon icon={faBolt} style={{ marginRight: 8, color: '#28a745' }} />默认模型
-                        </Radio.Button>
-                        <Dropdown menu={{
-                            items:advancedOptions,
-                            selectable:true,
-                            defaultSelectedKeys:['wsplin_ip'],
-                            onClick:handleSubModelChange
-                        }}>
-                            <Radio.Button value="advanced">
-                                <FontAwesomeIcon icon={faWandMagicSparkles} style={{ marginRight: 8, color: '#854eea' }}/>
-                                {selectedSubModelLabel}
-                            </Radio.Button>
-                        </Dropdown>
-                    </Radio.Group>
-                </div>
-
-                <Descriptions title="模型详情">
-                    {preferredModel === 'default' && <Descriptions.Item label="Default Model">采用 Swin Transformer 对病害图像进行分类</Descriptions.Item>}
-                    {selectedSubModel === 'wsplin_ip' && <Descriptions.Item label="wsplin_ip">Advanced Model - wsplin_ip 详情</Descriptions.Item>}
-                    {selectedSubModel === 'wsplin_sp' && <Descriptions.Item label="wsplin_sp">Advanced Model - wsplin_sp 详情</Descriptions.Item>}
-                    {selectedSubModel === 'PicT' && <Descriptions.Item label="PicT">Advanced Model - PicT 详情</Descriptions.Item>}
-                </Descriptions>
-            </Card>
         </Space>
     );
-};
+})
 
 export default UserSetting;

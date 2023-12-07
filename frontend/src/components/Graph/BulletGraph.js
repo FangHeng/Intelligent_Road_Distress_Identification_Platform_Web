@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { Bullet } from '@ant-design/plots';
 import {Card} from "antd";
@@ -6,124 +6,49 @@ import {Card} from "antd";
 const DemoBullet = () => {
     const data = [
         {
-            title: '重庆',
-            ranges: [30, 90, 120],
-            measures: [65],
-            target: 80,
+            title: '5🌟',
+            ranges: [100, 80],
+            measures: [50, 40],
+            targets: [85],
         },
         {
-            title: '杭州',
-            ranges: [30, 90, 120],
-            measures: [50],
-            target: 100,
+            title: '4🌟',
+            ranges: [100, 10],
+            measures: [12, 40],
+            targets: [40, 70],
         },
         {
-            title: '广州',
-            ranges: [30, 90, 120],
-            measures: [40],
-            target: 85,
+            title: '3🌟',
+            ranges: [100],
+            measures: [20],
+            targets: [22],
         },
         {
-            title: '深圳',
-            ranges: [30, 90, 120],
-            measures: [50],
-            target: 100,
+            title: '0-2🌟',
+            ranges: [100],
+            measures: [30],
+            targets: [10],
         },
     ];
+
+    const color = {
+        ranges: ['#FFbcb8', '#FFe0b0', '#bfeec8'],
+        measures: ['#5B8FF9', '#61DDAA'],
+        targets: ['#f0f'],
+    };
+
     const config = {
         data,
-        measureField: 'measures',
-        rangeField: 'ranges',
-        targetField: 'target',
-        xField: 'title',
-        autoFit: true,
-        color: {
-            range: ['#FFbcb8', '#FFe0b0', '#bfeec8'],
-            measure: '#5B8FF9',
-            target: '#39a3f4',
-        },
-        label: {
-            measure: {
-                position: 'middle',
-                style: {
-                    fill: '#fff',
-                },
-            },
-        },
-        xAxis: {
-            line: null,
-        },
-        yAxis: false,
-        // 自定义 legend
-        legend: {
-            custom: true,
-            position: 'bottom',
-            items: [
-                {
-                    value: '差',
-                    name: '差',
-                    marker: {
-                        symbol: 'square',
-                        style: {
-                            fill: '#FFbcb8',
-                            r: 5,
-                        },
-                    },
-                },
-                {
-                    value: '良',
-                    name: '良',
-                    marker: {
-                        symbol: 'square',
-                        style: {
-                            fill: '#FFe0b0',
-                            r: 5,
-                        },
-                    },
-                },
-                {
-                    value: '优',
-                    name: '优',
-                    marker: {
-                        symbol: 'square',
-                        style: {
-                            fill: '#bfeec8',
-                            r: 5,
-                        },
-                    },
-                },
-                {
-                    value: '实际值',
-                    name: '实际值',
-                    marker: {
-                        symbol: 'square',
-                        style: {
-                            fill: '#5B8FF9',
-                            r: 5,
-                        },
-                    },
-                },
-                {
-                    value: '目标值',
-                    name: '目标值',
-                    marker: {
-                        symbol: 'line',
-                        style: {
-                            stroke: '#39a3f4',
-                            r: 5,
-                        },
-                    },
-                },
-            ],
-        },
+        color,
     };
-    return(
-            <Card title="Card 3">
-                <Bullet {...config}  style={{
-                    height: '300px',
-                }}/>
-            </Card>
-        )
+
+    return (
+        <Card title="Bullet Chart" style={{ width: '100%' }}>
+            <Bullet {...config}
+                containerStyle={{width: '100%', height: '30vh'}}
+            />
+        </Card>
+    );
 };
 
 export default DemoBullet;

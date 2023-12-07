@@ -5,11 +5,16 @@ import { useNavigate } from 'react-router-dom'; //history对象用不了了，�
 import {UserOutlined, LockOutlined, MailOutlined} from '@ant-design/icons';
 import { setCookie } from '../../utils/utils';
 import backgroundImage from '../../assets/background.jpg';
+import {userStore} from '../../store/userStore'
+import { observer } from 'mobx-react-lite'
 
-const LoginPage = () => {
-    const [loading, setLoading] = useState(false);
+const Login = observer(() => {
     const navigate = useNavigate(); // 获取 history 对象
-    // 注册模态框
+
+    const [jobNumber, setJobNumber] = useState('');
+    const [password, setPassword] = useState('');
+
+    // 忘记密码模态框
     const [visible, setVisible] = useState(false);
 
     const showModal = () => {
@@ -26,146 +31,96 @@ const LoginPage = () => {
         setVisible(false);
     };
 
-
-    // 登录方法
-    const handleSubmit = async (values) => {
-        setLoading(true);
-
-
-
-
-
-
-
-
-        const fetchPromise = fetch('http://127.0.0.1:3001/mongodb/login', {
-            method: 'POST',
-            body: JSON.stringify({ userid: values.username,password:values.password }),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('请求超时，请稍后再试')), 3000)
-        );
-
-        try {
-            const response = await Promise.race([fetchPromise, timeoutPromise]);
-            console.log(response);
-            if(response.status===200){
-                console.log("登陆成功");
-                setLoading(false);
-                message.success('登录成功！');
-                setCookie('isLogin', btoa('true')) //最简单的加密方式
-                setCookie('userId',values.username)
-                navigate('/pages/'); // 跳转到导航页面
-            }else{
-                setLoading(false);
-                message.error('登录失败，请检查您的用户名和密码！');
-            }
-        } catch (error) {
-            console.log(error);
-            setLoading(false);
-            message.error('请求超时，请稍后再试');
+    const handleLogin = async () => {
+        await userStore.login(jobNumber, password);
+        if (userStore.isLoggedIn) {
+            navigate('/pages');
         }
     };
 
-
-
     return (
         <div style={styles.container}>
-
             <div style={styles.loginBox}>
                 <h1 style={styles.title}>智能道路病害识别平台</h1>
 
                 <Form
                     name="normal_login"
-
-
-                    initialValues={{ remember: true }}
-                    onFinish={handleSubmit}
+                    onFinish={handleLogin}
                 >
                     <Form.Item
-                        name="username"
-                        style={{marginTop:30}}
-                        rules={[{ required: true, message: '请输入您的用户名！' }]}
+                        name="jobNumber"
+                        style={{marginTop: 30}}
+                        rules={[{required: true, message: '请输入您的工号！'}]}
                     >
-                        <Input prefix={<UserOutlined />} placeholder="用户名" />
+                        <Input prefix={<UserOutlined/>} placeholder="工号" value={jobNumber} onChange={(e) => setJobNumber(e.target.value)}/>
                     </Form.Item>
                     <Form.Item
                         name="password"
-                        rules={[{ required: true, message: '请输入您的密码！' }]}
+                        rules={[{required: true, message: '请输入您的密码！'}]}
                     >
                         <Input
-                            prefix={<LockOutlined />}
+                            prefix={<LockOutlined/>}
                             type="password"
                             placeholder="密码"
+                            value={password} onChange={(e) => setPassword(e.target.value)}
                         />
                     </Form.Item>
                     <Form.Item>
                         <Button
-
                             type="primary"
                             htmlType="submit"
                             block
-                            loading={loading}
+                            loading={userStore.isLoading} // 控制按钮加载状态
                         >
                             登录
                         </Button>
+                        {userStore.loginError && (
+                            message.error(userStore.loginError)
+                        )}
                     </Form.Item>
                 </Form>
-                <div style={{ textAlign: 'center'}}>
-                
-                <Button type="link" onClick={showModal}>
-                忘记密码？
-                </Button>
-            </div>
-            <Modal
-                title="注册"
-                open={visible}
-                onOk={handleOk}
-                onCancel={handleCancel}
-            >
-                <Form
-                    name="register"
-                    initialValues={{ remember: true }}
-                    // onFinish={handleRegister} // 处理注册的函数
+                <div style={{textAlign: 'center'}}>
+
+                    <Button type="link" onClick={showModal}>
+                        忘记密码？
+                    </Button>
+                </div>
+                <Modal
+                    title="重置密码"
+                    open={visible}
+                    onOk={handleOk}
+                    onCancel={handleCancel}
                 >
-                    <Form.Item
-                        name="email"
-                        rules={[{ required: true, message: '请输入您的邮箱！' }]}
+                    <Form
+                        name="resetPassword"
+                        initialValues={{remember: true}}
+                        // onFinish={handleRegister} // 处理注册的函数
                     >
-                        <Input prefix={<MailOutlined />} placeholder="邮箱" />
-                    </Form.Item>
-                    <Form.Item
-                        name="username"
-                        rules={[{ required: true, message: '请输入您的用户名！' }]}
-                    >
-                        <Input prefix={<UserOutlined />} placeholder="用户名" />
-                    </Form.Item>
-                    <Form.Item
-                        name="password"
-                        rules={[{ required: true, message: '请输入您的密码！' }]}
-                    >
-                        <Input.Password prefix={<LockOutlined />} placeholder="密码" />
-                    </Form.Item>
-                    {/*<Form.Item*/}
-                    {/*    name="captcha"*/}
-                    {/*    rules={[{ required: true, message: '请输入验证码！' }]}*/}
-                    {/*>*/}
-                    {/*    <Input placeholder="验证码" />*/}
-                    {/*</Form.Item>*/}
-                    {/*<Captcha*/}
-                    {/*    charNum={4}*/}
-                    {/*    // onChange={handleChange}*/}
-                    {/*/>*/}
-                </Form>
-            </Modal>
+                        <Form.Item
+                            name="email"
+                            rules={[{required: true, message: '请输入您的邮箱！'}]}
+                        >
+                            <Input prefix={<MailOutlined/>} placeholder="邮箱"/>
+                        </Form.Item>
+                        <Form.Item
+                            name="jobNumber"
+                            rules={[{required: true, message: '请输入您的工号！'}]}
+                        >
+                            <Input prefix={<UserOutlined/>} placeholder="工号"/>
+                        </Form.Item>
+                        <Form.Item
+                            name="password"
+                            rules={[{required: true, message: '请输入您的密码！'}]}
+                        >
+                            <Input.Password prefix={<LockOutlined/>} placeholder="密码"/>
+                        </Form.Item>
+                    </Form>
+                </Modal>
             </div>
         </div>
     );
-};
+})
+
 
 const styles = {
     container: {
@@ -194,11 +149,6 @@ const styles = {
         fontWeight: 'bold',
         fontSize: '24px',
     },
-    // buttonContainer: {
-    //     display: 'flex',
-    //     justifyContent: 'center',
-    //     width: '100%',
-    // },
 }
 
-export default LoginPage;
+export default Login;
