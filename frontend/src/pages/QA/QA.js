@@ -1,8 +1,9 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Layout, Menu, Input, Collapse, Button, Breadcrumb } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import './header.css'
 import {Link} from "react-router-dom";
+import {uiStore} from "../../store/UIStore";
 
 const { Header, Content } = Layout;
 const { Search } = Input;
@@ -16,6 +17,11 @@ const questions = [
 ];
 
 const QA = () => {
+    useEffect(() => {
+        // 当主页加载完成，停止进度条
+        uiStore.stopLoading();
+    }, []);
+
     return (
         <Layout className="layout" style={{ minHeight: '100vh' }}>
             <Header style={{ background: '#f0f2f5', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

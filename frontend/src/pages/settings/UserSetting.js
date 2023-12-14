@@ -14,7 +14,7 @@ import {
     message,
 } from 'antd';
 import {EditOutlined,} from "@ant-design/icons";
-import {userStore} from '../../store/userStore'
+import {userStore} from '../../store/UserStore'
 import { observer } from 'mobx-react-lite'
 
 
@@ -293,7 +293,7 @@ const UserSetting = observer(() => {
                             </Form.Item>
 
                             <Form.Item {...tailFormItemLayout}>
-                                <Button type="primary" htmlType="submit">
+                                <Button type="primary" htmlType="submit" >
                                     确认
                                 </Button>
                             </Form.Item>

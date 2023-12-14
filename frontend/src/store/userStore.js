@@ -22,7 +22,7 @@ class UserStore {
         makeAutoObservable(this);
     }
 
-    async login(jobNumber, password) {
+    async login(companyID, jobNumber, password) {
         try {
             this.isLoading = true;
             this.loginError = '';
@@ -43,11 +43,13 @@ class UserStore {
             //     // 处理错误，例如显示登录失败的消息
             //     this.loginError = '工号或密码错误！';
             // }
-            if (jobNumber === '123' && password === '123'){
+            console.log(companyID, jobNumber, password);
+            if (companyID === '1' && jobNumber === '123' && password === '123'){
                 this.isLoggedIn = true;
                 this.loginHint.message = '登陆成功！';
                 this.loginHint.status = 'success';
             }else {
+                this.isLoggedIn = false;
                 this.loginHint.message = '工号或密码错误！';
                 this.loginHint.status = 'error';
             }

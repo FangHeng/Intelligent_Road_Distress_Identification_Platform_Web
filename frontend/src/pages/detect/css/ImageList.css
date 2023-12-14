@@ -4,15 +4,15 @@
 }
 
 .custom-upload .ant-upload-list-item-container {
-    width: 190px !important;
-    height: 190px !important;
-    margin: 16px !important;
+    width: 175px !important;
+    height: 175px !important;
+    margin: 15px !important;
 }
 
 .custom-upload .ant-upload-select{
-    width: 190px !important;
-    height: 190px !important;
-    margin: 16px !important;
+    width: 175px !important;
+    height: 175px !important;
+    margin: 15px !important;
 }
 
 

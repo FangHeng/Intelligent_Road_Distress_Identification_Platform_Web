@@ -1,6 +1,5 @@
 import { Radar } from '@ant-design/plots';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import {Card} from "antd";
 
 const data = [

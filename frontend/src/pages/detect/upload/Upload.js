@@ -1,36 +1,50 @@
 import React, { useState } from 'react';
-import {Upload, Modal, Input, Button, Card} from 'antd';
-import {PlusOutlined, } from '@ant-design/icons';
+import {Upload, Button, Input, Select, Row, Col, Card, Space, Modal, message} from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { observer } from 'mobx-react-lite'
+import imageStore from '../../../store/ImgStore'
 import '../css/ImageList.css'
+import {getBase64} from "../../../utils/utils";
 
-const ImageUploadPage = () => {
+
+const ImageUpload = observer(() => {
     const [fileList, setFileList] = useState([]);
-    const [imageInfo, setImageInfo] = useState({}); // For storing image info and tags
-    const [infoModalVisible, setInfoModalVisible] = useState(false); // For showing the info modal
+    const [imageInfo, setImageInfo] = useState({ title: '', road: '' });
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
+    const [previewTitle, setPreviewTitle] = useState('');
 
-    const handleCancel = () => {
-        setInfoModalVisible(false);
+    const handleFileChange = ({ fileList }) => setFileList(fileList);
+
+    const handleCancel = () => setPreviewOpen(false);
+    const handlePreview = async (file) => {
+        if (!file.url && !file.preview) {
+            file.preview = await getBase64(file.originFileObj);
+        }
+        setPreviewImage(file.url || file.preview);
+        setPreviewOpen(true);
+        setPreviewTitle(file.name || file.url.substring(file.url.lastIndexOf('/') + 1));
     };
 
-    const handleChange = ({ fileList: newFileList }) => {
-        setFileList(newFileList);
-    };
+    const handleUpload = async () => {
+        // 检查是否所有字段都已填写
+        if (!imageInfo.title || !imageInfo.road) {
+            message.warning('请填写所有必要信息后再上传！');
+            return;
+        }
+        if (fileList.length === 0) {
+            message.warning('请先选择图片后再上传！');
+            return;
+        }
+        // 调用 store 的 uploadImages 方法
+        await imageStore.uploadImages({ fileList, imageInfo });
 
-    const beforeUpload = (file) => {
-        // Show modal for user to enter image info and tags
-        setInfoModalVisible(true);
-        setImageInfo({ file: file }); // Temporarily save the file
-        return false; // Prevent automatic upload
-    };
-
-    const handleInfoSubmit = () => {
-        // Here you would handle the actual file upload manually
-        // For example, you could append the info to FormData and send it to the server
-        console.log('Uploading', imageInfo);
-
-        // Hide modal and clear temp image info state
-        setInfoModalVisible(false);
-        setImageInfo({});
+        // 显示提示信息
+        if (imageStore.uploadHint.status === 'success') {
+            message.success(imageStore.uploadHint.message);
+        } else if (imageStore.uploadHint.status === 'error') {
+            message.error(imageStore.uploadHint.message);
+        }
     };
 
     const uploadButton = (
@@ -41,42 +55,57 @@ const ImageUploadPage = () => {
     );
 
     return (
-        <Card title='上传图片' style={{ height: '90vh', overflow: 'auto' }} >
-            <Upload
-                className="custom-upload"
-                listType="picture-card"
-                fileList={fileList}
-                beforeUpload={beforeUpload}
-                onChange={handleChange}
-                multiple={true}
-            >
-                {fileList.length >= 16 ? null : uploadButton}
-            </Upload>
-            <Modal
-                title="Image Information"
-                open={infoModalVisible}
-                onCancel={handleCancel}
-                footer={[
-                    <Button key="back" onClick={handleCancel}>
-                        返回
-                    </Button>,
-                    <Button key="submit" type="primary" onClick={handleInfoSubmit}>
+        <Row gutter={24}>
+            <Col span={18}>
+                <Card style={{ height: '90vh', overflow: 'auto' }} >
+                    <Upload
+                        className="custom-upload"
+                        listType="picture-card"
+                        onChange={handleFileChange}
+                        beforeUpload={() => false} // 阻止自动上传
+                        fileList={fileList}
+                        onPreview={handlePreview}
+                        multiple={true}
+                    >
+                        {fileList.length >= 64 ? null : uploadButton}
+                    </Upload>
+                    <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
+                        <img
+                            alt="example"
+                            style={{
+                                width: '100%',
+                            }}
+                            src={previewImage}
+                        />
+                    </Modal>
+                </Card>
+            </Col>
+            <Col span={6}>
+                <Card title="图片信息填写" style={{ height: '90vh', overflow: 'auto', paddingBottom: '20px' }}>
+                    <Space direction="vertical" style={{ width: '100%' }} size="large">
+                        <Input
+                            placeholder="输入图片名称"
+                            onChange={(e) => setImageInfo({ ...imageInfo, title: e.target.value })}
+                        />
+                        <Select
+                            placeholder="选择道路"
+                            style={{ width: '100%' }}
+                            onChange={(value) => setImageInfo({ ...imageInfo, road: value })}
+                        >
+                            <Select.Option value="1">道路1</Select.Option>
+                        </Select>
+                    <Button type="primary"
+                            style={{ width: '85%', position: 'absolute', bottom: '5vh' }}
+                            onClick={handleUpload}
+                            loading={imageStore.uploadHint.loading}
+                    >
                         上传
-                    </Button>,
-                ]}
-            >
-                <Input
-                    placeholder="Enter image title"
-                    onChange={(e) => setImageInfo({ ...imageInfo, title: e.target.value })}
-                />
-                <Input
-                    placeholder="Enter image tags"
-                    onChange={(e) => setImageInfo({ ...imageInfo, tags: e.target.value.split(',') })}
-                    style={{ marginTop: '1rem' }}
-                />
-            </Modal>
-        </Card>
+                    </Button>
+                    </Space>
+                </Card>
+            </Col>
+        </Row>
     );
-};
+});
 
-export default ImageUploadPage;
+export default ImageUpload;

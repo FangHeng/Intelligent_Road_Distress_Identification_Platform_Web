@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, message, Modal } from 'antd';
-
-import { useNavigate } from 'react-router-dom'; //history对象用不了了，现在用Navigate对象
+import React, {useState} from 'react';
+import {Form, Input, Button, message, Modal, Select} from 'antd';
+import { useNavigate } from 'react-router-dom';
 import {UserOutlined, LockOutlined, MailOutlined} from '@ant-design/icons';
-import { setCookie } from '../../utils/utils';
 import backgroundImage from '../../assets/background.jpg';
-import {userStore} from '../../store/userStore'
+import {userStore} from '../../store/UserStore'
 import { observer } from 'mobx-react-lite'
+import {uiStore} from "../../store/UIStore";
+const { Option } = Select;
 
 const Login = observer(() => {
+    const companyOptions = [
+        {id: '1', name: '公司1'},
+        {id: '2', name: '公司2'},
+        {id: '3', name: '公司3'},
+    ];
+
     const navigate = useNavigate(); // 获取 history 对象
 
     const [jobNumber, setJobNumber] = useState('');
     const [password, setPassword] = useState('');
+    const [company, setCompany] = useState(1);
 
     // 忘记密码模态框
     const [visible, setVisible] = useState(false);
@@ -32,9 +39,14 @@ const Login = observer(() => {
     };
 
     const handleLogin = async () => {
-        await userStore.login(jobNumber, password);
+        uiStore.startLoading();
+        await userStore.login(company, jobNumber, password);
         if (userStore.isLoggedIn) {
             navigate('/pages');
+        }
+        else {
+            uiStore.stopLoading();
+            message.error(userStore.loginHint.message);
         }
     };
 
@@ -48,8 +60,18 @@ const Login = observer(() => {
                     onFinish={handleLogin}
                 >
                     <Form.Item
+                        name="company"
+                        rules={[{required: true, message: '请选择公司！'}]}
+                    >
+                    <Select style={{marginTop: 30, width: '100%'}} placeholder="选择公司" onChange={(value) => setCompany(value)}>
+                        {companyOptions.map(company => (
+                            <Option key={company.id} value={company.id}>{company.name}</Option>
+                        ))}
+                    </Select>
+                    </Form.Item>
+
+                    <Form.Item
                         name="jobNumber"
-                        style={{marginTop: 30}}
                         rules={[{required: true, message: '请输入您的工号！'}]}
                     >
                         <Input prefix={<UserOutlined/>} placeholder="工号" value={jobNumber} onChange={(e) => setJobNumber(e.target.value)}/>
@@ -74,9 +96,6 @@ const Login = observer(() => {
                         >
                             登录
                         </Button>
-                        {userStore.loginError && (
-                            message.error(userStore.loginError)
-                        )}
                     </Form.Item>
                 </Form>
                 <div style={{textAlign: 'center'}}>

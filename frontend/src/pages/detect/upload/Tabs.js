@@ -1,12 +1,12 @@
 import React from 'react';
 import { Tabs } from 'antd';
 import UploadFolder from './UploadFolder';
-import ImageUploadPage from "./Upload";
+import ImageUpload from "./Upload";
 const items = [
     {
         key: '1',
         label: `上传图片`,
-        children: <ImageUploadPage/>,
+        children: <ImageUpload/>,
     },
     {
         key: '2',

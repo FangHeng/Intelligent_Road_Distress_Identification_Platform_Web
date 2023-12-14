@@ -5,7 +5,7 @@ import UserTable from "../../components/Table/UserTable";
 import {RegisterSingleUser} from "../../components/Forms/registerSingleUser";
 import {RegisterMultipleUser} from "../../components/Forms/registerMultipleUser";
 import {UserAddOutlined, UsergroupAddOutlined} from "@ant-design/icons";
-import {userStore} from "../../store/userStore";
+import {userStore} from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
 
 const SubordinateUserRegistration = observer(() => {

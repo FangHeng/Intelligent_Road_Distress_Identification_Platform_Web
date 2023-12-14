@@ -1,6 +1,5 @@
 import { Scatter } from '@ant-design/plots';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import {Card} from "antd";
 
 const DemoScatter = () => {
@@ -20,9 +19,9 @@ const DemoScatter = () => {
         style: { fillOpacity: 0.3, lineWidth: 1 },
     };
     return (
-        <Card title="Scatter Chart" style={{ width: '100%' }}>
+        <Card bordered={false} className='secondRowColCard'>
             <Scatter {...config}
-                containerStyle={{width: '100%', height: '20vh'}}
+                containerStyle={{width: '100%', height: '30vh'}}
             />
         </Card>
     );

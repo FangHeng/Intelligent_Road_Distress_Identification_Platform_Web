@@ -5,7 +5,6 @@ import MaleAvatar from '../../assets/Male.png'
 import logo from '../../assets/logo.png'
 import logo_mini from '../../assets/logo-mini.png'
 import { Outlet } from 'react-router-dom'
-import { getCookie } from '../../utils/utils'
 import deleteCookie from '../../utils/utils'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHouse, faArrowRightFromBracket, faGears, faCircleInfo, faChartColumn, faCube } from '@fortawesome/free-solid-svg-icons';
@@ -13,8 +12,9 @@ import {
     LineOutlined, ExportOutlined, FileSearchOutlined, AlertOutlined
 } from "@ant-design/icons";
 import { observer } from 'mobx-react-lite'
-import {userStore} from '../../store/userStore'
-
+import {userStore} from '../../store/UserStore'
+import {uiStore} from "../../store/UIStore";
+import { useLocation } from 'react-router-dom';
 const { Text } = Typography
 const { Sider, Content, Footer } = Layout
 
@@ -33,8 +33,24 @@ const SideBarLayout = observer(() => {
         }
     }, [])
 
+    useEffect(() => {
+        // 当主页加载完成，停止进度条
+        uiStore.stopLoading();
+    }, []);
+
+    const handleNavigate = (path) => {
+        uiStore.startLoading();
+        navigate(path);
+    };
+
     // 使用 userStore 中的用户数据
     const { username, avatar } = userStore.userInfo;
+
+    // 使用 useLocation 钩子获取当前路由信息
+    const location = useLocation();
+
+    // 当前路由路径
+    const currentRoute = location.pathname;
 
     return (
         <Layout style={{ width: '100vw', height: '100vh', overflow: 'initial'}}>
@@ -58,6 +74,7 @@ const SideBarLayout = observer(() => {
                         console.log(key.key)
                     }}
                     defaultSelectedKeys={['1']}
+                    selectedKeys={[currentRoute]}
                     items={[
                         {
                             key: '/pages/home',
@@ -83,7 +100,17 @@ const SideBarLayout = observer(() => {
                         {
                             key: '/pages/visualize',
                             icon: <FontAwesomeIcon icon={faChartColumn} />,
-                            label: '可视化结果',
+                            label: '结果可视化',
+                            children: [
+                                {
+                                    key: '/pages/visualize/OverallVisualize',
+                                    label: '总体可视化',
+                                },
+                                {
+                                    key: '/pages/visualize/ImgVisualize',
+                                    label: '图片可视化',
+                                },
+                            ],
                         },
                         {
                             key: '/pages/settings',
@@ -95,6 +122,10 @@ const SideBarLayout = observer(() => {
                                     label: '个人信息',
                                 },
                                 {
+                                    key: '/pages/settings/AddRoad',
+                                    label: '添加道路',
+                                },
+                                {
                                     key: '/pages/settings/ModelSelect',
                                     label: '模型选择',
                                 },
@@ -102,6 +133,7 @@ const SideBarLayout = observer(() => {
                                     key: '/pages/settings/SubordinateUserRegistration',
                                     label: '下属用户注册',
                                 },
+
                             ],
                         },
                         {
@@ -166,10 +198,18 @@ const SideBarLayout = observer(() => {
                             icon={<AlertOutlined />}
                         >
                             <Tooltip title='发布版本' placement="left">
-                            <FloatButton target='_blank' href='/#/release-notes' icon={<ExportOutlined/>}/>
+                                <Tooltip title='发布版本' placement="left">
+                                    <FloatButton
+                                        onClick={() => handleNavigate('/release-notes')}
+                                        icon={<ExportOutlined/>}
+                                    />
+                                </Tooltip>
                             </Tooltip>
                             <Tooltip title='Q&A' placement="left">
-                            <FloatButton target='_blank' href='/#/qa' icon={<FileSearchOutlined />} />
+                                <FloatButton
+                                    onClick={() => handleNavigate('/qa')}
+                                    icon={<FileSearchOutlined />}
+                                />
                             </Tooltip>
                         </FloatButton.Group>
                     </div>

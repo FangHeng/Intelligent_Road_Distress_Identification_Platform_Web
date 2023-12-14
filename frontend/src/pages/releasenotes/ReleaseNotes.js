@@ -1,7 +1,7 @@
-import React from 'react';
-import { Layout, Menu, Input, Collapse, Breadcrumb } from 'antd';
-import { BookOutlined } from '@ant-design/icons';
+import React, {useEffect} from 'react';
+import { Layout, Input, Collapse, Breadcrumb } from 'antd';
 import {Link} from "react-router-dom";
+import {uiStore} from "../../store/UIStore";
 
 const { Header, Content, Footer } = Layout;
 const { Search } = Input;
@@ -15,6 +15,11 @@ const releaseNotes = [
 ];
 
 const ReleaseNotes = () => {
+    useEffect(() => {
+        // 当主页加载完成，停止进度条
+        uiStore.stopLoading();
+    }, []);
+
     return (
         <Layout className="layout" style={{ minHeight: '100vh' }}>
             <Header style={{ background: '#f0f2f5', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

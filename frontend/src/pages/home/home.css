@@ -1,0 +1,40 @@
+/* 设置卡片的高度和其他通用样式 */
+.card {
+    height: 25vh;
+    /* 添加其他样式，如果需要的话 */
+}
+
+/* 如果你想对第二排的卡片应用不同的样式，你可以创建另一个类 */
+.secondRowCard {
+    height: 70vh;
+    /* 添加其他样式 */
+}
+
+.secondRowColCard {
+    height: 34vh;
+    /* 添加其他样式 */
+}
+
+.welcomeCard {
+    height: 25vh;
+}
+
+.info-title {
+    display: flex;
+    align-items: center;
+    color: rgba(0, 0, 0, 0.45);
+    padding: 0.1vh 0;
+    margin-bottom: 0.2vh;
+}
+
+.info-content {
+    color: #3f8600;
+    font-size: 2.6vh;
+}
+
+.service-icon{
+    width: 2.5vh;
+    height: 2.5vh;
+    vertical-align: middle;
+    margin-right:0.5vh
+}

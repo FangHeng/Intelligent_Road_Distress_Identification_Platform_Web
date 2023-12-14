@@ -66,7 +66,7 @@ const DemoBar = () => {
         },
     };
     return (
-        <Card title="Bar Chart" style={{ width: '100%' }}>
+        <Card bordered={false} className='secondRowColCard'>
             <Bar {...config}
                 containerStyle={{width: '100%', height: '30vh'}}
             />

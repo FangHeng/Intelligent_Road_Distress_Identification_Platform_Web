@@ -10,7 +10,7 @@ import './CSS/Visualize.css'
 
 const { Option } = Select;
 
-const Visualize = () => {
+const ImgVisualize = () => {
     const [viewMode, setViewMode] = useState('grid');
 
     const [previewVisible, setPreviewVisible] = useState(false);
@@ -168,4 +168,4 @@ const Visualize = () => {
     );
 };
 
-export default Visualize;
+export default ImgVisualize;
