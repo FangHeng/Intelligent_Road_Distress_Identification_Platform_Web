@@ -11,6 +11,6 @@ RUN pip install -r requirements.txt
 # 复制项目文件
 COPY . .
 
-
-# 运行Django应用
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# 检查数据库连接
+# 运行Django项目
+CMD python wait_for_db.py && python manage.py runserver 0.0.0.0:8000

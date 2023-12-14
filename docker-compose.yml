@@ -4,14 +4,22 @@ services:
   backend:
     build: ./backend
     volumes:
-      - ./django_app:/app
-      - uploads:/uploads
+      - ./backend/backend:/backend
+      - ./backend/uploads:/uploads
+      - ./backend/IRDIP:/IRDIP
+      - ./backend/homepage:/homepage
+#      - uploads:/uploads
     ports:
       - "8000:8000"
     depends_on:
       - db
     environment:
       - DATABASE_URL=mysql://...
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - DB_HOST=db
 
   frontend:
     build: ./frontend
@@ -25,10 +33,14 @@ services:
     ports:
         - "3333:3306"
     environment:
-      MYSQL_DATABASE: IRDIP
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
 
 
 volumes:
