@@ -1,0 +1,10 @@
+Django
+djangorestframework
+mysqlclient
+gunicorn
+django-cors-headers
+python-dotenv
+Pillow
+torch==2.0.1
+numpy==1.24.1
+matplotlib

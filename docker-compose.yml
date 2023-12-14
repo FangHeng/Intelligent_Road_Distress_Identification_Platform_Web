@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  backend:
+    build: ./backend
+    volumes:
+      - ./django_app:/app
+      - uploads:/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=mysql://...
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+
+  db:
+    image: mysql:8.0
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+        - "3333:3306"
+    environment:
+      MYSQL_DATABASE: IRDIP
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+
+volumes:
+  mysql_data:
+  uploads:
