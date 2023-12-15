@@ -14,5 +14,7 @@ app_name = 'IRDIP'
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("login/", views.login, name="login"),
+    path("get_company_info/", views.get_company_info, name="get_company_info"),
 
 ]

@@ -3,7 +3,7 @@
 # @Author  : Fang Heng
 # @File    : wait_for_db.py
 # @Software: PyCharm 
-# @Comment :
+# @Comment : 检查数据库状态，等待数据库启动完成后再启动后端服务
 
 
 import os
