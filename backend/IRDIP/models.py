@@ -5,9 +5,11 @@ import uuid
 
 # 用户角色表
 class UserRole(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     employee_number = models.CharField(max_length=255)
     user_level = models.IntegerField(choices=[(0, 'Level 0'), (1, 'Level 1'), (2, 'Level 2')])
+    gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], default='Male')
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     company = models.ForeignKey('Company', on_delete=models.CASCADE)
@@ -37,7 +39,6 @@ class Company(models.Model):
     company_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company_name = models.CharField(max_length=255)
     employee_number_length = models.IntegerField()
-    root_account = models.ForeignKey(User, on_delete=models.CASCADE)
 
 # 道路表
 class Road(models.Model):

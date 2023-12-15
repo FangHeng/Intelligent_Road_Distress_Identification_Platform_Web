@@ -9,8 +9,8 @@ class UserRoleAdmin(admin.ModelAdmin):
 
 # 公司信息表的管理界面设置
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ['company_name', 'employee_number_length', 'root_account']
-    search_fields = ['company_name', 'root_account__username']
+    list_display = ['company_name', 'employee_number_length']
+    search_fields = ['company_name']
 
 
 # 注册模型及其对应的Admin类到Django admin
