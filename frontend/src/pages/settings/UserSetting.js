@@ -14,7 +14,7 @@ import {
     message,
 } from 'antd';
 import {EditOutlined,} from "@ant-design/icons";
-import {userStore} from '../../store/UserStore'
+import {userStore} from '../../store/userStore'
 import { observer } from 'mobx-react-lite'
 
 

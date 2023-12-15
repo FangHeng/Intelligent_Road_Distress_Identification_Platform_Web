@@ -1,6 +1,6 @@
 import {Alert, Button, Form, Input} from "antd";
 import React from "react";
-import {userStore} from "../../store/UserStore";
+import {userStore} from "../../store/userStore";
 import {observer} from "mobx-react-lite";
 
 const onFinish = (values) => {

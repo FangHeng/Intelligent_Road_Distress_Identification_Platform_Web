@@ -12,7 +12,7 @@ import {
     LineOutlined, ExportOutlined, FileSearchOutlined, AlertOutlined
 } from "@ant-design/icons";
 import { observer } from 'mobx-react-lite'
-import {userStore} from '../../store/UserStore'
+import {userStore} from '../../store/userStore'
 import {uiStore} from "../../store/UIStore";
 import { useLocation } from 'react-router-dom';
 const { Text } = Typography
