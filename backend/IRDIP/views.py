@@ -1,33 +1,40 @@
 from django.shortcuts import render
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
 from django.http import JsonResponse
 from .models import UserRole, UploadRecord, FileUpload, Company, Road
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 
 def index(request):
     return render(request)
 
+@csrf_exempt
 def login(request):
+    # print("====================================")
+    # print(request.COOKIES)
     if request.method == 'POST':
         company_id = request.POST.get('company_id')
         employee_number = request.POST.get('employee_number')
         password = request.POST.get('password')
+        print(company_id, employee_number, password)
 
         try:
             user_role = UserRole.objects.get(employee_number=employee_number, company_id=company_id)
             user = authenticate(username=user_role.user.username, password=password)
             if user is not None:
-                login(request, user)
+                auth_login(request, user)
                 # 返回成功的登录信息
                 return JsonResponse({"status": "success", "user_id": user.id})
             else:
                 # 认证失败
                 return JsonResponse({"status": "error", "message": "Invalid credentials"}, status=401)
         except UserRole.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "User not found"}, status=404)
+            return JsonResponse({"status": "error", "message": "User not found"}, status=444)
     else:
         # 非 POST 请求
         return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
 
+# @ensure_csrf_cookie
 def get_company_info(request):
     # 查询所有公司
     companies = Company.objects.all()

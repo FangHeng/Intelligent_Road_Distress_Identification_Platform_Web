@@ -1,0 +1,10 @@
+{
+    "0": "cementation_fissures",
+    "1": "crack",
+    "2": "longitudinal_crack",
+    "3": "loose",
+    "4": "massive_crack",
+    "5": "mending",
+    "6": "normal",
+    "7": "transverse_crack"
+}
