@@ -1,8 +1,29 @@
 import React, { useState } from 'react';
-import {Card, Col, Row, Checkbox, Select, Image, Divider, Space, message, Modal, List, Segmented, Button} from 'antd';
+import {
+    Card,
+    Col,
+    Row,
+    Checkbox,
+    Select,
+    Image,
+    Divider,
+    Space,
+    message,
+    Modal,
+    List,
+    Segmented,
+    Button,
+    Drawer
+} from 'antd';
 import DecimalStep from "../../components/Slider/DecimalStep";
 import '../detect/css/checkbox.css';
-import {AppstoreOutlined, BarsOutlined, PictureOutlined} from "@ant-design/icons";
+import {
+    AppstoreOutlined,
+    BarsOutlined,
+    PictureOutlined,
+    PlusOutlined,
+    VerticalAlignBottomOutlined
+} from "@ant-design/icons";
 import image0 from '../../assets/cementation_fissures_0.jpg';
 import image1 from '../../assets/cementation_fissures_1.jpg';
 import './CSS/Visualize.css'
@@ -12,7 +33,6 @@ const { Option } = Select;
 
 const ImgVisualize = () => {
     const [viewMode, setViewMode] = useState('grid');
-
     const [previewVisible, setPreviewVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
     const [previewImage, setPreviewImage] = useState('');
@@ -29,6 +49,17 @@ const ImgVisualize = () => {
         setPreviewImage('');
     };
 
+    const [open, setOpen] = useState(false);
+    const [placement, setPlacement] = useState('right');
+    const showDrawer = () => {
+        setOpen(true);
+    };
+    const onChange = (e) => {
+        setPlacement(e.target.value);
+    };
+    const onClose = () => {
+        setOpen(false);
+    };
 
 
     // 处理Segmented选择变化
@@ -59,6 +90,7 @@ const ImgVisualize = () => {
                 onChange={handleSegmentChange}
             />
         </div>
+
     );
 
     const listView = (
@@ -162,6 +194,37 @@ const ImgVisualize = () => {
                             </Space>
                         </Row>
                     </Checkbox.Group>
+                    <div style={{position: 'absolute', bottom: '5vh', width: '100%'}}>
+                    <Space style={{ width: '100%', justifyContent: 'center', }} size='large'>
+                        <Button type="primary"><VerticalAlignBottomOutlined />
+                            导出结果
+                        </Button>
+                        <Button type="primary" onClick={showDrawer}>
+                            <PlusOutlined />
+                            下载报告
+                        </Button>
+                    </Space>
+                        <Drawer
+                            title="报告模板"
+                            placement={placement}
+
+                            onClose={onClose}
+                            open={open}
+                            size={'large'}
+                            extra={
+                                <Space>
+                                    <Button onClick={onClose}>取消</Button>
+                                    <Button type="primary" onClick={onClose}>
+                                        确定
+                                    </Button>
+                                </Space>
+                            }
+                        >
+                            <p>Some contents...</p>
+                            <p>Some contents...</p>
+                            <p>Some contents...</p>
+                        </Drawer>
+                    </div>
                 </Card>
             </Col>
         </Row>

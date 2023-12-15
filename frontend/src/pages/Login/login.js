@@ -3,7 +3,7 @@ import {Form, Input, Button, message, Modal, Select} from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {UserOutlined, LockOutlined, MailOutlined} from '@ant-design/icons';
 import backgroundImage from '../../assets/background.jpg';
-import {userStore} from '../../store/UserStore'
+import {userStore} from '../../store/userStore'
 import { observer } from 'mobx-react-lite'
 import {uiStore} from "../../store/UIStore";
 const { Option } = Select;

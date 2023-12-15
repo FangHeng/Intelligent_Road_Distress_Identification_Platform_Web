@@ -3,7 +3,7 @@ import './home.css';
 import {Card, Button, Row, Col, Avatar, Statistic, Empty, Spin} from 'antd';
 import {IdcardOutlined, PictureOutlined, UserOutlined} from "@ant-design/icons";
 import services from './services';
-import {userStore} from "../../store/UserStore";
+import {userStore} from "../../store/userStore";
 import {observer} from "mobx-react-lite";
 import {Link} from "react-router-dom";
 import NoticeEmpty from '../../assets/empty.png'
@@ -44,14 +44,10 @@ const Home = observer( () =>  {
                             </Col>
                             <Col span={12}>
                                 <Card bordered={false}>
-                                    <Statistic
-                                        title="图片上传数量"
-                                        value={117}
-                                        valueStyle={{
-                                            color: '#cf1322',
-                                        }}
-                                        prefix={<PictureOutlined />}
-                                    />
+                                    <div>
+                                        <span className="info-title">图片上传数量</span>
+                                        <span className="info-content-img"><PictureOutlined style={{marginRight:'0.4vh', fontSize: '2.5vh'}}/>117</span>
+                                    </div>
                                 </Card>
                             </Col>
                         </Row>
@@ -61,12 +57,11 @@ const Home = observer( () =>  {
                     <Card title="常用服务" bordered={false} className='card'>
                         <Row gutter={16}>
                             {services.map((service, index) => (
-                                <Col key={index} span={8} style={{ marginBottom: 16}}>
+                                <Col key={index} span={12} style={{ marginBottom: 16}}>
                                     <Link to={service.link}>
                                     <Button
                                         type="link"
                                         block
-                                        size='large'
                                         style={{ color: 'black' }}
                                     >
                                         <service.icon className='service-icon' />

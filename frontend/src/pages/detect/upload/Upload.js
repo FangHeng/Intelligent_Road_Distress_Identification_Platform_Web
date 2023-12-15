@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import {Upload, Button, Input, Select, Row, Col, Card, Space, Modal, message} from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import {Upload, Button, Input, Select, Row, Col, Card, Space, Modal, message, Affix, Flex} from 'antd';
+import {PlusOutlined, VerticalAlignTopOutlined} from '@ant-design/icons';
 import { observer } from 'mobx-react-lite'
 import imageStore from '../../../store/ImgStore'
 import '../css/ImageList.css'
@@ -57,7 +57,7 @@ const ImageUpload = observer(() => {
     return (
         <Row gutter={24}>
             <Col span={18}>
-                <Card style={{ height: '90vh', overflow: 'auto' }} >
+                <Card style={{ height: '90vh', overflow: 'auto', position:'relative' }}>
                     <Upload
                         className="custom-upload"
                         listType="picture-card"
@@ -81,7 +81,7 @@ const ImageUpload = observer(() => {
                 </Card>
             </Col>
             <Col span={6}>
-                <Card title="图片信息填写" style={{ height: '90vh', overflow: 'auto', paddingBottom: '20px' }}>
+                <Card title="图片信息填写" style={{ height: '90vh', overflow:'auto'}}>
                     <Space direction="vertical" style={{ width: '100%' }} size="large">
                         <Input
                             placeholder="输入图片名称"
@@ -94,12 +94,18 @@ const ImageUpload = observer(() => {
                         >
                             <Select.Option value="1">道路1</Select.Option>
                         </Select>
+
                     <Button type="primary"
-                            style={{ width: '85%', position: 'absolute', bottom: '5vh' }}
+                            style={{
+                                width: '85%',
+                                position: 'absolute',
+                                bottom: '5vh',
+                                left: '25px',
+                            }}
                             onClick={handleUpload}
                             loading={imageStore.uploadHint.loading}
                     >
-                        上传
+                        <VerticalAlignTopOutlined />上传
                     </Button>
                     </Space>
                 </Card>
