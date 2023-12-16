@@ -3,7 +3,7 @@ import { Layout, Menu, Input, Collapse, Button, Breadcrumb } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import './header.css'
 import {Link} from "react-router-dom";
-import {uiStore} from "../../store/UIStore";
+import uiStore from "../../store/UIStore";
 
 const { Header, Content } = Layout;
 const { Search } = Input;

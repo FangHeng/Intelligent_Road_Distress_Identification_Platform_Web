@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {Upload, Button, Input, Select, Row, Col, Card, Space, Modal, message, Affix, Flex} from 'antd';
+import {Upload, Button, Input, Select, Row, Col, Card, Space, Modal, message,} from 'antd';
 import {PlusOutlined, VerticalAlignTopOutlined} from '@ant-design/icons';
 import { observer } from 'mobx-react-lite'
 import imageStore from '../../../store/ImgStore'

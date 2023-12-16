@@ -1,33 +1,21 @@
-// 设置Cookie
-// expires是指cookie的过期时间，默认为一小时，path='/'表示为在当前页面下设置一个名为name的Cookie，值为value
-export const setCookie = (name, value, path = '/') => {
-    const now = new Date();
-    const time = now.getTime();
-    const expireTime = time + 8 * 60 * 60 * 1000; // 8小时后的时间
-    now.setTime(expireTime);
-    const expires = 'expires=' + now.toUTCString();
-    document.cookie = `${name}=${value}; expires=${expires}; path=${path}`;
-};
-
-// 获取Cookie
-export const getCookie = (name) => {
-    const cookie = document.cookie;
-    const prefix = `${name}=`;
-    const start = cookie.indexOf(prefix);
-    if (start === -1) {
-        return null;
+// utils.js
+export function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
     }
-    const end = cookie.indexOf(';', start + prefix.length);
-    if (end === -1) {
-        return cookie.substring(start + prefix.length);
-    }
-    return cookie.substring(start + prefix.length, end);
-};
-
-//删除cookie
-export default function deleteCookie(name) {
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    return cookieValue;
 }
+
+
 
 export const getBase64 = (file) =>
     new Promise((resolve, reject) => {

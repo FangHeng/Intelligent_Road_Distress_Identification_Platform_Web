@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import { Layout, Input, Collapse, Breadcrumb } from 'antd';
 import {Link} from "react-router-dom";
-import {uiStore} from "../../store/UIStore";
+import uiStore from "../../store/UIStore";
 
 const { Header, Content, Footer } = Layout;
 const { Search } = Input;

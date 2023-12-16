@@ -5,15 +5,14 @@ import MaleAvatar from '../../assets/Male.png'
 import logo from '../../assets/logo.png'
 import logo_mini from '../../assets/logo-mini.png'
 import { Outlet } from 'react-router-dom'
-import deleteCookie from '../../utils/utils'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHouse, faArrowRightFromBracket, faGears, faCircleInfo, faChartColumn, faCube } from '@fortawesome/free-solid-svg-icons';
 import {
     LineOutlined, ExportOutlined, FileSearchOutlined, AlertOutlined
 } from "@ant-design/icons";
 import { observer } from 'mobx-react-lite'
-import {userStore} from '../../store/userStore'
-import {uiStore} from "../../store/UIStore";
+import userStore from '../../store/UserStore'
+import uiStore from "../../store/UIStore";
 import { useLocation } from 'react-router-dom';
 const { Text } = Typography
 const { Sider, Content, Footer } = Layout
@@ -67,7 +66,7 @@ const SideBarLayout = observer(() => {
                     mode="inline"
                     onClick={(key) => {
                         if (key.key === '/') {
-                            deleteCookie('isLogin')
+                            // deleteCookie('isLogin')
                             localStorage.removeItem('messages')
                         }
                         navigate(key.key)

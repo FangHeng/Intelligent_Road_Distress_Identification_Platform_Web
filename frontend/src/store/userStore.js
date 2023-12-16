@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx';
+import {getCookie} from "../utils/utils";
 
 class UserStore {
     userInfo = {
@@ -8,7 +9,6 @@ class UserStore {
         gender: '',
         phone: '',
         email: '',
-        companyID: '',
         companyName: '',
         avatar: '',
         numberCode: 0,
@@ -17,6 +17,7 @@ class UserStore {
     isLoading = false;
     loginHint = {message:'', status:'error'};
     infoChangeHint = {message:'', status:'error'}
+    getInfoHint = {message:'', status:'error'}
 
     constructor() {
         makeAutoObservable(this);
@@ -26,47 +27,65 @@ class UserStore {
         try {
             this.isLoading = true;
             this.loginError = '';
-            // const response = await fetch('http://your-backend-url/api/login', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({ jobNumber, password }),
-            // });
-            //
-            // if (response.ok) {
-            //     const data = await response.json();
-            //     this.userInfo = { ...data, jobNumber };
-            //     this.isLoggedIn = true;
-            //     // 在这里还可以设置 token，保存在 localStorage 等
-            // } else {
-            //     // 处理错误，例如显示登录失败的消息
-            //     this.loginError = '工号或密码错误！';
-            // }
-            console.log(companyID, jobNumber, password);
-            if (companyID === '1' && jobNumber === '123' && password === '123'){
+
+            const csrfToken = getCookie('csrftoken'); // 从cookie中获取CSRF token
+            console.log(csrfToken)
+
+            // 使用FormData来发送数据
+            const formData = new FormData();
+            formData.append('company_id', companyID);
+            formData.append('employee_number', jobNumber);
+            formData.append('password', password);
+
+            const response = await fetch('/irdip/login/', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                method: 'POST',
+                credentials: 'include',
+                body: formData, // 发送FormData
+            });
+
+            // 使用.entries()方法遍历并打印FormData中的内容
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
+            if (response.ok) {
+                const data = await response.json();
+                this.userInfo = { ...data, jobNumber, companyID };
                 this.isLoggedIn = true;
                 this.loginHint.message = '登陆成功！';
                 this.loginHint.status = 'success';
-            }else {
+                // 可以在这里设置token，保存在localStorage等
+                // 注意：不要存储密码
+            } else {
                 this.isLoggedIn = false;
                 this.loginHint.message = '工号或密码错误！';
                 this.loginHint.status = 'error';
             }
         } catch (error) {
-            // 处理错误
+            this.isLoggedIn = false;
             this.loginHint.message = '网络似乎出现了错误，请稍后再试！';
             this.loginHint.status = 'error';
             console.error('There has been a problem with your fetch operation:', error);
-        }finally {
+        } finally {
             this.isLoading = false;
         }
     }
 
-    async fetchUserInfo() {
-        // 假设这是一个调用后端 API 获取用户信息的函数
+
+    async fetchUserInfo(callback) {
         const userData = await fetchUserFromDatabase();
-        this.setUserInfo(userData);
+        if (userData) {
+            this.setUserInfo(userData);
+            console.log(this.userInfo)
+        } else {
+            this.getInfoHint.status = 'error'
+            this.getInfoHint.message = '获取用户信息失败！'
+            callback();
+        }
     }
 
     async updateUserInfo(data) {
@@ -107,59 +126,67 @@ class UserStore {
     }
 
     setUserInfo(userData) {
-        this.userInfo = userData;
+        // 更新userStore中的userInfo
+        this.userInfo = {
+            ...this.userInfo,
+            ...userData,
+        };
     }
 }
 
-function fetchUserFromDatabase() {
-    // // 使用 fetch API 向 Django 后端发送请求
-    // return fetch('http://your-backend-url/api/user-info')
-    //     .then(response => {
-    //         if (!response.ok) {
-    //             throw new Error('Network response was not ok');
-    //         }
-    //         return response.json(); // 解析 JSON 数据
-    //     })
-    //     .then(data => {
-    //         // 返回的数据是用户信息
-    //         return {
-    //             name: data.name, // 假设返回的数据中有 'name'
-    //             avatar: data.avatar // 假设返回的数据中有 'avatar' 的路径
-    //         };
-    //     })
-    //     .catch(error => {
-    //         // 在这里处理错误情况
-    //         console.error('There has been a problem with your fetch operation:', error);
+// 异步函数，用于从数据库获取用户信息
+async function fetchUserFromDatabase() {
+    try {
+        // 发送请求到后端API
+        const response = await fetch('/irdip/get_user_info/', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+
+        // 检查响应状态
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // 解析JSON响应
+        const data = await response.json();
+        console.log(data)
+        // 返回解析后的数据
+        return data;
+    } catch (error) {
+        console.error('Fetching user data failed:', error);
+        // 在错误情况下，可能需要返回一个错误标记或默认值
+        return null;
+    }
+}
+
+    // const userLevelMap = {
+    //     '0': 'root',
+    //     '1': '管理员',
+    //     '2': '普通用户',
+    // };
     //
-    //     });
-    // return new Promise((resolve) => {
-    //     setTimeout(() => {
-    //         resolve({ name: 'John Doe', avatar: {MaleAvatar} });
-    //     }, 1000);
-    // });
-    const userLevelMap = {
-        '0': 'root',
-        '1': '管理员',
-        '2': '普通用户',
-    };
+    // const userLevel = '0';
+    //
+    // return {
+    //     jobNumber: '000000',
+    //     // 进行转换一下，将数字转换为对应的字符串
+    //     userLevel: userLevelMap[userLevel],
+    //     username: 'John Doe',
+    //     password: '123456',
+    //     gender: 'male',
+    //     phone: '00000000000',
+    //     email: '123@qq.com',
+    //     companyID: '000000',
+    //     companyName: '重庆大学',
+    //     avatar: '../assets/Male.png',
+    //     numberCode: 4,
+    // }
 
-    const userLevel = '0';
 
-    return {
-        jobNumber: '000000',
-        // 进行转换一下，将数字转换为对应的字符串
-        userLevel: userLevelMap[userLevel],
-        username: 'John Doe',
-        password: '123456',
-        gender: 'male',
-        phone: '00000000000',
-        email: '123@qq.com',
-        companyID: '000000',
-        companyName: '重庆大学',
-        avatar: '../assets/Male.png',
-        numberCode: 4,
-    }
+const userStore = new UserStore();
 
-}
-
-export const userStore = new UserStore();
+export default userStore;
