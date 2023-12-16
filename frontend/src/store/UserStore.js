@@ -1,17 +1,19 @@
 import { makeAutoObservable } from 'mobx';
 import {getCookie} from "../utils/utils";
+import MaleAvatar from '../assets/Male.png'
+import FemaleAvatar from '../assets/Female.png'
 
 class UserStore {
     userInfo = {
-        jobNumber: '',
-        userLevel: '',
+        user_id: 0,
         username: '',
+        employee_number: '',
+        phone_number: '',
+        user_level: '',
         gender: '',
-        phone: '',
         email: '',
-        companyName: '',
+        company_name: '',
         avatar: '',
-        numberCode: 0,
     };
     isLoggedIn = false;
     isLoading = false;
@@ -80,7 +82,6 @@ class UserStore {
         const userData = await fetchUserFromDatabase();
         if (userData) {
             this.setUserInfo(userData);
-            console.log(this.userInfo)
         } else {
             this.getInfoHint.status = 'error'
             this.getInfoHint.message = '获取用户信息失败！'
@@ -88,45 +89,57 @@ class UserStore {
         }
     }
 
+    getAvatarUrl() {
+        // 如果 userInfo.avatar 不为空，则返回它
+        if (this.userInfo.avatar) {
+            return this.userInfo.avatar;
+        }
+
+        // 根据性别返回默认头像
+        switch (this.userInfo.gender) {
+            case 'Male':
+                return MaleAvatar;
+            case 'Female':
+                return FemaleAvatar;
+            default:
+                return MaleAvatar; // 或者是一个通用的默认头像
+        }
+    }
+
     async updateUserInfo(data) {
-        // // 与后端交互
-        // try {
-        //     const response = await fetch('http://your-backend-url/api/update-user-info', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify(this.userInfo),
-        //     });
-        //
-        //     if (response.ok) {
-        //         // 更新状态
-        //         this.userInfo = {
-        //             ...this.userInfo,
-        //             ...data,
-        //         };
-        //         this.infoChangeHint.status = 'success'
-        //         this.infoChangeHint.message = '信息修改成功！'
-        //     }else{
-        //         this.infoChangeHint.status = 'error'
-        //         this.infoChangeHint.message = '信息修改失败！'
-        //         throw new Error('Network response was not ok');
-        //     }
-        this.userInfo = {
-            ...this.userInfo,
-            ...data,
-        };
-        this.infoChangeHint.status = 'success'
-        this.infoChangeHint.message = '信息修改成功！'
-        // } catch (error) {
-        //     this.infoChangeHint.status = 'error'
-        //     this.infoChangeHint.message = '信息修改失败！'
-        //     console.error('There has been a problem with your fetch operation:', error);
-        // }
+        try {
+            // 发送POST请求到后端API
+            const response = await fetch('/irdip/change_user_info/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: data.email,
+                    phone_number: data.phone,
+                    username: data.nickname,
+                    gender: data.gender,
+                }),
+            });
+
+            // 检查响应状态
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // 解析JSON响应
+            const responseData = await response.json();
+
+            // 处理响应数据
+            return responseData;
+        } catch (error) {
+            console.error('Updating user info failed:', error);
+            // 在错误情况下，可能需要返回一个错误标记或默认值
+            return null;
+        }
     }
 
     setUserInfo(userData) {
-        // 更新userStore中的userInfo
         this.userInfo = {
             ...this.userInfo,
             ...userData,

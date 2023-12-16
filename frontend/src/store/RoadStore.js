@@ -1,5 +1,8 @@
 import { makeAutoObservable } from "mobx";
 import userStore from "./UserStore";
+import {getCookie} from "../utils/utils";
+
+const csrfToken = getCookie('csrftoken'); // 从cookie中获取CSRF token
 
 class RoadStore {
     selectedItem = null;
@@ -26,20 +29,19 @@ class RoadStore {
 
     saveData(callback) {
         this.isLoading = true;
-        console.log(this.selectedItem)
-        console.log(this.selectedRegion)
         if (this.selectedItem !== null && this.selectedRegion !== null) {
             const url = '/irdip/road_registration/';
             const dataToSave = {
                 region: this.selectedRegion,
                 roadDetails: this.selectedItem
             };
-
+            console.log(csrfToken)
             fetch(url, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
                 },
                 body: JSON.stringify(dataToSave),
             })
@@ -58,6 +60,7 @@ class RoadStore {
                     if (data.status === 'success') {
                         this.hint.status = 'success';
                         this.hint.message = "保存成功！";
+                        this.fetchRoadData(); // 保存成功后立即获取最新数据
                     } else {
                         this.hint.status = 'error';
                         this.hint.message = data.message || '保存失败，请稍后再试！';
@@ -79,9 +82,9 @@ class RoadStore {
         }
     }
 
-    async getRoadData() {
+    async fetchRoadData() {
         try {
-            const url = '/irdip/get_road_info';
+            const url = '/irdip/get_road_info/';
             const response = await fetch(
                 url,{
                     headers: {
@@ -93,7 +96,6 @@ class RoadStore {
             if (response.ok) {
                 const data = await response.json();
                 this.roadData = Object.values(data);
-                console.log(this.roadData)
             } else {
                 console.error('Failed to fetch road data:', response.status);
             }

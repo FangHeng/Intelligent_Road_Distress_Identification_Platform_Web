@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {Upload, Button, Input, Select, Row, Col, Card, Space, Modal, message,} from 'antd';
 import {PlusOutlined, VerticalAlignTopOutlined} from '@ant-design/icons';
 import { observer } from 'mobx-react-lite'
 import imageStore from '../../../store/ImgStore'
+import roadStore from '../../../store/RoadStore'
 import '../css/ImageList.css'
 import {getBase64} from "../../../utils/utils";
 
@@ -13,6 +14,7 @@ const ImageUpload = observer(() => {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
+    const roadData = roadStore.roadData; // 从 roadStore 获取道路数据
 
     const handleFileChange = ({ fileList }) => setFileList(fileList);
 
@@ -36,10 +38,12 @@ const ImageUpload = observer(() => {
             message.warning('请先选择图片后再上传！');
             return;
         }
-        // 调用 store 的 uploadImages 方法
-        await imageStore.uploadImages({ fileList, imageInfo });
 
-        // 显示提示信息
+        console.log(imageInfo, fileList)
+        // 调用 store 的 uploadImages 方法
+        await imageStore.uploadImages(fileList, imageInfo);
+
+    // 显示提示信息
         if (imageStore.uploadHint.status === 'success') {
             message.success(imageStore.uploadHint.message);
         } else if (imageStore.uploadHint.status === 'error') {
@@ -92,10 +96,14 @@ const ImageUpload = observer(() => {
                             style={{ width: '100%' }}
                             onChange={(value) => setImageInfo({ ...imageInfo, road: value })}
                         >
-                            <Select.Option value="1">道路1</Select.Option>
+                            {roadStore.roadData.map((road) => (
+                                <Select.Option key={road.road_id} value={road.road_id}>
+                                    {road.road_name}
+                                </Select.Option>
+                            ))}
                         </Select>
 
-                    <Button type="primary"
+                        <Button type="primary"
                             style={{
                                 width: '85%',
                                 position: 'absolute',
