@@ -49,3 +49,4 @@ class Road(models.Model):
     administrative_province = models.CharField(max_length=100)
     administrative_city = models.CharField(max_length=100)
     administrative_district = models.CharField(max_length=100)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)

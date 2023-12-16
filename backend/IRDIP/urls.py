@@ -16,5 +16,9 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("login/", views.login, name="login"),
     path("get_company_info/", views.get_company_info, name="get_company_info"),
+    path("upload/", views.upload, name="upload"),
+    path("road_registration/", views.road_registration, name="road_registration"),
+    path("get_road_info/", views.get_road_info, name="get_road_info"),
+    path("get_user_info/", views.get_user_info, name="get_user_info"),
 
 ]
