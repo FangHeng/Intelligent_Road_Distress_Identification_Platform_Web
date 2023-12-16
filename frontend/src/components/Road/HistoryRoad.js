@@ -46,10 +46,6 @@ const HistoryRoad = (observer(() => {
     const [formattedRoadData, setFormattedRoadData] = useState([]);
 
     useEffect(() => {
-        roadStore.getRoadData(); // 获取道路数据
-    }, []);
-
-    useEffect(() => {
         // 当道路数据更新时，添加顺序编号
         const dataWithIndex = roadStore.roadData.map((road, index) => ({
             key: index, // 添加唯一的 key
@@ -72,6 +68,7 @@ const HistoryRoad = (observer(() => {
                 <Table
                     dataSource={formattedRoadData}
                     columns={columns}
+                    loading={roadStore.roadData.length === 0}
                     pagination={{ pageSize: 10 }} // 设置每页显示10条数据
                 />
             </Space>

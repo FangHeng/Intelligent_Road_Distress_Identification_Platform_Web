@@ -14,6 +14,8 @@ import { observer } from 'mobx-react-lite'
 import userStore from '../../store/UserStore'
 import uiStore from "../../store/UIStore";
 import { useLocation } from 'react-router-dom';
+import companyStore from "../../store/CompanyStore";
+import roadStore from "../../store/RoadStore";
 const { Text } = Typography
 const { Sider, Content, Footer } = Layout
 
@@ -25,7 +27,14 @@ const SideBarLayout = observer(() => {
     } = theme.useToken()
 
     useEffect(() => {
-        userStore.fetchUserInfo();
+        userStore.fetchUserInfo(
+            () => {
+                if (userStore.getInfoHint.status === 'error') {
+                    message.error(userStore.getInfoHint.message)
+                }
+            }
+        );
+        companyStore.fetchEmployeeNumber();
         const {loginHint} = userStore
         if (loginHint.status === 'success'){
             message.success('登陆成功！')
@@ -35,6 +44,11 @@ const SideBarLayout = observer(() => {
     useEffect(() => {
         // 当主页加载完成，停止进度条
         uiStore.stopLoading();
+    }, []);
+
+    // 获取道路数据以便多个页面使用
+    useEffect(() => {
+        roadStore.fetchRoadData();
     }, []);
 
     const handleNavigate = (path) => {

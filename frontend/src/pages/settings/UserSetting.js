@@ -15,6 +15,7 @@ import {
 } from 'antd';
 import {EditOutlined,} from "@ant-design/icons";
 import userStore from '../../store/UserStore'
+import companyStore from "../../store/CompanyStore";
 import { observer } from 'mobx-react-lite'
 
 
@@ -43,19 +44,27 @@ const tailFormItemLayout = {
     },
 };
 
-
-
 const UserSetting = observer(() => {
     const {userInfo, infoChangeHint} = userStore;
 
     useEffect(() => {
+        // 添加性别映射逻辑
+        const genderMapping = {
+            'Male': '男',
+            'Female': '女',
+            'Other': '其他'
+        };
+
+        // 使用映射逻辑来更新性别字段
+        const genderValue = genderMapping[userInfo.gender] ?? '';
+
         const fieldsValue = {
             email: userInfo.email ?? '',
             phone: userInfo.phone ?? '',
             nickname: userInfo.username ?? '',
-            gender: userInfo.gender ?? '',
-            company: userInfo.companyName ?? '',
-            numberCode: userInfo.numberCode ?? ''
+            gender: genderValue, // 使用映射后的性别值
+            company: userInfo.company_name ?? '',
+            numberCode: companyStore.employeeNumber ?? ''
         };
 
         // 过滤掉值为 null 或空字符串的字段
@@ -67,18 +76,21 @@ const UserSetting = observer(() => {
     }, [userInfo]);
 
     const [form] = Form.useForm();
-    const onFinish = (values) => {
+
+    const onFinish = async (values) => {
         console.log('Received values of form: ', values);
-    //     对mobx中的数据进行更新，并更新到数据库中
-        userStore.updateUserInfo(values);
-        console.log(infoChangeHint)
-        if (infoChangeHint.status === 'success'){
-            message.success(infoChangeHint.message)
-        }else{
-            message.error(infoChangeHint.message)
+        const response = await userStore.updateUserInfo(values);
+        if (response && response.message === "用户信息已更新") {
+            // 成功更新
+            message.success('用户信息已更新！')
+            userStore.updateUserInfo(values);
+        } else {
+            // 更新失败，处理错误
+            message.error('用户信息更新失败！')
         }
 
     };
+
 
     const handleUpload = async ({ file }) => {
         try{
@@ -126,7 +138,7 @@ const UserSetting = observer(() => {
 
     const uploadButton = (
         <div>
-            <Avatar size={128} src={userInfo.avatar}/>
+            <Avatar size={128} src={userStore.getAvatarUrl()}/>
             <div style={{position: 'absolute', right: 0, top: 0}}>
                 <Upload
                     accept="image/*"
@@ -160,8 +172,8 @@ const UserSetting = observer(() => {
                             }}>
                                 {uploadButton}
                                 <h5>{userInfo.username}</h5>
-                                <h5>{userInfo.jobNumber}</h5>
-                                <Tag key={userInfo.userLevel} color='processing' bordered={false}>{userInfo.userLevel}</Tag>
+                                <h5>{userInfo.employee_number}</h5>
+                                <Tag key={userInfo.user_level} color='processing' bordered={false}>{userInfo.user_level}</Tag>
                             </Col>
                         </div>
                     </Col>
@@ -210,41 +222,6 @@ const UserSetting = observer(() => {
                             </Form.Item>
 
 
-                            {/*<Form.Item name="password" label="密码" rules={[*/}
-                            {/*    {*/}
-                            {/*        required: true,*/}
-                            {/*        message: '请输入您的密码！',*/}
-                            {/*    },*/}
-                            {/*]}*/}
-                            {/*           hasFeedback>*/}
-                            {/*    <Input.Password/>*/}
-                            {/*</Form.Item>*/}
-
-
-                            {/*<Form.Item*/}
-                            {/*    name="confirm"*/}
-                            {/*    label="确认密码"*/}
-                            {/*    dependencies={['password']}*/}
-                            {/*    hasFeedback*/}
-                            {/*    rules={[*/}
-                            {/*        {*/}
-                            {/*            required: true,*/}
-                            {/*            message: '请确认您的密码!',*/}
-                            {/*        },*/}
-                            {/*        ({getFieldValue}) => ({*/}
-                            {/*            validator(_, value) {*/}
-                            {/*                if (!value || getFieldValue('password') === value) {*/}
-                            {/*                    return Promise.resolve();*/}
-                            {/*                }*/}
-                            {/*                return Promise.reject(new Error('您输入的新密码不匹配！'));*/}
-                            {/*            },*/}
-                            {/*        }),*/}
-                            {/*    ]}*/}
-                            {/*>*/}
-                            {/*    <Input.Password/>*/}
-                            {/*</Form.Item>*/}
-
-
                             <Form.Item
                                 name="nickname"
                                 label="昵称"
@@ -284,7 +261,7 @@ const UserSetting = observer(() => {
                                     message: '请输入您的公司！',
                                 },
                             ]}>
-                                <Input/>
+                                <Input disabled={true}/>
                             </Form.Item>
 
 
@@ -294,7 +271,7 @@ const UserSetting = observer(() => {
                                     message: '请输入您的公司工号位数！',
                                 },
                             ]}>
-                                <Input/>
+                                <Input />
                             </Form.Item>
 
                             <Form.Item {...tailFormItemLayout}>
@@ -305,6 +282,57 @@ const UserSetting = observer(() => {
                         </Form>
                     </Col>
                 </Row>
+            </Card>
+            <Card title="修改密码" style={{height:'40vh'}}>
+                <Form
+                    {...formItemLayout}
+                    form={form}
+                    name="passwordSetting"
+                    onFinish={onFinish}
+                    initialValues={{
+                        prefix: '86',
+                    }}
+                    scrollToFirstError
+                >
+                    <Form.Item name="password" label="密码" rules={[
+                        {
+                            required: true,
+                            message: '请输入您的密码！',
+                        },
+                    ]}
+                               hasFeedback>
+                        <Input.Password/>
+                    </Form.Item>
+
+
+                    <Form.Item
+                        name="confirm"
+                        label="确认密码"
+                        dependencies={['password']}
+                        hasFeedback
+                        rules={[
+                            {
+                                required: true,
+                                message: '请确认您的密码!',
+                            },
+                            ({getFieldValue}) => ({
+                                validator(_, value) {
+                                    if (!value || getFieldValue('password') === value) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error('您输入的新密码不匹配！'));
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input.Password/>
+                    </Form.Item>
+                    <Form.Item {...tailFormItemLayout}>
+                        <Button type="primary" htmlType="submit" >
+                            确认
+                        </Button>
+                    </Form.Item>
+                </Form>
             </Card>
         </Space>
     );

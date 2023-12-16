@@ -48,7 +48,7 @@ const Home = observer(() => {
                       <IdcardOutlined
                         style={{ marginRight: '0.4vh', fontSize: '2.5vh' }}
                       />
-                      {userInfo.jobNumber}
+                      {userInfo.employee_number}
                     </span>
                   </div>
                 </Card>
