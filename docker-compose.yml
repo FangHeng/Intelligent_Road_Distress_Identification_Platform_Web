@@ -25,6 +25,8 @@ services:
     build: ./frontend
     ports:
       - "3000:80"
+    environment:
+      - Map_Key=${Map_Key}
 
   db:
     image: mysql:8.0
