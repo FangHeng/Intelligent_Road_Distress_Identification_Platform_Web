@@ -20,5 +20,9 @@ urlpatterns = [
     path("road_registration/", views.road_registration, name="road_registration"),
     path("get_road_info/", views.get_road_info, name="get_road_info"),
     path("get_user_info/", views.get_user_info, name="get_user_info"),
+    path("change_user_info/", views.change_user_info, name="change_user_info"),
+    path("get_employee_number_length/", views.get_employee_number_length, name="get_employee_number_length"),
+    path("change_employee_number_length/", views.change_employee_number_length, name="change_employee_number_length"),
+
 
 ]

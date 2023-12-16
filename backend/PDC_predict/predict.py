@@ -4,7 +4,7 @@
 """
 
 import os
-from swin.swin_predict import predict_swin
+from PDC_predict.swin.swin_predict import predict_swin
 from pprint import pprint
 
 

@@ -1,6 +1,8 @@
 import os
 import json
 import uuid
+import base64
+import pytz
 
 from django.shortcuts import render
 from django.contrib.auth import authenticate
@@ -10,6 +12,7 @@ from .models import UserRole, UploadRecord, FileUpload, Company, Road
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
+from django.core.files.base import ContentFile
 
 from PDC_predict.predict import predict
 
@@ -43,6 +46,7 @@ def login(request):
         # 非 POST 请求
         return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
 
+
 # @ensure_csrf_cookie
 def get_company_info(request):
     # 查询所有公司
@@ -54,37 +58,60 @@ def get_company_info(request):
 
 
 def upload(request):
-    if request.method == 'POST':
-        user_role = UserRole.objects.get(user=request.user)
-        user_id = user_role.id
-        upload_time = timezone.now()  # 获取当前时间
-        folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
-        os.makedirs(folder_name, exist_ok=True)
+    try:
+        if request.method == 'POST':
+            user_role = UserRole.objects.get(user=request.user)
+            user_id = user_role.id
+            # 设置北京时区并获取当前时间
+            tz = pytz.timezone('Asia/Shanghai')
+            upload_time = timezone.now().astimezone(tz)
+            folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
+            os.makedirs(folder_name, exist_ok=True)
 
-        upload_record = UploadRecord.objects.create(
-            upload_time=upload_time,
-            folder_url=folder_name,
-            uploader_id=user_id,
-            road_id=request.POST['road_id'],
-            upload_name=request.POST['upload_name'],
-            upload_count=len(request.FILES)
-        )
+            # 从表单数据中获取 imageInfo
+            image_info = {
+                'title': request.POST.get('title', ''),
+                'road': request.POST.get('road', '')
+            }
 
-        for f in request.FILES.values():
-            file_name = uuid.uuid4().hex  # 生成唯一的文件名
-            file_path = os.path.join(folder_name, file_name)
-            handle_uploaded_file(f, file_path)
+            upload_count = sum(len(request.FILES.getlist(field_name)) for field_name in request.FILES)
 
-            # 假设你有一个predict函数来处理文件并返回结果
-            result = predict(user_id, upload_time, file_path)
-            FileUpload.objects.create(
-                upload=upload_record,
-                file_url=file_path,
-                classification_result=result['classification'],
-                confidence=result['confidence']
+            upload_record = UploadRecord.objects.create(
+                upload_time=upload_time,
+                folder_url=folder_name,
+                uploader_id=user_id,
+                road_id=image_info['road'],
+                upload_name=image_info['title'],
+                upload_count=upload_count
             )
 
-        return JsonResponse({'message': 'Upload successful'})
+            for field_name, files in request.FILES.lists():
+                for file in files:
+                    original_name = file.name
+                    file_name = uuid.uuid4().hex
+                    extension = os.path.splitext(original_name)[1]  # 提取文件后缀
+                    file_path = os.path.join(folder_name, file_name + extension)  # 使用上传的文件的原始文件名
+
+                    handle_uploaded_file(file, file_path)
+
+            predictions = {}
+            # predictions = predict(user=user_id, time=upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
+            for file_name, result in predictions.items():
+                FileUpload.objects.create(
+                    upload=upload_record,
+                    file_url=os.path.join(folder_name, file_name),
+                    classification_result=result['class'],
+                    confidence=result['probability']
+                )
+
+            return JsonResponse({'message': 'Upload successful'}, status=200)
+    except UserRole.DoesNotExist:
+        return JsonResponse({'error': 'User role not found'}, status=404)
+    except OSError as e:
+        return JsonResponse({'error': f'File system error: {e}'}, status=500)
+    except Exception as e:
+        return JsonResponse({'error': f'An unexpected error occurred: {e}'}, status=501)
+
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
@@ -93,6 +120,14 @@ def handle_uploaded_file(f, file_name):
         for chunk in f.chunks():
             destination.write(chunk)
 
+
+def save_base64_file(encoded_data, file_path):
+    format, imgstr = encoded_data.split(';base64,')  # 分割数据格式和实际的Base64字符串
+    ext = format.split('/')[-1]  # 获取文件扩展名
+    data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)  # 解码和封装文件内容
+    with open(file_path, 'wb+') as destination:
+        for chunk in data.chunks():
+            destination.write(chunk)
 
 @csrf_exempt
 def road_registration(request):
@@ -177,9 +212,10 @@ def get_road_info(request):
 
         roads = Road.objects.filter(company_id=company_id)
 
-        # 构造道路信息字典
-        road_list = {
-            str(road.road_id): {
+        # 构造道路信息列表
+        road_list = [
+            {
+                'road_id': str(road.road_id),
                 'road_name': road.road_name,
                 'gps_longitude': float(road.gps_longitude),
                 'gps_latitude': float(road.gps_latitude),
@@ -187,9 +223,9 @@ def get_road_info(request):
                 'administrative_city': road.administrative_city,
                 'administrative_district': road.administrative_district
             } for road in roads
-        }
+        ]
 
-        return JsonResponse(road_list)
+        return JsonResponse(road_list, safe=False)
 
     except UserRole.DoesNotExist:
         return JsonResponse({'error': '用户角色信息不存在'}, status=444)
@@ -228,3 +264,115 @@ def get_user_info(request):
         return JsonResponse({"error": "用户信息未找到"}, status=444)
     except Company.DoesNotExist:
         return JsonResponse({"error": "公司信息未找到"}, status=444)
+
+
+@require_http_methods(["POST"])
+def change_user_info(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "未认证的用户"}, status=401)
+
+    # 获取当前用户和用户角色信息
+    current_user = request.user
+    try:
+        user_role = UserRole.objects.get(user=current_user)
+    except UserRole.DoesNotExist:
+        return JsonResponse({"error": "用户角色信息未找到"}, status=404)
+
+    # 从POST请求中获取信息
+    new_email = request.POST.get('email', user_role.email)
+    new_phone_number = request.POST.get('phone_number', user_role.phone_number)
+    new_username = request.POST.get('username', current_user.username)
+    new_gender = request.POST.get('gender', user_role.gender)
+
+    # 检查UserRole信息是否有变化
+    user_role_changes = (
+        new_email != user_role.email or
+        new_phone_number != user_role.phone_number or
+        new_gender != user_role.gender
+    )
+
+    # 检查User信息是否有变化
+    user_changes = new_username != current_user.username
+
+    if user_role_changes:
+        # 更新UserRole信息
+        user_role.email = new_email
+        user_role.phone_number = new_phone_number
+        user_role.gender = new_gender
+
+        user_role.save()
+
+    if user_changes:
+        # 更新User信息
+        current_user.username = new_username
+        current_user.save()
+
+    if user_role_changes or user_changes:
+        return JsonResponse({"message": "用户信息已更新"}, status=200)
+
+    return JsonResponse({"message": "没有检测到信息变化"}, status=304)
+
+
+def get_employee_number_length(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "未认证的用户"}, status=401)
+
+    current_user = request.user
+
+    try:
+        # 获取用户角色信息
+        user_role = UserRole.objects.get(user=current_user)
+
+        # 获取公司信息
+        company = Company.objects.get(company_id=user_role.company.company_id)
+
+        # 准备要返回的用户信息
+        employee_number_length = {
+            "employee_number_length": company.employee_number_length
+        }
+
+        return JsonResponse(employee_number_length)
+
+    except UserRole.DoesNotExist:
+        return JsonResponse({"error": "用户信息未找到"}, status=444)
+    except Company.DoesNotExist:
+        return JsonResponse({"error": "公司信息未找到"}, status=444)
+
+
+@require_http_methods(["POST"])
+def change_employee_number_length(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "未认证的用户"}, status=401)
+
+    current_user = request.user
+
+    try:
+        # 获取用户角色信息
+        user_role = UserRole.objects.get(user=current_user)
+
+        # 检查用户权限
+        if user_role.user_level != 0:
+            return JsonResponse({"error": "无权限更改工号长度"}, status=403)
+
+        # 获取POST请求中的新员工号码长度
+        new_length = request.POST.get('new_length')
+        if new_length:
+            new_length = int(new_length)
+        else:
+            return JsonResponse({"error": "未提供新的员工号码长度"}, status=400)
+
+        # 获取公司信息并更新员工号码长度
+        company = Company.objects.get(company_id=user_role.company.company_id)
+        company.employee_number_length = new_length
+        company.save()
+
+        return JsonResponse({"message": "员工号码长度更新成功"})
+
+    except UserRole.DoesNotExist:
+        return JsonResponse({"error": "用户信息未找到"}, status=404)
+    except Company.DoesNotExist:
+        return JsonResponse({"error": "公司信息未找到"}, status=404)
+    except ValueError:
+        return JsonResponse({"error": "无效的员工号码长度"}, status=400)
+
+
