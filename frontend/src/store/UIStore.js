@@ -20,4 +20,6 @@ class UIStore {
     }
 }
 
-export const uiStore =  new UIStore();
+const uiStore = new UIStore();
+
+export default uiStore;

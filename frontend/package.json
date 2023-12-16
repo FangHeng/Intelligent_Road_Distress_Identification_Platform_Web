@@ -16,6 +16,8 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "antd": "^5.12.1",
+    "gcoord": "^1.0.5",
+    "js-cookie": "^3.0.5",
     "lodash-es": "^4.17.20",
     "mobx": "^6.12.0",
     "mobx-react-lite": "^4.0.5",
@@ -32,6 +34,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "proxy": "http://10.234.114.102:8000",
   "eslintConfig": {
     "extends": [
       "react-app",

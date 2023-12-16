@@ -1,25 +1,23 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Form, Input, Button, message, Modal, Select} from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {UserOutlined, LockOutlined, MailOutlined} from '@ant-design/icons';
 import backgroundImage from '../../assets/background.jpg';
-import {userStore} from '../../store/userStore'
+import userStore from '../../store/UserStore'
 import { observer } from 'mobx-react-lite'
-import {uiStore} from "../../store/UIStore";
-const { Option } = Select;
+import uiStore from "../../store/UIStore";
+import companyStore from "../../store/CompanyStore";
 
 const Login = observer(() => {
-    const companyOptions = [
-        {id: '1', name: '公司1'},
-        {id: '2', name: '公司2'},
-        {id: '3', name: '公司3'},
-    ];
+    useEffect(() => {
+        companyStore.fetchCompanies(); // 获取公司列表
+    }, []);
 
     const navigate = useNavigate(); // 获取 history 对象
 
     const [jobNumber, setJobNumber] = useState('');
     const [password, setPassword] = useState('');
-    const [company, setCompany] = useState(1);
+    const [company, setCompany] = useState('');
 
     // 忘记密码模态框
     const [visible, setVisible] = useState(false);
@@ -61,13 +59,19 @@ const Login = observer(() => {
                 >
                     <Form.Item
                         name="company"
-                        rules={[{required: true, message: '请选择公司！'}]}
+                        rules={[{ required: true, message: '请选择公司！' }]}
                     >
-                    <Select style={{marginTop: 30, width: '100%'}} placeholder="选择公司" onChange={(value) => setCompany(value)}>
-                        {companyOptions.map(company => (
-                            <Option key={company.id} value={company.id}>{company.name}</Option>
-                        ))}
-                    </Select>
+                        <Select
+                            style={{ marginTop: 30, width: '100%' }}
+                            placeholder="选择公司"
+                            onChange={(value) => setCompany(value)}
+                        >
+                            {companyStore.companyOptions.map(company => (
+                                <Select.Option key={company.id} value={company.id}>
+                                    {company.name}
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </Form.Item>
 
                     <Form.Item

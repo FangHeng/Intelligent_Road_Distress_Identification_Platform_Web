@@ -14,7 +14,7 @@ import {
     message,
 } from 'antd';
 import {EditOutlined,} from "@ant-design/icons";
-import {userStore} from '../../store/userStore'
+import userStore from '../../store/UserStore'
 import { observer } from 'mobx-react-lite'
 
 
@@ -49,16 +49,21 @@ const UserSetting = observer(() => {
     const {userInfo, infoChangeHint} = userStore;
 
     useEffect(() => {
-        form.setFieldsValue({
-            email: userInfo.email,
-            phone: userInfo.phone,
-            password: userInfo.password,
-            confirm: userInfo.password,
-            nickname: userInfo.username,
-            gender: userInfo.gender,
-            company: userInfo.companyName,
-            numberCode: userInfo.numberCode,
-        });
+        const fieldsValue = {
+            email: userInfo.email ?? '',
+            phone: userInfo.phone ?? '',
+            nickname: userInfo.username ?? '',
+            gender: userInfo.gender ?? '',
+            company: userInfo.companyName ?? '',
+            numberCode: userInfo.numberCode ?? ''
+        };
+
+        // 过滤掉值为 null 或空字符串的字段
+        const filteredFieldsValue = Object.fromEntries(
+            Object.entries(fieldsValue).filter(([_, value]) => value != null && value !== '')
+        );
+
+        form.setFieldsValue(filteredFieldsValue);
     }, [userInfo]);
 
     const [form] = Form.useForm();
@@ -205,39 +210,39 @@ const UserSetting = observer(() => {
                             </Form.Item>
 
 
-                            <Form.Item name="password" label="密码" rules={[
-                                {
-                                    required: true,
-                                    message: '请输入您的密码！',
-                                },
-                            ]}
-                                       hasFeedback>
-                                <Input.Password/>
-                            </Form.Item>
+                            {/*<Form.Item name="password" label="密码" rules={[*/}
+                            {/*    {*/}
+                            {/*        required: true,*/}
+                            {/*        message: '请输入您的密码！',*/}
+                            {/*    },*/}
+                            {/*]}*/}
+                            {/*           hasFeedback>*/}
+                            {/*    <Input.Password/>*/}
+                            {/*</Form.Item>*/}
 
 
-                            <Form.Item
-                                name="confirm"
-                                label="确认密码"
-                                dependencies={['password']}
-                                hasFeedback
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '请确认您的密码!',
-                                    },
-                                    ({getFieldValue}) => ({
-                                        validator(_, value) {
-                                            if (!value || getFieldValue('password') === value) {
-                                                return Promise.resolve();
-                                            }
-                                            return Promise.reject(new Error('您输入的新密码不匹配！'));
-                                        },
-                                    }),
-                                ]}
-                            >
-                                <Input.Password/>
-                            </Form.Item>
+                            {/*<Form.Item*/}
+                            {/*    name="confirm"*/}
+                            {/*    label="确认密码"*/}
+                            {/*    dependencies={['password']}*/}
+                            {/*    hasFeedback*/}
+                            {/*    rules={[*/}
+                            {/*        {*/}
+                            {/*            required: true,*/}
+                            {/*            message: '请确认您的密码!',*/}
+                            {/*        },*/}
+                            {/*        ({getFieldValue}) => ({*/}
+                            {/*            validator(_, value) {*/}
+                            {/*                if (!value || getFieldValue('password') === value) {*/}
+                            {/*                    return Promise.resolve();*/}
+                            {/*                }*/}
+                            {/*                return Promise.reject(new Error('您输入的新密码不匹配！'));*/}
+                            {/*            },*/}
+                            {/*        }),*/}
+                            {/*    ]}*/}
+                            {/*>*/}
+                            {/*    <Input.Password/>*/}
+                            {/*</Form.Item>*/}
 
 
                             <Form.Item
