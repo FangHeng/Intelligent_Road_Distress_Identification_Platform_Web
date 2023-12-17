@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from .swin import swin_large_patch4_window7_224_in22k as create_model
 
 
-def predict_swin(folder_path=None ,json_path='class_indices.json',model_weight_path='E:\code\weights\PDC\PDC_swinL_224_in22k_86.3.pth'):
+def predict_swin(folder_path=None ,json_path='class_indices.json',model_weight_path=None):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     img_size = 224
@@ -19,9 +19,8 @@ def predict_swin(folder_path=None ,json_path='class_indices.json',model_weight_p
          transforms.ToTensor(),
          transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 
-
     # read class_indict
-    json_path = json_path
+    json_path = os.path.join('PDC_predict', json_path)
     assert os.path.exists(json_path), "file: '{}' dose not exist.".format(json_path)
 
     with open(json_path, "r") as f:
