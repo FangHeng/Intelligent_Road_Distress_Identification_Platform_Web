@@ -4,6 +4,9 @@
 """
 
 import os
+
+from django.conf import settings
+
 from PDC_predict.swin.swin_predict import predict_swin
 from pprint import pprint
 
@@ -21,8 +24,7 @@ def predict(user=None, time=None, model=None, model_weight_path=None, json_path=
     user_str = str(user) if user is not None else ""
     time_str = str(time) if time is not None else ""
 
-    folder_path = os.path.join("upload", user_str, time_str)
-    print(folder_path)
+    folder_path = os.path.join(settings.BASE_DIR, "uploads", user_str, time_str)
     if model == 'swin':
         if model_weight_path is None:
             model_weight_path = os.path.join("weights", "PDC_swinL_224_in22k_86.3.pth")

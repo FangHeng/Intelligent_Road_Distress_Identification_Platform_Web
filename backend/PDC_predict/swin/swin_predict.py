@@ -4,7 +4,6 @@ import json
 import torch
 from PIL import Image
 from torchvision import transforms
-import matplotlib.pyplot as plt
 
 from .swin import swin_large_patch4_window7_224_in22k as create_model
 
