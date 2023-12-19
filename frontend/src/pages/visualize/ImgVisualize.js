@@ -65,17 +65,17 @@ const ImgVisualize = observer(() => {
     const [checkAll, setCheckAll] = useState(false);
     const [photos, setPhotos] = useState([]);
 
-    // // 当组件加载时，只调用一次 fetchLastUploadId
-    // useEffect(() => {
-    //     imgStore.fetchLastUploadId();
-    // }, []); // 空依赖数组表示只在组件挂载时执行
-    //
-    // useEffect(() => {
-    //     if (imgStore.isLastUploadIdFetched) {
-    //         imgStore.fetchResultData();
-    //         imgStore.isLastUploadIdFetched = false; // 重置标志
-    //     }
-    // }, [imgStore.isLastUploadIdFetched]); // 依赖于 isLastUploadIdFetched
+    // 当组件加载时，只调用一次 fetchLastUploadId
+    useEffect(() => {
+        imgStore.fetchLastUploadId();
+    }, []); // 空依赖数组表示只在组件挂载时执行
+
+    useEffect(() => {
+        if (imgStore.isLastUploadIdFetched) {
+            imgStore.fetchResultData();
+            imgStore.isLastUploadIdFetched = false; // 重置标志
+        }
+    }, [imgStore.isLastUploadIdFetched]); // 依赖于 isLastUploadIdFetched
 
 
     useEffect(() => {

@@ -152,7 +152,7 @@ def get_subordinates_info(request):
     return JsonResponse(subordinates_info, safe=False, status=200)
 
 
-# @ensure_csrf_cookie
+@ensure_csrf_cookie
 def get_company_info(request):
     # 查询所有公司
     companies = Company.objects.all()

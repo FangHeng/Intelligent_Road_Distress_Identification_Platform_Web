@@ -22,3 +22,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+frontend/.idea/
+
+backend/IRDIP/__pycache__/
+
+backend/backend/__pycache__/
