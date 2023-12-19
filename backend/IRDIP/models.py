@@ -15,13 +15,14 @@ class UserRole(models.Model):
     company = models.ForeignKey('Company', on_delete=models.CASCADE)
     avatar_url = models.URLField(null=True, blank=True)
     supervisor = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    selected_model = models.IntegerField(choices=[(0, 'Swin'), (1, 'WSPLIN-IP'), (2, 'WSPLIN-SS'),(3, "PicT")], default=0)
 
 # 上传记录表
 class UploadRecord(models.Model):
     upload_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     upload_time = models.DateTimeField()
     folder_url = models.CharField(max_length=255)
-    uploader = models.ForeignKey(User, on_delete=models.CASCADE)
+    uploader = models.ForeignKey('UserRole', on_delete=models.CASCADE)
     road = models.ForeignKey('Road', on_delete=models.CASCADE)
     upload_name = models.CharField(max_length=255)
     upload_count = models.IntegerField()
@@ -49,3 +50,4 @@ class Road(models.Model):
     administrative_province = models.CharField(max_length=100)
     administrative_city = models.CharField(max_length=100)
     administrative_district = models.CharField(max_length=100)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)

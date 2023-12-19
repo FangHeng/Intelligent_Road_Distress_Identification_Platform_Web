@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-me3ws7_mb3*&3s64ep742bq*^_289w^_xvv5r9zb==+mri_p)v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.234.114.3']
+ALLOWED_HOSTS = ['10.234.114.64']
 
 
 # Application definition
@@ -54,6 +54,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
 ]
 
 CSRF_COOKIE_NAME = "csrftoken"
@@ -61,16 +62,30 @@ CSRF_COOKIE_NAME = "csrftoken"
 # CSRF_COOKIE_SAMESITE = 'None'
 
 # 允许全部的来源
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
 
-# 允许部分来源
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://10.234.114.14:3000",
+CORS_ALLOW_HEADERS = [
+    "authorization",
+    "content-type",
 ]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+# # 允许部分来源
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",
+#     "http://127.0.0.1:3000",
+#     "http://10.234.114.14:3000",
+# ]
 
 ROOT_URLCONF = "backend.urls"
 
@@ -132,7 +147,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "zh-Hans"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Shanghai"
 
 USE_I18N = True
 
