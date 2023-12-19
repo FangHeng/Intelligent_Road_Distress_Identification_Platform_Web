@@ -1,17 +1,19 @@
-import {Fullscreen, GeoLocate, Scene} from '@antv/l7';
-import { TencentMap } from '@antv/l7-maps';
+import {Fullscreen, GeoLocate, Scene, Zoom} from '@antv/l7';
+import {GaodeMap} from '@antv/l7-maps';
 import gcoord from 'gcoord';
 
 function initSettingMap(latitude = 39.90374, longitude = 116.397827){
     const scene = new Scene({
         id: 'settingMap',
         logoVisible: false,
-        map: new TencentMap({
+        map: new GaodeMap({
             center: [longitude, latitude],
             zoom: 10,
             minZoom: 5,
-            maxZoom: 18
+            maxZoom: 18,
+            token: '65bf53c3527579a6a2bddfecf9b8d5ee',
         })
+
     });
     scene.on('loaded', () => {
         const fullscreen = new Fullscreen({
@@ -33,7 +35,14 @@ function initSettingMap(latitude = 39.90374, longitude = 116.397827){
         scene.addControl(geoLocate);
     });
 
+    scene.on('loaded', () => {
+        const zoom = new Zoom();
+        scene.addControl(zoom);
+    });
+
+
     return  scene;
 }
 
 export default initSettingMap;
+

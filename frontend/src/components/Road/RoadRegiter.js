@@ -1,10 +1,10 @@
 import {Alert, AutoComplete, Button, Card, Cascader, Col, Form, message, Row, Space} from "antd";
 import React, {useEffect, useState} from "react";
-import initSettingMap from "../../components/Graph/SettingMap";
+import initSettingMap from "../Graph/SettingMap";
 import {Marker, Popup} from "@antv/l7";
 import roadStore from "../../store/RoadStore";
 import {observer} from "mobx-react-lite";
-const rawData = require('../../assets/county.json');
+const rawData = require('../../assets/json/county.json');
 
 // 创建一个映射来存储转换后的数据
 const dataMap = {};
@@ -183,7 +183,6 @@ const RoadRegister = observer(() => {
                 // 创建新的标记并添加到地图
                 const newMarker = new Marker().setLnglat([location.lng, location.lat]).setPopup(popup);
                 scene.addMarker(newMarker);
-
                 // 更新当前标记的引用
                 setCurrentMarker(newMarker);
             }
@@ -261,7 +260,7 @@ const RoadRegister = observer(() => {
                         </Form.Item>
                     </Form>
                 </Card>
-                <div id="settingMap" style={{width: '100%', height: '55vh'}}/>
+                <div style={{height: "55vh", justifyContent:"center", position: "relative"}} id="settingMap"/>
             </Space>
         </>
     )

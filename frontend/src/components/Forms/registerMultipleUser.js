@@ -2,6 +2,7 @@ import {Alert, Button, Col, Form, Input, Row} from "antd";
 import React from "react";
 import userStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
+import companyStore from "../../store/CompanyStore";
 
 const onFinish = (values) => {
     console.log('Success:', values);
@@ -11,12 +12,13 @@ const onFinishFailed = (errorInfo) => {
 };
 
 export const RegisterMultipleUser = observer (()=> {
-    const {userLevel, numberCode } = userStore.userInfo;
+    const {user_level } = userStore.userInfo;
+    const numberCode = companyStore.employeeNumber;
     return (
         <>
             <Alert
-                message={userLevel === 'root' ? `您正在以root身份批量注册管理员，下属用户将可以使用您注册的账号登录系统并可以创建新的普通用户，你们公司的工号数为${numberCode}位。`
-                    : `您正在以管理员身份批量注册普通账号以使用我们的系统，你们公司的工号数为${numberCode}位。`}
+                message={user_level === 'root' ? `您正在以最高权限（Level 0）身份批量注册管理员（Level 1），下属用户将可以使用您注册的账号登录系统并可以创建新的普通用户，你们公司的工号数为${numberCode}位。`
+                    : `您正在以管理员（Level）身份批量注册普通账号以使用我们的系统，你们公司的工号数为${numberCode}位。`}
                 type="info"
                 showIcon
                 closable

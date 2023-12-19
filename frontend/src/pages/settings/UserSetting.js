@@ -11,9 +11,9 @@ import {
     Tag,
     Avatar,
     Select,
-    message,
+    message, Descriptions,
 } from 'antd';
-import {EditOutlined,} from "@ant-design/icons";
+import {EditOutlined, UserOutlined,} from "@ant-design/icons";
 import userStore from '../../store/UserStore'
 import companyStore from "../../store/CompanyStore";
 import { observer } from 'mobx-react-lite'
@@ -44,8 +44,33 @@ const tailFormItemLayout = {
     },
 };
 
+const colformItemLayout = {
+    labelCol: {
+        xs: {span: 21},
+        sm: {span: 5},
+    },
+    wrapperCol: {
+        xs: {span: 24},
+        sm: {span: 16},
+    },
+};
+
+const colTailformItemLayout = {
+    wrapperCol: {
+        xs: {
+            span: 12,
+            offset: 12,
+        },
+        sm: {
+            span: 14,
+            offset: 10,
+        },
+    },
+};
+
 const UserSetting = observer(() => {
     const {userInfo, infoChangeHint} = userStore;
+    const {employeeNumber} = companyStore;
 
     useEffect(() => {
         // 添加性别映射逻辑
@@ -58,24 +83,36 @@ const UserSetting = observer(() => {
         // 使用映射逻辑来更新性别字段
         const genderValue = genderMapping[userInfo.gender] ?? '';
 
-        const fieldsValue = {
+        const personalInfofieldsValue = {
             email: userInfo.email ?? '',
-            phone: userInfo.phone ?? '',
+            phone: userInfo.phone_number ?? '',
             nickname: userInfo.username ?? '',
             gender: genderValue, // 使用映射后的性别值
-            company: userInfo.company_name ?? '',
-            numberCode: companyStore.employeeNumber ?? ''
         };
 
         // 过滤掉值为 null 或空字符串的字段
-        const filteredFieldsValue = Object.fromEntries(
-            Object.entries(fieldsValue).filter(([_, value]) => value != null && value !== '')
+        const filteredPersonalInfofieldsValue = Object.fromEntries(
+            Object.entries(personalInfofieldsValue).filter(([_, value]) => value != null && value !== '')
         );
 
-        form.setFieldsValue(filteredFieldsValue);
+        formPersonalInfo.setFieldsValue(filteredPersonalInfofieldsValue);
     }, [userInfo]);
 
-    const [form] = Form.useForm();
+    const [formPersonalInfo] = Form.useForm();
+    const [formPasswordSet] = Form.useForm();
+
+    const companyItems = [
+        {
+            key: '1',
+            label: '公司名称',
+            children: `${userInfo.company_name}`,
+        },
+        {
+            key: '2',
+            label: '工号位数',
+            children: `${employeeNumber}`,
+        },
+    ];
 
     const onFinish = async (values) => {
         console.log('Received values of form: ', values);
@@ -173,7 +210,7 @@ const UserSetting = observer(() => {
                                 {uploadButton}
                                 <h5>{userInfo.username}</h5>
                                 <h5>{userInfo.employee_number}</h5>
-                                <Tag key={userInfo.user_level} color='processing' bordered={false}>{userInfo.user_level}</Tag>
+                                <Tag key={userInfo.user_level}  bordered={false} color="blue">{userInfo.user_level}</Tag>
                             </Col>
                         </div>
                     </Col>
@@ -181,7 +218,7 @@ const UserSetting = observer(() => {
                     <Col span={16}>
                         <Form
                             {...formItemLayout}
-                            form={form}
+                            form={formPersonalInfo}
                             name="userSetting"
                             onFinish={onFinish}
                             initialValues={{
@@ -255,25 +292,6 @@ const UserSetting = observer(() => {
                                 </Select>
                             </Form.Item>
 
-                            <Form.Item name="company" label="公司" rules={[
-                                {
-                                    required: true,
-                                    message: '请输入您的公司！',
-                                },
-                            ]}>
-                                <Input disabled={true}/>
-                            </Form.Item>
-
-
-                            <Form.Item name="numberCode" label="工号位数" rules={[
-                                {
-                                    required: true,
-                                    message: '请输入您的公司工号位数！',
-                                },
-                            ]}>
-                                <Input />
-                            </Form.Item>
-
                             <Form.Item {...tailFormItemLayout}>
                                 <Button type="primary" htmlType="submit" >
                                     确认
@@ -283,57 +301,67 @@ const UserSetting = observer(() => {
                     </Col>
                 </Row>
             </Card>
-            <Card title="修改密码" style={{height:'40vh'}}>
-                <Form
-                    {...formItemLayout}
-                    form={form}
-                    name="passwordSetting"
-                    onFinish={onFinish}
-                    initialValues={{
-                        prefix: '86',
-                    }}
-                    scrollToFirstError
-                >
-                    <Form.Item name="password" label="密码" rules={[
-                        {
-                            required: true,
-                            message: '请输入您的密码！',
-                        },
-                    ]}
-                               hasFeedback>
-                        <Input.Password/>
-                    </Form.Item>
-
-
-                    <Form.Item
-                        name="confirm"
-                        label="确认密码"
-                        dependencies={['password']}
-                        hasFeedback
-                        rules={[
-                            {
-                                required: true,
-                                message: '请确认您的密码!',
-                            },
-                            ({getFieldValue}) => ({
-                                validator(_, value) {
-                                    if (!value || getFieldValue('password') === value) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('您输入的新密码不匹配！'));
+            <Row gutter={16}>
+                <Col span={12}>
+                    <Card title='你的公司' style={{height:'40vh'}}>
+                        <Descriptions layout="vertical" bordered items={companyItems} />
+                    </Card>
+                </Col>
+                <Col span={12}>
+                    <Card title="修改密码" style={{height:'40vh'}}>
+                        <Form
+                            {...colformItemLayout}
+                            form={formPasswordSet}
+                            name="passwordSetting"
+                            onFinish={onFinish}
+                            initialValues={{
+                                prefix: '86',
+                            }}
+                            scrollToFirstError
+                        >
+                            <Form.Item name="password" label="密码" rules={[
+                                {
+                                    required: true,
+                                    message: '请输入您的密码！',
                                 },
-                            }),
-                        ]}
-                    >
-                        <Input.Password/>
-                    </Form.Item>
-                    <Form.Item {...tailFormItemLayout}>
-                        <Button type="primary" htmlType="submit" >
-                            确认
-                        </Button>
-                    </Form.Item>
-                </Form>
-            </Card>
+                            ]}
+                                       hasFeedback>
+                                <Input.Password/>
+                            </Form.Item>
+
+
+                            <Form.Item
+                                name="confirm"
+                                label="确认密码"
+                                dependencies={['password']}
+                                hasFeedback
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: '请确认您的密码!',
+                                    },
+                                    ({getFieldValue}) => ({
+                                        validator(_, value) {
+                                            if (!value || getFieldValue('password') === value) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('您输入的新密码不匹配！'));
+                                        },
+                                    }),
+                                ]}
+                            >
+                                <Input.Password/>
+                            </Form.Item>
+                            <Form.Item {...colTailformItemLayout}>
+                                <Button type="primary" htmlType="submit">
+                                    确认
+                                </Button>
+                            </Form.Item>
+                        </Form>
+                    </Card>
+                </Col>
+
+            </Row>
         </Space>
     );
 })

@@ -1,11 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import {Upload, Button, Input, Select, Row, Col, Card, Space, Modal, message,} from 'antd';
+import React, {useState} from 'react';
+import {Upload, Button, Input, Select, Row, Col, Card, Space, Modal, message, Spin,} from 'antd';
 import {PlusOutlined, VerticalAlignTopOutlined} from '@ant-design/icons';
 import { observer } from 'mobx-react-lite'
 import imageStore from '../../../store/ImgStore'
 import roadStore from '../../../store/RoadStore'
 import '../css/ImageList.css'
 import {getBase64} from "../../../utils/utils";
+import {useNavigate} from "react-router-dom";
 
 
 const ImageUpload = observer(() => {
@@ -14,7 +15,8 @@ const ImageUpload = observer(() => {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
-    const roadData = roadStore.roadData; // 从 roadStore 获取道路数据
+
+    const navigate = useNavigate();
 
     const handleFileChange = ({ fileList }) => setFileList(fileList);
 
@@ -39,13 +41,13 @@ const ImageUpload = observer(() => {
             return;
         }
 
-        console.log(imageInfo, fileList)
         // 调用 store 的 uploadImages 方法
         await imageStore.uploadImages(fileList, imageInfo);
 
-    // 显示提示信息
+        // 显示提示信息
         if (imageStore.uploadHint.status === 'success') {
             message.success(imageStore.uploadHint.message);
+            navigate('/pages/visualize/ImgVisualize');
         } else if (imageStore.uploadHint.status === 'error') {
             message.error(imageStore.uploadHint.message);
         }
@@ -62,6 +64,7 @@ const ImageUpload = observer(() => {
         <Row gutter={24}>
             <Col span={18}>
                 <Card style={{ height: '90vh', overflow: 'auto', position:'relative' }}>
+                    {imageStore.uploadHint.isProcessing ? <div className="spin"><Spin tip="处理中..."><div className='content'></div></Spin> </div>: null}
                     <Upload
                         className="custom-upload"
                         listType="picture-card"
@@ -75,7 +78,7 @@ const ImageUpload = observer(() => {
                     </Upload>
                     <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
                         <img
-                            alt="example"
+                            alt="选择的图片"
                             style={{
                                 width: '100%',
                             }}
@@ -111,7 +114,7 @@ const ImageUpload = observer(() => {
                                 left: '25px',
                             }}
                             onClick={handleUpload}
-                            loading={imageStore.uploadHint.loading}
+                            loading={imageStore.uploadHint.isProcessing}
                     >
                         <VerticalAlignTopOutlined />上传
                     </Button>

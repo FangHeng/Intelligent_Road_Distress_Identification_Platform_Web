@@ -2,6 +2,7 @@ import React, {useEffect} from 'react';
 import { Layout, Input, Collapse, Breadcrumb } from 'antd';
 import {Link} from "react-router-dom";
 import uiStore from "../../store/UIStore";
+import {HomeOutlined} from "@ant-design/icons";
 
 const { Header, Content, Footer } = Layout;
 const { Search } = Input;
@@ -27,7 +28,7 @@ const ReleaseNotes = () => {
             </Header>
             <Content style={{ padding: '0 50px' }}>
                 <Breadcrumb style={{ margin: '16px 0' }}>
-                    <Breadcrumb.Item><Link to="/pages/home">首页</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item><Link to="/pages/home"><HomeOutlined  style={{ marginRight: '4px' }}/>首页</Link></Breadcrumb.Item>
                     <Breadcrumb.Item>版本发布公告</Breadcrumb.Item>
                 </Breadcrumb>
                 <div className="site-layout-content" style={{ background: 'white', padding: 24, minHeight: 280 }}>

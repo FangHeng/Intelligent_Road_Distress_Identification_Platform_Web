@@ -3,8 +3,8 @@ import './index.css';
 import './App.css';
 import 'antd/dist/reset.css';
 import zhCN from 'antd/lib/locale/zh_CN';
-import {ConfigProvider} from 'antd';
-import {HashRouter, Routes, Route} from 'react-router-dom';
+import {ConfigProvider, Switch} from 'antd';
+// import {HashRouter, Routes, Route} from 'react-router-dom';
 import Login from './pages/Login/login';
 import SideBarLayout from './components/SideBarLayout/SideBarLayout';
 import Home from './pages/home/Home';
@@ -19,11 +19,23 @@ import QA from "./pages/QA/QA";
 import ReleaseNotes from "./pages/releasenotes/ReleaseNotes";
 import ModelSelect from "./pages/settings/ModelSelect";
 import AddRoad from "./pages/settings/AddRoad";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+
+// import {theme} from "antd";
+//
+// const { darkAlgorithm, compactAlgorithm } = theme;
 
 function App() {
+  // const theme = {
+  //   algorithm: [darkAlgorithm],
+  // };
   return(
-      <HashRouter>
-        <ConfigProvider locale={zhCN}>
+      // <HashRouter>
+      <Router>
+        <ConfigProvider
+            locale={zhCN}
+            // theme={theme}
+        >
           <Routes>
             <Route path='' element={<Login/>}/>
             <Route path="/qa" element={<QA/>}/>
@@ -46,7 +58,8 @@ function App() {
           </Routes>
 
         </ConfigProvider>
-      </HashRouter>
+      </Router>
+      // </HashRouter>
   )
 }
 

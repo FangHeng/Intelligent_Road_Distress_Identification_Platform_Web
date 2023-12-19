@@ -1,9 +1,9 @@
 import {Button, Layout, Menu, theme, message, Divider, Tooltip, Avatar, Typography, FloatButton} from 'antd'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import MaleAvatar from '../../assets/Male.png'
-import logo from '../../assets/logo.png'
-import logo_mini from '../../assets/logo-mini.png'
+import MaleAvatar from '../../assets/img/Male.png'
+import logo from '../../assets/img/logo.png'
+import logo_mini from '../../assets/img/logo-mini.png'
 import { Outlet } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHouse, faArrowRightFromBracket, faGears, faCircleInfo, faChartColumn, faCube } from '@fortawesome/free-solid-svg-icons';
@@ -51,10 +51,14 @@ const SideBarLayout = observer(() => {
         roadStore.fetchRoadData();
     }, []);
 
-    const handleNavigate = (path) => {
-        uiStore.startLoading();
-        navigate(path);
+    // const handleNavigate = (path) => {
+    //     uiStore.startLoading();
+    //     navigate(path);
+    // };
+    const handleNavigate = (url) => {
+        window.open(url, '_blank');
     };
+
 
     // 使用 userStore 中的用户数据
     const { username, avatar } = userStore.userInfo;
@@ -79,9 +83,10 @@ const SideBarLayout = observer(() => {
                     // theme="white"
                     mode="inline"
                     onClick={(key) => {
-                        if (key.key === '/') {
-                            // deleteCookie('isLogin')
-                            localStorage.removeItem('messages')
+                        if (key.key === '/logout') {
+                            userStore.logout();
+                            navigate('/');
+                            return;
                         }
                         navigate(key.key)
                         console.log(key.key)

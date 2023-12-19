@@ -1,26 +1,30 @@
 import React, { useEffect, useState } from 'react'
 import './home.css'
-import { Card, Button, Row, Col, Avatar, Empty, Spin } from 'antd'
+import {Card, Button, Row, Col, Avatar, Empty, Spin, Tag, Space,} from 'antd'
 import {
   IdcardOutlined,
-  PictureOutlined,
+  PictureOutlined, ReconciliationOutlined,
   UserOutlined,
 } from '@ant-design/icons'
 import services from './services'
 import userStore from '../../store/UserStore'
 import { observer } from 'mobx-react-lite'
 import { Link } from 'react-router-dom'
-import NoticeEmpty from '../../assets/empty.png'
-import initMap from '../../components/Graph/HomeMap'
+import NoticeEmpty from '../../assets/img/empty.png'
+import initHomeMap from '../../components/Graph/HomeMap'
 import DemoBar from '../../components/Graph/BarGraph'
 import DemoScatter from '../../components/Graph/ScatterGraph'
 
 const { Meta } = Card
 const Home = observer(() => {
   const [scene, setScene] = useState(null)
+  const [mapLoading, setMapLoading] = useState(true)
+
   useEffect(() => {
-    const newScene = initMap()
-    setScene(newScene)
+    const newScene = initHomeMap();
+    setMapLoading(false);
+    setScene(newScene);
+
   }, [])
   const { userInfo } = userStore
   return (
@@ -31,19 +35,24 @@ const Home = observer(() => {
             <Meta
               avatar={
                 <Avatar
-                  src={userInfo.avatar}
+                  src={userStore.getAvatarUrl()}
                   size={64}
                   icon={<UserOutlined />}
                 />
               }
               title={`${userInfo.username}，祝您今天开心！`}
-              description="上次登录时间：2021-01-01 00:00:00"
+              description={
+                <Space>
+                  <Tag icon={<ReconciliationOutlined />} color="magenta" >{userInfo.company_name}</Tag>
+                  <Tag icon={<UserOutlined />} color="blue">{userInfo.user_level}</Tag>
+                </Space>
+              }
             />
             <Row gutter={16} style={{ marginTop: '2vh' }}>
               <Col span={12}>
                 <Card bordered={false}>
                   <div>
-                    <span className="info-title">你的工号</span>
+                    <span className="info-title">您的工号</span>
                     <span className="info-content">
                       <IdcardOutlined
                         style={{ marginRight: '0.4vh', fontSize: '2.5vh' }}
@@ -61,7 +70,7 @@ const Home = observer(() => {
                       <PictureOutlined
                         style={{ marginRight: '0.4vh', fontSize: '2.5vh' }}
                       />
-                      117
+                        {userInfo.upload_count}
                     </span>
                   </div>
                 </Card>
@@ -101,7 +110,16 @@ const Home = observer(() => {
       <Row gutter={16} style={{ marginTop: 16 }}>
         <Col span={16}>
           <Card bordered={false} className="secondRowCard">
-            <div id="map" style={{ height: '65vh' }} />
+            {mapLoading ? (
+                <div style={{ height: "65vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                    <Spin tip={'正在加载...'}>
+                      <div className='content'></div>
+                    </Spin>
+
+                </div>
+            ) : (
+                <div style={{ height: "65vh", justifyContent: "center", position: "relative" }} id="homeMap" />
+            )}
           </Card>
         </Col>
         <Col span={8}>

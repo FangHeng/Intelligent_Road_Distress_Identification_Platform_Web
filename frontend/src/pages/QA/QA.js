@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
-import { Layout, Menu, Input, Collapse, Button, Breadcrumb } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import {Layout, Menu, Input, Collapse, Button, Breadcrumb, Space} from 'antd';
+import {HomeOutlined, PlusOutlined} from '@ant-design/icons';
 import './header.css'
 import {Link} from "react-router-dom";
 import uiStore from "../../store/UIStore";
@@ -37,7 +37,7 @@ const QA = () => {
             </Header>
             <Content style={{ padding: '0 50px' }}>
                 <Breadcrumb style={{ margin: '16px 0' }}>
-                    <Breadcrumb.Item ><Link to="/pages/home">首页</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item ><Link to="/pages/home"><HomeOutlined  style={{ marginRight: '4px' }}/>首页</Link></Breadcrumb.Item>
                     <Breadcrumb.Item>QA</Breadcrumb.Item>
                 </Breadcrumb>
                 <div className="site-layout-content" style={{ background: 'white', padding: 24, minHeight: 280 }}>

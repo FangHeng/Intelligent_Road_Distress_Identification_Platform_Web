@@ -1,7 +1,8 @@
 import { makeAutoObservable } from 'mobx';
-import {getCookie} from "../utils/utils";
-import MaleAvatar from '../assets/Male.png'
-import FemaleAvatar from '../assets/Female.png'
+import MaleAvatar from '../assets/img/Male.png'
+import FemaleAvatar from '../assets/img/Female.png'
+import axiosInstance from "../utils/AxiosInstance";
+// import {fetchWithToken, getCookie} from "../utils/utils";
 
 class UserStore {
     userInfo = {
@@ -14,6 +15,7 @@ class UserStore {
         email: '',
         company_name: '',
         avatar: '',
+        upload_count: 0,
     };
     isLoggedIn = false;
     isLoading = false;
@@ -30,50 +32,100 @@ class UserStore {
             this.isLoading = true;
             this.loginError = '';
 
-            const csrfToken = getCookie('csrftoken'); // 从cookie中获取CSRF token
-            console.log(csrfToken)
-
             // 使用FormData来发送数据
             const formData = new FormData();
             formData.append('company_id', companyID);
             formData.append('employee_number', jobNumber);
             formData.append('password', password);
 
-            const response = await fetch('/irdip/login/', {
+            const response = await axiosInstance({
+                url: '/irdip/login/',
+                method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'X-CSRFToken': csrfToken,
                 },
-                method: 'POST',
-                credentials: 'include',
-                body: formData, // 发送FormData
+                withCredentials: true, // 相当于 fetch 中的 credentials: 'include'
+                data: formData,
             });
 
-            // 使用.entries()方法遍历并打印FormData中的内容
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
-            }
-
-            if (response.ok) {
-                const data = await response.json();
-                this.userInfo = { ...data, jobNumber, companyID };
-                this.isLoggedIn = true;
-                this.loginHint.message = '登陆成功！';
-                this.loginHint.status = 'success';
-                // 可以在这里设置token，保存在localStorage等
-                // 注意：不要存储密码
-            } else {
-                this.isLoggedIn = false;
-                this.loginHint.message = '工号或密码错误！';
-                this.loginHint.status = 'error';
-            }
+            // 直接处理响应数据
+            const data = response.data;
+            this.isLoggedIn = true;
+            this.loginHint.message = '登陆成功！';
+            this.loginHint.status = 'success';
+            // ...之后的代码...
         } catch (error) {
             this.isLoggedIn = false;
-            this.loginHint.message = '网络似乎出现了错误，请稍后再试！';
+            this.loginHint.message = '工号或密码错误！';
             this.loginHint.status = 'error';
-            console.error('There has been a problem with your fetch operation:', error);
+            console.error('There has been a problem with your axios operation:', error);
         } finally {
             this.isLoading = false;
+        }
+    }
+    // async login(companyID, jobNumber, password) {
+    //     try {
+    //         this.isLoading = true;
+    //         this.loginError = '';
+    //
+    //         const csrfToken = getCookie('csrftoken'); // 从cookie中获取CSRF token
+    //         console.log(csrfToken)
+    //
+    //         // 使用FormData来发送数据
+    //         const formData = new FormData();
+    //         formData.append('company_id', companyID);
+    //         formData.append('employee_number', jobNumber);
+    //         formData.append('password', password);
+    //
+    //         const response = await fetchWithToken('/irdip/login/', {
+    //             method: 'POST',
+    //             credentials: 'include',
+    //             body: formData, // 发送FormData
+    //         });
+    //
+    //         console.log(response)
+    //
+    //         // 使用.entries()方法遍历并打印FormData中的内容
+    //         for (let [key, value] of formData.entries()) {
+    //             console.log(key, value);
+    //         }
+    //
+    //         if (response.ok) {
+    //             const data = await response.json();
+    //             console.log(data)
+    //             this.isLoggedIn = true;
+    //             this.loginHint.message = '登陆成功！';
+    //             this.loginHint.status = 'success';
+    //             // 可以在这里设置token，保存在localStorage等
+    //             // 注意：不要存储密码
+    //         } else {
+    //             this.isLoggedIn = false;
+    //             this.loginHint.message = '工号或密码错误！';
+    //             this.loginHint.status = 'error';
+    //         }
+    //     } catch (error) {
+    //         this.isLoggedIn = false;
+    //         this.loginHint.message = '网络似乎出现了错误，请稍后再试！';
+    //         this.loginHint.status = 'error';
+    //         console.error('There has been a problem with your fetch operation:', error);
+    //     } finally {
+    //         this.isLoading = false;
+    //     }
+    // }
+
+    async logout() {
+        try {
+            const response = await axiosInstance.post('/irdip/logout/'); // 确保这里的 URL 与后端视图的 URL 匹配
+            if (response.data.status === 'success') {
+                // 登出成功的逻辑处理
+                console.log('Logged out successfully');
+            } else {
+                // 处理错误情况
+                console.error('Logout failed:', response.data.message);
+            }
+        } catch (error) {
+            // 网络错误或服务器错误的处理
+            console.error('Error during logout:', error);
         }
     }
 
@@ -175,29 +227,6 @@ async function fetchUserFromDatabase() {
         return null;
     }
 }
-
-    // const userLevelMap = {
-    //     '0': 'root',
-    //     '1': '管理员',
-    //     '2': '普通用户',
-    // };
-    //
-    // const userLevel = '0';
-    //
-    // return {
-    //     jobNumber: '000000',
-    //     // 进行转换一下，将数字转换为对应的字符串
-    //     userLevel: userLevelMap[userLevel],
-    //     username: 'John Doe',
-    //     password: '123456',
-    //     gender: 'male',
-    //     phone: '00000000000',
-    //     email: '123@qq.com',
-    //     companyID: '000000',
-    //     companyName: '重庆大学',
-    //     avatar: '../assets/Male.png',
-    //     numberCode: 4,
-    // }
 
 
 const userStore = new UserStore();

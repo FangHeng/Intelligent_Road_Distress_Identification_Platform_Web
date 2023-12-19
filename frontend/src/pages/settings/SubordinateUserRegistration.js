@@ -9,7 +9,8 @@ import userStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
 
 const SubordinateUserRegistration = observer(() => {
-    const {userLevel} = userStore.userInfo;
+    const {user_level} = userStore.userInfo;
+    console.log(user_level);
     const [viewMode, setViewMode] = useState('single');
 
     const handleSegmentChange = (value) => {
@@ -38,8 +39,8 @@ const SubordinateUserRegistration = observer(() => {
     );
 
     let content;
-    switch (userLevel) {
-        case 'root':
+    switch (user_level) {
+        case 'Level 0':
             content = (
                 <Space
                     direction="vertical"
@@ -56,7 +57,7 @@ const SubordinateUserRegistration = observer(() => {
                 </Space>
             );
             break;
-        case '管理员':
+        case 'Level 1':
             content = (
                 <Space
                     direction="vertical"

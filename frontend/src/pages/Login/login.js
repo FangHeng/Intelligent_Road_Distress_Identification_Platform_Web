@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Form, Input, Button, message, Modal, Select} from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {UserOutlined, LockOutlined, MailOutlined} from '@ant-design/icons';
-import backgroundImage from '../../assets/background.jpg';
+import backgroundImage from '../../assets/img/background.jpg';
 import userStore from '../../store/UserStore'
 import { observer } from 'mobx-react-lite'
 import uiStore from "../../store/UIStore";
