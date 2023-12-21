@@ -1,7 +1,7 @@
 import {Fullscreen, GaodeMap, LayerPopup, MapTheme, PointLayer, Scene, TencentMap, Zoom} from '@antv/l7';
 import { IconImageLayer } from '@antv/l7-composite-layers';
 
-function initHomeMap(){
+function initHomeMap(setLoading){
     // const scene = new Scene({
     //     id: 'homeMap',
     //     map: new GaodeMap({

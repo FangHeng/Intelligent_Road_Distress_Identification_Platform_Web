@@ -3,6 +3,7 @@ import React from "react";
 import userStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
 import companyStore from "../../store/CompanyStore";
+import {checkComplexity} from "../../utils/utils";
 
 const onFinish = (values) => {
     console.log('Success:', values);
@@ -69,6 +70,13 @@ export const RegisterMultipleUser = observer (()=> {
                                     required: true,
                                     message: '请输入密码!',
                                 },
+                                ({getFieldValue}) => ({
+                                    validator(_, value) {
+                                        if (!value || !checkComplexity(value)) {
+                                            return Promise.reject(new Error('密码过于简单，请包含大写字母、数字和特殊字符'));
+                                        }
+                                    },
+                                }),
                             ]}
                         >
                             <Input.Password/>

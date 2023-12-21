@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
 import {Button, Result, Space, Card, Tooltip, Segmented} from 'antd';
 import UserTable from "../../components/Table/UserTable";
@@ -10,7 +10,6 @@ import {observer} from "mobx-react-lite";
 
 const SubordinateUserRegistration = observer(() => {
     const {user_level} = userStore.userInfo;
-    console.log(user_level);
     const [viewMode, setViewMode] = useState('single');
 
     const handleSegmentChange = (value) => {

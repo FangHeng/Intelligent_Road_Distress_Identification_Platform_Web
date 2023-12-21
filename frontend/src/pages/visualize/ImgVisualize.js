@@ -13,7 +13,7 @@ import {
     List,
     Segmented,
     Button,
-    Drawer, Pagination, Tag
+    Drawer, Pagination, Tag, Slider, InputNumber
 } from 'antd';
 import DecimalStep from "../../components/Slider/DecimalStep";
 import '../detect/css/checkbox.css';
@@ -24,19 +24,16 @@ import {
     PlusOutlined,
     VerticalAlignBottomOutlined
 } from "@ant-design/icons";
-import image0 from '../../assets/img/cementation_fissures_0.jpg';
-import image1 from '../../assets/img/cementation_fissures_1.jpg';
 import './CSS/Visualize.css';
 import '../detect/css/checkbox.css';
 import imgStore from "../../store/ImgStore";
 import {observer} from "mobx-react-lite";
-import {reaction} from "mobx";
 
 
 const { Option } = Select;
 const options = [
-    '正常', '横向裂缝', '巨大裂缝', '鳄鱼裂缝',
-    '浇注裂缝', '纵向裂缝', '修补', '开槽'
+    '胶结裂隙', '裂纹', '纵向裂纹', '松散',
+    '大裂缝', '修补', '正常', '横向裂纹'
 ];
 
 const classification_mapping = {
@@ -49,6 +46,7 @@ const classification_mapping = {
     6: "正常",
     7: "横向裂纹"
 };
+
 
 const ImgVisualize = observer(() => {
     const [viewMode, setViewMode] = useState('grid');
@@ -64,6 +62,15 @@ const ImgVisualize = observer(() => {
     const [indeterminate, setIndeterminate] = useState(true);
     const [checkAll, setCheckAll] = useState(false);
     const [photos, setPhotos] = useState([]);
+
+    //抽屉
+    const [open, setOpen] = useState(false);
+    const [placement, setPlacement] = useState('right');
+
+    // 调参阈值
+    const [confidenceThreshold, setConfidenceThreshold] = useState(0.7);
+    const [filterOption, setFilterOption] = useState('all');
+
 
     // 当组件加载时，只调用一次 fetchLastUploadId
     useEffect(() => {
@@ -89,6 +96,7 @@ const ImgVisualize = observer(() => {
                             id: file.file_id,
                             uploader: upload.uploader,
                             roadName: upload.road_name,
+                            uploadName:upload.upload_name,
                             imageName: file.file_name,
                             classificationResult: file.classification_result,
                             confidence: file.confidence,
@@ -114,14 +122,10 @@ const ImgVisualize = observer(() => {
         setPreviewImage('');
     };
 
-    const [open, setOpen] = useState(false);
-    const [placement, setPlacement] = useState('right');
     const showDrawer = () => {
         setOpen(true);
     };
-    const onChange = (e) => {
-        setPlacement(e.target.value);
-    };
+
     const onClose = () => {
         setOpen(false);
     };
@@ -139,8 +143,23 @@ const ImgVisualize = observer(() => {
         const pageSize = getCurrentPageSize();
         const indexOfLastPhoto = currentPage * pageSize;
         const indexOfFirstPhoto = indexOfLastPhoto - pageSize;
-        return photos.slice(indexOfFirstPhoto, indexOfLastPhoto);
+
+        let filteredPhotos = photos;
+        // 根据 filterOption 过滤
+        if (filterOption === 'disease') {
+            filteredPhotos = filteredPhotos.filter(photo => photo.classificationResult !== 6);
+        } else if (filterOption === 'normal') {
+            filteredPhotos = filteredPhotos.filter(photo => photo.classificationResult === 6);
+        }
+
+        // 根据 checkedList 进一步过滤
+        if (checkedList.length > 0 && !checkAll) {
+            filteredPhotos = filteredPhotos.filter(photo => checkedList.includes(classification_mapping[photo.classificationResult]));
+        }
+
+        return filteredPhotos.slice(indexOfFirstPhoto, indexOfLastPhoto);
     };
+
 
     const handlePageChange = page => {
         setCurrentPage(page);
@@ -155,6 +174,39 @@ const ImgVisualize = observer(() => {
         setCurrentPage(1); // 通常在改变页大小时回到第一页
     };
 
+    const handleSelectChange = value => {
+        setFilterOption(value);
+
+        // 当选择 "所有预测图象" 时，全选所有 Checkbox 选项
+        if (value === 'all') {
+            setCheckedList(options.map(option => option)); // 设置为所有选项
+            setCheckAll(true); // 更新全选状态为 true
+            setIndeterminate(false); // 设置不确定状态为 false
+        } else {
+            // 对于其他选择，可以选择保持当前的 checkedList 或进行其他操作
+            // 例如，如果需要重置，可以使用 setCheckedList([])
+            // 如果需要保持当前状态，则不做操作
+        }
+
+        setCurrentPage(1); // 返回到第一页
+    };
+
+
+    const getCheckboxOptions = () => {
+        switch(filterOption) {
+            case 'all':
+                return options; // 显示所有选项
+            case 'disease':
+                return options.filter(option => option !== classification_mapping[6]); // 排除 '正常'
+            case 'normal':
+                return [classification_mapping[6]]; // 只显示 '正常'
+            default:
+                return options; // 默认显示所有选项
+        }
+    };
+
+
+
     const onCheckAllChange = e => {
         setCheckedList(e.target.checked ? options : []);
         setIndeterminate(false);
@@ -165,6 +217,14 @@ const ImgVisualize = observer(() => {
         setCheckedList(list);
         setIndeterminate(!!list.length && list.length < options.length);
         setCheckAll(list.length === options.length);
+    };
+
+
+    const onChange = (value) => {
+        if (isNaN(value)) {
+            return;
+        }
+        setConfidenceThreshold(value);
     };
 
     const cardTitle = (
@@ -186,6 +246,23 @@ const ImgVisualize = observer(() => {
         </div>
     );
 
+    // 更新 renderTags 函数，使其根据 viewMode 来调整 Space 组件的方向
+    const renderTags = (photo) => {
+        const isGreen = photo.classificationResult === 6 || photo.confidence < confidenceThreshold;
+        const spaceDirection = viewMode === 'grid' ? 'vertical' : 'horizontal';
+
+        return (
+            <Space style={{ flexWrap: 'wrap' }} direction={spaceDirection}>
+                <Tag color={isGreen ? 'green' : 'red'}>
+                    {classification_mapping[photo.classificationResult]}（置信度: {photo.confidence.toFixed(2)}）
+                </Tag>
+                <Tag>所在道路：{photo.roadName}</Tag>
+                <Tag>上传名：{photo.uploadName}</Tag>
+            </Space>
+        );
+    };
+
+
     const listView = (
         <>
             <List
@@ -198,10 +275,7 @@ const ImgVisualize = observer(() => {
                             avatar={item.imgUrl ? <img src={item.imgUrl} alt={item.title} style={{ width: '5vh' }} /> : <PictureOutlined />}
                             title={item.imageName}
                             description={
-                            <>
-                                <Tag color="geekblue">{item.roadName}</Tag>
-                                <Tag color="orange">{classification_mapping[item.classificationResult]}（置信度: {item.confidence.toFixed(2)}）</Tag>
-                            </>
+                            renderTags(item)
                         }
                         />
                     </List.Item>
@@ -217,15 +291,12 @@ const ImgVisualize = observer(() => {
                 <Card
                     key={photo.id}
                     hoverable
-                    style={{ width: 240, margin: '10px' }}
-                    cover={<img alt={photo.name} src={photo.imgUrl} />}  // 确保这里使用 photo.src
+                    style={{ width: 240, margin: '1vw' }}
+                    cover={<img alt={photo.name} src={photo.imgUrl} />}
                     onClick={() => handleCardClick(photo)}
                 >
                     <Card.Meta title={photo.imageName} description={
-                        <Space style={{ flexWrap: 'wrap' }} direction="vertical">
-                            <Tag color="geekblue">{photo.roadName}</Tag>
-                            <Tag color="orange">{classification_mapping[photo.classificationResult]}（置信度: {photo.confidence.toFixed(2)}）</Tag>
-                        </Space>
+                        renderTags(photo)
                     } />
                 </Card>
             ))}
@@ -242,10 +313,12 @@ const ImgVisualize = observer(() => {
             pageSize={getCurrentPageSize()}
             showQuickJumper
             showSizeChanger={true}
-            showTotal={total => `共 ${total} 张`}
+            showTotal={total => `总共 ${total} 张`}
             pageSizeOptions={['8', '9', '20', '50']}
         />
     );
+
+
 
     return (
         <Row gutter={24}>
@@ -294,15 +367,41 @@ const ImgVisualize = observer(() => {
 
             <Col span={6}>
                 <Card title="调参面板" style={{ height: '95vh' }}>
-                    <div className="threshold-label">阈值:<DecimalStep /></div>
-                    <div style={{ marginTop: '5px'}} className="threshold-label">预测展示：</div>
-                    <Select defaultValue="all" style={{ width: '100%', marginTop: '20px' }}>
+                    <div className="threshold-label">阈值:
+                        <Row>
+                            <Col span={16}>
+                                <Slider
+                                    min={0}
+                                    max={1}
+                                    onChange={onChange}
+                                    value={typeof confidenceThreshold === 'number' ? confidenceThreshold : 0}
+                                    step={0.01}
+                                />
+                            </Col>
+                            <Col span={4}>
+                                <InputNumber
+                                    min={0}
+                                    max={1}
+                                    style={{
+                                        margin: '0 16px',
+                                    }}
+                                    step={0.01}
+                                    value={confidenceThreshold}
+                                    onChange={onChange}
+                                />
+                            </Col>
+                        </Row>
+                    </div>
+                    <Divider></Divider>
+                    <Space direction="vertical" style={{ width: '100%' }}>
+                    <div className="threshold-label">预测展示：</div>
+                    <Select defaultValue={filterOption} style={{ width: '100%',  marginBottom:'20px' }} onChange={handleSelectChange}>
                         <Option value="all">所有预测图象</Option>
                         <Option value="disease">只有病害的图像</Option>
                         <Option value="normal">只有正常的图像</Option>
                     </Select>
-                    <Divider></Divider>
-                    <Space direction="vertical" style={{ width: '100%' }}>
+
+                    <Space direction="vertical" style={{ width: '100%',}}>
                         <div style={{ marginBottom: '10px' }} className="threshold-label">图片类型：</div>
                         <Checkbox
                             indeterminate={indeterminate}
@@ -313,9 +412,10 @@ const ImgVisualize = observer(() => {
                             所有类型
                         </Checkbox>
                     </Space>
+                    </Space>
                     <div style={{ marginBottom: '10px' }}></div>
                     <Checkbox.Group value={checkedList} onChange={onCheckboxChange} style={{ width: '100%' }} className="large-font-checkbox">
-                        {options.map((value, index) => (
+                        {getCheckboxOptions().map((value, index) => (
                             <Space key={index} direction="vertical" style={{ width: '100%' }}>
                                 <Checkbox value={value}>
                                     {value}

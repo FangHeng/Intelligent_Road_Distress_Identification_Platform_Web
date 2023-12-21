@@ -35,7 +35,7 @@ const Home = observer(() => {
             <Meta
               avatar={
                 <Avatar
-                  src={userStore.getAvatarUrl()}
+                  src={userInfo.avatar}
                   size={64}
                   icon={<UserOutlined />}
                 />
@@ -123,17 +123,9 @@ const Home = observer(() => {
           </Card>
         </Col>
         <Col span={8}>
-          {/* 在这个Col中垂直分出两个Card */}
-          <Row gutter={[0, 16]}>
-            {' '}
-            {/* 添加垂直间隔 */}
-            <Col span={24}>
-              <DemoBar />
-            </Col>
-            <Col span={24}>
-              <DemoScatter />
-            </Col>
-          </Row>
+          <Card className='secondRowCard'>
+
+          </Card>
         </Col>
       </Row>
     </div>

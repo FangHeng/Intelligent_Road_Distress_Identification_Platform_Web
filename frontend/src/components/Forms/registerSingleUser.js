@@ -1,12 +1,12 @@
-import {Alert, Button, Form, Input} from "antd";
+import {Alert, Button, Form, Input, message} from "antd";
 import React from "react";
 import userStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
 import companyStore from "../../store/CompanyStore";
+import {checkComplexity} from "../../utils/utils";
+import axiosInstance from "../../utils/AxiosInstance";
 
-const onFinish = (values) => {
-    console.log('Success:', values);
-};
+
 const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
 };
@@ -16,6 +16,32 @@ const onFinishFailed = (errorInfo) => {
 export const RegisterSingleUser = observer(() =>{
     const {user_level} = userStore.userInfo;
     const numberCode = companyStore.employeeNumber;
+
+    const [registerSingleUser] = Form.useForm();
+
+    const onFinish = async (values) => {
+        // 构建要发送的数据
+        const formData = new FormData();
+        formData.append('employee_number', values.jobnumber);
+        formData.append('password', values.password);
+
+
+        try {
+            const response = await axiosInstance.post('/irdip/register_subordinate/', formData);
+            if (response.data.status === 'success') {
+                userStore.fetchSubordinatesInfo();
+                console.log('User registered successfully');
+                message.success('注册成功！')
+            } else if(response.data.status === 400){
+                console.log('Response: ', response.data);
+                message.error('工号已被注册！')
+            }
+        } catch (error) {
+            message.error('发生了一些错误，请稍后再试！')
+            console.error('Error during registration: ', error);
+            }
+        };
+
     return(
         <>
             <Alert
@@ -40,10 +66,12 @@ export const RegisterSingleUser = observer(() =>{
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
                 autoComplete="off"
+                form={registerSingleUser}
             >
                 <Form.Item
                     label="工号"
                     name="jobnumber"
+                    tooltip="我们会默认工号作为用户名。"
                     rules={[
                         {
                             required: true,
@@ -62,6 +90,14 @@ export const RegisterSingleUser = observer(() =>{
                             required: true,
                             message: '请输入密码!',
                         },
+                        ({getFieldValue}) => ({
+                            validator(_, value) {
+                                if (!value || !checkComplexity(value)) {
+                                    return Promise.reject(new Error('密码过于简单，请包含大写字母、数字和特殊字符'));
+                                }
+                                return Promise.resolve();
+                            },
+                        }),
                     ]}
                 >
                     <Input.Password />

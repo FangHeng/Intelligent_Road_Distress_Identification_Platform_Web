@@ -1,7 +1,6 @@
 import {Button, Layout, Menu, theme, message, Divider, Tooltip, Avatar, Typography, FloatButton} from 'antd'
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import MaleAvatar from '../../assets/img/Male.png'
+import {Navigate, useNavigate} from 'react-router-dom'
 import logo from '../../assets/img/logo.png'
 import logo_mini from '../../assets/img/logo-mini.png'
 import { Outlet } from 'react-router-dom'
@@ -59,7 +58,6 @@ const SideBarLayout = observer(() => {
         window.open(url, '_blank');
     };
 
-
     // 使用 userStore 中的用户数据
     const { username, avatar } = userStore.userInfo;
 
@@ -68,6 +66,11 @@ const SideBarLayout = observer(() => {
 
     // 当前路由路径
     const currentRoute = location.pathname;
+
+    // // 如果用户未登录，可以在这里重定向或展示登录提示
+    // if (!userStore.isLoggedIn) {
+    //     return <Navigate to="/" />;
+    // }
 
     return (
         <Layout style={{ width: '100vw', height: '100vh', overflow: 'initial'}}>
@@ -192,7 +195,8 @@ const SideBarLayout = observer(() => {
                 <div style={{ position: 'absolute', bottom: 0, width: '100%', alignItems:'center' }}>
                     <Divider></Divider>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent:'center', marginBottom:'10px' }}>
-                        <Avatar size={40} src={avatar || MaleAvatar} />
+                        {/*<Avatar size={40} src={avatar || MaleAvatar} />*/}
+                        <Avatar size={40} src={avatar} />
                         {!collapsed && <Text style={{ marginLeft: '10px', color: 'rgba(0, 0, 0, 0.65)' }}>{username}</Text>}
                     </div>
                 </div>

@@ -7,6 +7,7 @@
     "@ant-design/graphs": "^1.4.1",
     "@ant-design/icons": "^4.6.3",
     "@ant-design/plots": "^2.1.0",
+    "@ant-design/pro-components": "^2.6.43",
     "@antv/l7": "^2.20.5",
     "@antv/l7-composite-layers": "^0.16.4",
     "@antv/l7-maps": "^2.20.5",
@@ -27,6 +28,7 @@
     "react": "^18.2.0",
     "react-bmapgl": "^0.2.26",
     "react-dom": "^18.2.0",
+    "react-highlight-words": "^0.20.0",
     "react-router-dom": "^6.20.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
@@ -37,7 +39,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://10.234.114.87:8000",
+  "proxy": "http://10.234.114.39:8000",
   "eslintConfig": {
     "extends": [
       "react-app",

@@ -1,107 +1,180 @@
-import React, { useState } from 'react';
-import {Card, Col, Row, Checkbox, Select, List, Divider, Space} from 'antd';
-import { PictureOutlined } from '@ant-design/icons';
-import DecimalStep from "../../components/Slider/DecimalStep";
-import * as PropTypes from "prop-types";
-import './css/checkbox.css';
+import {Badge, Tag, Progress, Card, Button, Space, Select} from 'antd';
+import { ProList } from '@ant-design/pro-components';
+import {useEffect, useState} from 'react';
+import {observer} from "mobx-react-lite";
+import userStore from "../../store/UserStore";
+import historyStore from "../../store/HistoryStore";
 
-const { Option } = Select;
+const Detect = observer(() => {
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-function CheckboxGroup(props) {
-    return null;
-}
+    const [activeKey, setActiveKey] = useState('tab1');
 
-CheckboxGroup.propTypes = {
-    onChange: PropTypes.func,
-    options: PropTypes.arrayOf(PropTypes.any),
-    value: PropTypes.arrayOf(PropTypes.any)
-};
-const Detect = () => {
-    // 假设这是从后端获取的历史记录数据
-    const [records, setRecords] = useState([
-        // 这里可以填入一些示例数据，例如：
-        { id: 1, name: 'Image1.png', date: '2023-04-01' },
-        { id: 2, name: 'Image2.png', date: '2023-04-02' }
-    ]);
+    // 展示数量
+    const [totalRecords, setTotalRecords] = useState(0);
+    const [myRecords, setMyRecords] = useState(0);
 
-    const [checkedList, setCheckedList] = useState([]);
-    const [indeterminate, setIndeterminate] = useState(true);
-    const [checkAll, setCheckAll] = useState(false);
+    // 用于搜索
+    const [searchValue, setSearchValue] = useState('');
 
-    const options = [
-        '正常', '横向裂缝', '巨大裂缝', '鳄鱼裂缝',
-        '浇注裂缝', '纵向裂缝', '修补', '开槽'
-    ];
+    // 用于筛选
+    const [roadOptions, setRoadOptions] = useState([]);
+    const [selectedRoad, setSelectedRoad] = useState('');
+    const [initialData, setInitialData] = useState([]);
+    const [dataSource, setDataSource] = useState([]);
+    const userInfo = userStore.userInfo;
 
-    const onCheckAllChange = e => {
-        setCheckedList(e.target.checked ? options : []);
-        setIndeterminate(false);
-        setCheckAll(e.target.checked);
+    useEffect(() => {
+        historyStore.fetchUploadRecords().then(loadedData => {
+            setInitialData(loadedData);
+            setDataSource(loadedData);
+            setTotalRecords(loadedData.length);
+            setMyRecords(loadedData.filter(item => item.uploader === userInfo.username).length);
+            const roads = new Set(loadedData.map(item => item.road));
+            setRoadOptions(['全部', ...roads]);
+        });
+    }, []);
+
+    useEffect(() => {
+        let filteredData = initialData;
+        if (activeKey === 'tab1') {
+            filteredData = initialData;
+        } else if (activeKey === 'tab2') {
+            filteredData = initialData.filter(item => item.uploader === userInfo.username);
+        }
+
+        if (searchValue) {
+            filteredData = filteredData.filter(
+                item =>
+                    item.road.includes(searchValue) ||
+                    item.uploader.includes(searchValue) ||
+                    item.title.includes(searchValue)
+            );
+        }
+
+        setDataSource(filteredData);
+    }, [activeKey, searchValue, initialData]); // 确保这里包含了所有相关的依赖项
+
+    // 初始时展开第一条数据
+    const [expandedRowKeys, setExpandedRowKeys] = useState([]);
+
+    useEffect(() => {
+        if (dataSource.length > 0) {
+            setExpandedRowKeys([dataSource[0].id]);
+        }
+    }, [dataSource]);
+
+    const handleRoadChange = value => {
+        setSelectedRoad(value);
+        if (value === '全部') {
+            // 如果选择了“全部”，则不应用道路过滤
+            setDataSource(initialData);
+        } else {
+            // 否则，只显示选择的道路
+            const filteredData = initialData.filter(item => item.road === value);
+            setDataSource(filteredData);
+        }
     };
 
-    const onCheckboxChange = list => {
-        setCheckedList(list);
-        setIndeterminate(!!list.length && list.length < options.length);
-        setCheckAll(list.length === options.length);
+
+    const renderBadge = (count, active) => {
+        return active ? <Badge count={count} style={{ marginLeft: 8 }} /> : null;
+    };
+
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: (keys) => setSelectedRowKeys(keys),
+    };
+
+    const handleClick = () => {
+        // 处理自定义操作的函数
+        console.log('自定义操作:', selectedRowKeys);
+    };
+
+    const handleSelectAll = () => {
+        setSelectedRowKeys(dataSource.map(item => item.id));
     };
 
 
     return (
-        <Row gutter={24}>
-            <Col span={18}>
-                <Card title="历史记录" style={{ height: '95vh', overflow: 'auto' }} >
-                    <List
-                        size="large"
-                        bordered
-                        dataSource={records}
-                        renderItem={item => (
-                            <List.Item key={item.id}>
-                                <List.Item.Meta
-                                    avatar={<PictureOutlined />}
-                                    title={item.name}
-                                    description={`上传日期：${item.date}`}
-                                />
-                                {/* 这里可以添加更多关于记录的信息 */}
-                            </List.Item>
-                        )}
-                    />
-                </Card>
-            </Col>
-            <Col span={6}>
-                <Card title="调参面板" style={{ height: '95vh' }}>
-                    <div className="threshold-label">阈值:<DecimalStep /></div>
-                    <div style={{ marginTop: '5px'}} className="threshold-label">预测展示：</div>
-                    <Select defaultValue="all" style={{ width: '100%', marginTop: '20px' }}>
-                        <Option value="all">所有预测图象</Option>
-                        <Option value="disease">只有病害的图像</Option>
-                        <Option value="normal">只有正常的图像</Option>
-                    </Select>
-                    <Divider />
-                    <Space direction="vertical" style={{ width: '100%' }}>
-                        <div style={{ marginBottom: '10px' }} className="threshold-label">图片类型：</div>
-                        <Checkbox
-                            indeterminate={indeterminate}
-                            onChange={onCheckAllChange}
-                            checked={checkAll}
-                            className="large-font-checkbox-item"
+        <Card title='检测记录' style={{ height: '95vh', overflow: 'auto' }}>
+            <ProList
+                metas={{
+                    title: {},
+                    subTitle: {},
+                    type: {},
+                    description: {},
+                    avatar: {},
+                    content: {},
+                    actions: {},
+                }}
+                toolbar={{
+                    menu: {
+                        activeKey,
+                        items: [
+                            {
+                                key: 'tab1',
+                                label: (
+                                    <span>全部上传记录{renderBadge(totalRecords, activeKey === 'tab1')}</span>
+                                ),
+                            },
+                            {
+                                key: 'tab2',
+                                label: (
+                                    <span>
+                                    我上传的记录{renderBadge(myRecords, activeKey === 'tab2')}
+                                    </span>
+                                ),
+                            },
+                        ],
+                        onChange: (key) => setActiveKey(key),
+                    },
+                    actions: [
+                        <Select
+                            key="roadSelect"
+                            showSearch
+                            style={{ width: 200, marginLeft: 8 }}
+                            placeholder="选择道路"
+                            optionFilterProp="children"
+                            onChange={handleRoadChange}
+                            filterOption={(input, option) =>
+                                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            }
                         >
-                            所有类型
-                        </Checkbox>
-                    </Space>
-                    <div style={{ marginBottom: '10px' }}></div>
-                    <Checkbox.Group value={checkedList} onChange={onCheckboxChange} style={{ width: '100%' }} className="large-font-checkbox">
-                        {options.map((value, index) => (
-                            <Space key={index} direction="vertical" style={{ width: '100%' }}>
-                                <Checkbox value={value}>
-                                    {value}
-                                </Checkbox>
-                            </Space>
-                        ))}
-                    </Checkbox.Group>
-                </Card>
-            </Col>
-        </Row>
+                            {roadOptions.map(road => (
+                                <Select.Option key={road} value={road}>{road}</Select.Option>
+                            ))}
+                        </Select>,
+                        <Button key="selectAll" onClick={handleSelectAll}>
+                            全选
+                        </Button>,
+                        selectedRowKeys.length ? (
+                            <Button key="customAction" onClick={handleClick}>
+                                查看所选记录
+                            </Button>
+                        ) : null,
+                    ],
+                    search: {
+                        onSearch: (value) => {
+                            setSearchValue(value);
+                        },
+                    },
+                }}
+                rowKey="id"
+                // headerTitle="预设的列状态"
+                rowSelection={rowSelection}
+                dataSource={dataSource}
+                expandable={{
+                    expandedRowKeys,
+                    onExpandedRowsChange: setExpandedRowKeys,
+                }}
+                size={'large'}
+                pagination={{
+                    pageSize: 10,
+                }}
+            />
+        </Card>
     );
-};
+});
 
 export default Detect;

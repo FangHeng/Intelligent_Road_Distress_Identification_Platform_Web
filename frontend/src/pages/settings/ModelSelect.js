@@ -7,30 +7,45 @@ import {
 } from 'antd';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBolt, faWandMagicSparkles} from "@fortawesome/free-solid-svg-icons";
+import userStore from "../../store/UserStore";
+import {observer} from "mobx-react-lite";
 
-const ModelSelect = () => {
-    const [preferredModel, setPreferredModel] = useState('default');
-    const [selectedSubModel, setSelectedSubModel] = useState('');
-    const [loading, setLoading] = useState(false);
+// 用于根据selectedSubModel的值映射相应的显示标签
+const advancedModelLabels = {
+    'WSPLIN-IP': 'WSPLIN-IP',
+    'WSPLIN-SS': 'WSPLIN-SS',
+    'PicT': 'PicT'
+};
 
-    // 用于根据selectedSubModel的值映射相应的显示标签
-    const advancedModelLabels = {
-        'WSPLIN-IP': 'WSPLIN-IP',
-        'WSPLIN-SS': 'WSPLIN-SS',
-        'PicT': 'PicT'
-    };
+const ModelSelect = observer(() => {
+
+    // 初始化时，考虑高级模型的子模型, 以及是否已经选择了子模型
+    const [hasSelectedSubModel, setHasSelectedSubModel] = useState(false);
+
+    const initialModel = advancedModelLabels[userStore.userInfo.selected_model] ? 'advanced' : userStore.userInfo.selected_model;
+    const [preferredModel, setPreferredModel] = useState(initialModel);
+    const [selectedSubModel, setSelectedSubModel] = useState(userStore.userInfo.selected_model);
+
 
     const handleModelChange = e => {
+        if (e.target.value === 'advanced' && !hasSelectedSubModel) {
+            // 如果点击了高级模型但没有选择子模型
+            return;
+        }
         setPreferredModel(e.target.value);
-        // 如果选择默认模型，重置子模型选择
-        if (e.target.value === 'default') {
-            setSelectedSubModel(null);
+        userStore.setPreferredModel(e.target.value);
+        userStore.sendPreferredModel(e.target.value);
+        if (e.target.value === 'Swin') {
+            setSelectedSubModel('');
+            setHasSelectedSubModel(false);
         }
     };
 
     const handleSubModelChange = ({ key }) => {
         setSelectedSubModel(key);
-        // 当选择子模型时，自动切换到高级模型
+        userStore.setPreferredModel(key);
+        userStore.sendPreferredModel(key);
+        setHasSelectedSubModel(true);
         setPreferredModel('advanced');
     };
 
@@ -46,16 +61,15 @@ const ModelSelect = () => {
         <Card title="首选模型设置" style={{ width: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <Radio.Group onChange={handleModelChange} value={preferredModel} size="large">
-                    <Radio.Button value="default">
+                    <Radio.Button value="Swin"  className="radio-button-min-width">
                         <FontAwesomeIcon icon={faBolt} style={{ marginRight: 8, color: '#28a745' }} />默认模型
                     </Radio.Button>
                     <Dropdown menu={{
                         items:advancedOptions,
                         selectable:true,
-                        defaultSelectedKeys:['WSPLIN-IP'],
                         onClick:handleSubModelChange
                     }}>
-                        <Radio.Button value="advanced">
+                        <Radio.Button value="advanced" className="radio-button-min-width">
                             <FontAwesomeIcon icon={faWandMagicSparkles} style={{ marginRight: 8, color: '#854eea' }}/>
                             {selectedSubModelLabel}
                         </Radio.Button>
@@ -64,13 +78,13 @@ const ModelSelect = () => {
             </div>
 
             <Descriptions title="模型详情">
-                {preferredModel === 'default' && <Descriptions.Item label="Default Model">采用 Swin Transformer 对病害图像进行分类</Descriptions.Item>}
+                {preferredModel === 'Swin' && <Descriptions.Item label="Default Model">采用 Swin Transformer 对病害图像进行分类</Descriptions.Item>}
                 {selectedSubModel === 'WSPLIN-IP' && <Descriptions.Item label="WSPLIN-IP">Advanced Model - WSPLIN-IP 详情</Descriptions.Item>}
                 {selectedSubModel === 'WSPLIN-SS' && <Descriptions.Item label="WSPLIN-SS">Advanced Model - WSPLIN-SS 详情</Descriptions.Item>}
                 {selectedSubModel === 'PicT' && <Descriptions.Item label="PicT">Advanced Model - PicT 详情</Descriptions.Item>}
             </Descriptions>
         </Card>
     );
-}
+});
 
 export default ModelSelect;
