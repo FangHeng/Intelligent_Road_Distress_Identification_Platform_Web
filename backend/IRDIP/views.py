@@ -44,7 +44,7 @@ def login(request):
         employee_number = request.POST.get('employee_number')
         password = request.POST.get('password')
 
-        print(company_id, employee_number, password)
+        # print(company_id, employee_number, password)
 
         try:
             user_role = UserRole.objects.get(employee_number=employee_number, company_id=company_id)
@@ -83,17 +83,16 @@ def register_subordinate(request):
             return JsonResponse({'status': 'error', 'message': 'Unauthorized to register new users'}, status=403)
 
         # 获取注册信息
-        username = request.POST.get('username')
         password = request.POST.get('password')
         employee_number = request.POST.get('employee_number')
-        email = request.POST.get('email')
+        username = employee_number  # 初始化时用户名与工号相同
 
         # 检查工号是否在同一公司内已被使用
         if UserRole.objects.filter(company=current_user_role.company, employee_number=employee_number).exists():
             return JsonResponse({'status': 'error', 'message': 'Employee number already exists in the company'}, status=400)
 
         # 创建新用户
-        new_user = User.objects.create_user(username, email, password)
+        new_user = User.objects.create_user(username, password)
         new_user_role = UserRole.objects.create(
             user=new_user,
             employee_number=employee_number,
@@ -128,8 +127,9 @@ def get_subordinates_info(request):
     # 获取下属用户的基本信息和上传记录信息
     subordinates = UserRole.objects.filter(id__in=subordinate_ids).select_related('user')
 
+    # 如果没有找到下属用户，返回空列表
     if not subordinates:
-        return JsonResponse({'error': '未找到下属用户'}, status=404)
+        return JsonResponse([], safe=False, status=200)
 
     subordinates_info = []
     for subordinate in subordinates:
@@ -138,16 +138,18 @@ def get_subordinates_info(request):
 
         # 获取上传记录数量和上传文件总数
         upload_stats = UploadRecord.objects.filter(uploader=subordinate).aggregate(
-            upload_count=Count('id'), total_files=Sum('upload_count'))
+            upload_record_count=Count('upload_id'), total_files=Sum('upload_count'))
 
         subordinates_info.append({
+            'user_id': subordinate.user.id,
             'employee_number': subordinate.employee_number,
             'last_login': subordinate.user.last_login,
             'is_active': is_active,
-            'user_level': subordinate.user_level,
-            'upload_record_count': upload_stats['upload_count'] or 0,
+            'user_level': subordinate.get_user_level_display(),
+            'upload_record_count': upload_stats['upload_record_count'] or 0,
             'total_upload_files': upload_stats['total_files'] or 0,
         })
+        # print(subordinates_info)
 
     return JsonResponse(subordinates_info, safe=False, status=200)
 
@@ -163,6 +165,7 @@ def get_company_info(request):
 
 
 def upload(request):
+    print(request)
     try:
         if request.method == 'POST':
             user_role = UserRole.objects.get(user=request.user)
@@ -277,7 +280,7 @@ def handle_uploaded_file(f, file_name):
 @require_http_methods(["GET"])
 def get_result(request):
     upload_ids = request.GET.getlist('upload_id')
-    print(upload_ids)
+    # print(upload_ids)
     response_data = {}
     request_user = request.user
 
@@ -357,7 +360,7 @@ def get_lasted_upload_id(request):
         # 按照上传时间排序，获取最后一个上传的记录
         upload_record = UploadRecord.objects.filter(uploader=user_role).order_by('-upload_time').first()
         if upload_record:
-            print(f"upload_id: {str(upload_record.upload_id)}")
+            # print(f"upload_id: {str(upload_record.upload_id)}")
             return JsonResponse({"upload_id": str(upload_record.upload_id)})
         else:
             return JsonResponse({"upload_id": ""})
@@ -485,7 +488,18 @@ def get_user_info(request):
             total_uploaded_files=Sum('upload_count')
         )['total_uploaded_files'] or 0
 
-        # 准备要返回的用户信息
+        # 映射selected_model的整数值到其对应的模型名称
+        model_mapping = {
+            0: 'Swin',
+            1: 'WSPLIN-IP',
+            2: 'WSPLIN-SS',
+            3: 'PicT'
+        }
+
+        avatar = None
+        if user_role.avatar_url:
+            avatar = get_base64_encoded_image(user_role.avatar_url)
+
         user_info = {
             "user_id": current_user.id,
             "username": current_user.username,
@@ -495,8 +509,9 @@ def get_user_info(request):
             "gender": user_role.get_gender_display(),
             "email": user_role.email,
             "company_name": company.company_name,
-            "avatar_url": user_role.avatar_url,
+            "avatar": avatar,
             "upload_count": total_upload_count,
+            "selected_model": model_mapping.get(user_role.selected_model, "Unknown")
         }
 
         return JsonResponse(user_info)
@@ -524,6 +539,7 @@ def change_user_info(request):
     new_phone_number = request.POST.get('phone_number', user_role.phone_number)
     new_username = request.POST.get('username', current_user.username)
     new_gender = request.POST.get('gender', user_role.gender)
+    # print(new_email, new_phone_number, new_username, new_gender)
 
     # 检查UserRole信息是否有变化
     user_role_changes = (
@@ -552,6 +568,34 @@ def change_user_info(request):
         return JsonResponse({"message": "用户信息已更新"}, status=200)
 
     return JsonResponse({"message": "没有检测到信息变化"}, status=304)
+
+
+def upload_avatar(request):
+    try:
+        if request.method == 'POST':
+            user_role = UserRole.objects.get(user=request.user)
+
+            # 检查是否有文件被上传
+            if 'avatar' in request.FILES:
+                avatar_file = request.FILES['avatar']
+                folder_name = 'avatars/'
+                file_extension = os.path.splitext(avatar_file.name)[1]
+                unique_file_name = uuid.uuid4().hex + file_extension
+                file_path = os.path.join(folder_name, unique_file_name)
+
+                # 保存文件
+                handle_uploaded_file(avatar_file, file_path)
+
+                user_role.avatar_url = file_path
+                user_role.save()
+
+                return JsonResponse({'message': 'Avatar uploaded successfully', 'url': file_path}, status=200)
+            else:
+                return JsonResponse({'error': 'No avatar file provided'}, status=400)
+    except UserRole.DoesNotExist:
+        return JsonResponse({'error': 'User role not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'An unexpected error occurred: {e}'}, status=500)
 
 
 @require_http_methods(["POST"])
@@ -673,33 +717,6 @@ def get_subordinate_user_ids(user):
     return subordinate_ids
 
 
-@require_http_methods(["POST"])
-def update_selected_model(request):
-    try:
-        user_id = request.POST.get('user_id')
-        new_model = int(request.POST.get('selected_model'))
-
-        # 确保 new_model 是有效的选择
-        if new_model not in [0, 1, 2, 3]:
-            return JsonResponse({'error': 'Invalid model selection'}, status=400)
-
-        # 查找并更新用户角色
-        user_role = UserRole.objects.get(user_id=user_id)
-        user_role.selected_model = new_model
-        user_role.save()
-
-        return JsonResponse({'message': 'Model updated successfully'})
-
-    except ObjectDoesNotExist:
-        return JsonResponse({'error': 'UserRole not found'}, status=404)
-    except ValueError:
-        # 处理类型转换错误
-        return JsonResponse({'error': 'Invalid data format'}, status=400)
-    except Exception as e:
-        # 其他潜在错误
-        return JsonResponse({'error': str(e)}, status=500)
-
-
 @require_http_methods(["GET"])
 def get_selected_model(request):
     try:
@@ -717,3 +734,33 @@ def get_selected_model(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+@require_http_methods(["POST"])
+def change_selected_model(request):
+    user = request.user
+    model_name = request.POST.get('update_model')
+
+    if model_name is None:
+        return JsonResponse({'status': 'error', 'message': 'No model selected'}, status=400)
+
+    # 将模型名称映射到对应的整数
+    model_mapping = {
+        'Swin': 0,
+        'WSPLIN-IP': 1,
+        'WSPLIN-SS': 2,
+        'PicT': 3
+    }
+
+    update_model = model_mapping.get(model_name)
+
+    # 检查是否是有效的模型选择
+    if update_model is None:
+        return JsonResponse({'status': 'error', 'message': 'Invalid model selection'}, status=400)
+
+    try:
+        user_role = UserRole.objects.get(user=user)
+        user_role.selected_model = update_model
+        user_role.save()
+    except UserRole.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User role not found'}, status=404)
+
+    return JsonResponse({'status': 'success', 'message': 'Model updated successfully'}, status=200)
