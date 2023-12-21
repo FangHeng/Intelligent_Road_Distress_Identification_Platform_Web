@@ -9,6 +9,7 @@ services:
       - ./backend/IRDIP:/IRDIP
       - ./backend/homepage:/homepage
       - ./backend/PDC_predict:/PDC_predict
+      - ./backend/avatars:/avatars
 #      - uploads:/uploads
     ports:
       - "8000:8000"

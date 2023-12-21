@@ -17,6 +17,7 @@ urlpatterns = [
     path("login/", views.login, name="login"),
     path("logout/", views.logout, name="logout"),
     path("register_subordinate/", views.register_subordinate, name="register_subordinate"),
+    path("delete_subordinate/", views.delete_subordinate, name="delete_subordinate"),
     path("get_subordinates_info/", views.get_subordinates_info, name="get_subordinates_info"),
     path("get_company_info/", views.get_company_info, name="get_company_info"),
     path("upload/", views.upload, name="upload"),
@@ -31,6 +32,7 @@ urlpatterns = [
     path("get_employee_number_length/", views.get_employee_number_length, name="get_employee_number_length"),
     # path("change_employee_number_length/", views.change_employee_number_length, name="change_employee_number_length"),
     path("get_upload_records/", views.get_upload_records, name="get_upload_records"),
+    path("delete_upload_record/", views.delete_upload_record, name="delete_upload_record"),
     path("get_selected_model/", views.get_selected_model, name="get_selected_model"),
     path("change_selected_model/", views.change_selected_model, name="change_selected_model"),
 

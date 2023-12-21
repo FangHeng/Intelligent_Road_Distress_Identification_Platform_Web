@@ -29,3 +29,5 @@ backend/.idea/
 backend/IRDIP/__pycache__/
 
 backend/backend/__pycache__/
+
+.idea/

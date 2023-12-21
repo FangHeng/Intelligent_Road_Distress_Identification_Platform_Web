@@ -28,3 +28,6 @@ yarn-error.log*
 
 # uploads
 /uploads
+
+# avatars
+/avatars

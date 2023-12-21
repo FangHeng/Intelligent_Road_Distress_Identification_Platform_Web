@@ -3,6 +3,7 @@ import json
 import uuid
 import pytz
 import base64
+import shutil
 
 from django.contrib.auth.models import User
 from django.shortcuts import render
@@ -105,6 +106,38 @@ def register_subordinate(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
+@require_http_methods(["DELETE"])
+def delete_subordinate(request, user_id):
+    if request.method == 'DELETE':
+        current_user = request.user
+        current_user_role = UserRole.objects.get(user=current_user)
+
+        # 获取当前用户的所有下属用户ID
+        subordinate_ids = get_subordinate_user_ids(current_user_role)
+
+        # 检查是否存在该下属用户并且当前用户是否有权删除
+        if user_id not in subordinate_ids:
+            return JsonResponse({'status': 'error', 'message': 'Unauthorized or user not found'}, status=403)
+
+        # 删除用户及其相关数据
+        try:
+            subordinate_user_role = UserRole.objects.get(id=user_id)
+            UploadRecord.objects.filter(uploader=subordinate_user_role).delete()
+
+            # 删除用户文件夹
+            user_folders = [os.path.join('uploads', str(user_id)), os.path.join('avatar', str(user_id))]
+            for folder in user_folders:
+                if os.path.exists(folder):
+                    shutil.rmtree(folder)
+
+            subordinate_user_role.user.delete()  # 这会级联删除UserRole
+        except ObjectDoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+        return JsonResponse({'status': 'success', 'message': 'User deleted successfully'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
 
 def get_subordinates_info(request):
     # 检查用户是否已登录
@@ -141,7 +174,7 @@ def get_subordinates_info(request):
             upload_record_count=Count('upload_id'), total_files=Sum('upload_count'))
 
         subordinates_info.append({
-            'user_id': subordinate.user.id,
+            'user_id': subordinate.id,
             'employee_number': subordinate.employee_number,
             'last_login': subordinate.user.last_login,
             'is_active': is_active,
@@ -166,109 +199,111 @@ def get_company_info(request):
 
 def upload(request):
     print(request)
-    try:
-        if request.method == 'POST':
-            user_role = UserRole.objects.get(user=request.user)
-            user_id = user_role.id
-            # 设置北京时区并获取当前时间
-            tz = pytz.timezone('Asia/Shanghai')
-            upload_time = timezone.now().astimezone(tz)
-            folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
-            os.makedirs(folder_name, exist_ok=True)
-
-            # 从表单数据中获取 imageInfo
-            image_info = {
-                'title': request.POST.get('title', ''),
-                'road': request.POST.get('road', '')
-            }
-
-            upload_count = sum(len(request.FILES.getlist(field_name)) for field_name in request.FILES)
-
-            upload_record = UploadRecord.objects.create(
-                upload_time=upload_time,
-                folder_url=folder_name,
-                uploader_id=user_id,
-                road_id=image_info['road'],
-                upload_name=image_info['title'],
-                upload_count=upload_count
-            )
-
-            for field_name, files in request.FILES.lists():
-                for file in files:
-                    original_name = file.name
-                    file_name = uuid.uuid4().hex
-                    extension = os.path.splitext(original_name)[1]  # 提取文件后缀
-                    file_path = os.path.join(folder_name, file_name + extension)  # 使用上传的文件的原始文件名
-
-                    handle_uploaded_file(file, file_path)
-
-            # predictions = {}
-            predictions = predict(user=user_id, time=upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
-            for file_name, result in predictions.items():
-                classification_int = classification_mapping.get(result['class'], -1)
-                FileUpload.objects.create(
-                    upload=upload_record,
-                    file_url=os.path.join(folder_name, file_name),
-                    classification_result=classification_int,
-                    confidence=result['probability']
-                )
-
-            return JsonResponse({'message': 'Upload successful'}, status=200)
-    except UserRole.DoesNotExist:
-        return JsonResponse({'error': 'User role not found'}, status=404)
-    except OSError as e:
-        return JsonResponse({'error': f'File system error: {e}'}, status=500)
-    except Exception as e:
-        return JsonResponse({'error': f'An unexpected error occurred: {e}'}, status=501)
-
-    return JsonResponse({'error': 'Invalid request'}, status=400)
-    # if request.method == 'POST':
-    #     user_role = UserRole.objects.get(user=request.user)
-    #     user_id = user_role.id
-    #     # 设置北京时区并获取当前时间
-    #     tz = pytz.timezone('Asia/Shanghai')
-    #     upload_time = timezone.now().astimezone(tz)
-    #     folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
-    #     os.makedirs(folder_name, exist_ok=True)
+    # try:
+    #     if request.method == 'POST':
+    #         user_role = UserRole.objects.get(user=request.user)
+    #         user_id = user_role.id
+    #         # 设置北京时区并获取当前时间
+    #         tz = pytz.timezone('Asia/Shanghai')
+    #         upload_time = timezone.now().astimezone(tz)
+    #         folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
+    #         os.makedirs(folder_name, exist_ok=True)
     #
-    #     # 从表单数据中获取 imageInfo
-    #     image_info = {
-    #         'title': request.POST.get('title', ''),
-    #         'road': request.POST.get('road', '')
-    #     }
+    #         # 从表单数据中获取 imageInfo
+    #         image_info = {
+    #             'title': request.POST.get('title', ''),
+    #             'road': request.POST.get('road', '')
+    #         }
     #
-    #     upload_count = sum(len(request.FILES.getlist(field_name)) for field_name in request.FILES)
+    #         upload_count = sum(len(request.FILES.getlist(field_name)) for field_name in request.FILES)
     #
-    #     upload_record = UploadRecord.objects.create(
-    #         upload_time=upload_time,
-    #         folder_url=folder_name,
-    #         uploader_id=user_id,
-    #         road_id=image_info['road'],
-    #         upload_name=image_info['title'],
-    #         upload_count=upload_count
-    #     )
-    #
-    #     for field_name, files in request.FILES.lists():
-    #         for file in files:
-    #             original_name = file.name
-    #             file_name = uuid.uuid4().hex
-    #             extension = os.path.splitext(original_name)[1]  # 提取文件后缀
-    #             file_path = os.path.join(folder_name, file_name + extension)  # 使用上传的文件的原始文件名
-    #
-    #             handle_uploaded_file(file, file_path)
-    #
-    #     # predictions = {}
-    #     predictions = predict(user=user_id, time=upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
-    #     for file_name, result in predictions.items():
-    #         classification_int = classification_mapping.get(result['class'], -1)
-    #         FileUpload.objects.create(
-    #             upload=upload_record,
-    #             file_url=os.path.join(folder_name, file_name),
-    #             classification_result=classification_int,
-    #             confidence=result['probability']
+    #         upload_record = UploadRecord.objects.create(
+    #             upload_time=upload_time,
+    #             folder_url=folder_name,
+    #             uploader_id=user_id,
+    #             road_id=image_info['road'],
+    #             upload_name=image_info['title'],
+    #             upload_count=upload_count
     #         )
     #
-    #     return JsonResponse({'message': 'Upload successful'}, status=200)
+    #         for field_name, files in request.FILES.lists():
+    #             for file in files:
+    #                 original_name = file.name
+    #                 file_name = uuid.uuid4().hex
+    #                 extension = os.path.splitext(original_name)[1]  # 提取文件后缀
+    #                 file_path = os.path.join(folder_name, file_name + extension)  # 使用上传的文件的原始文件名
+    #
+    #                 handle_uploaded_file(file, file_path)
+    #
+    #         # predictions = {}
+    #         predictions = predict(user=user_id, time=upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
+    #         for file_name, result in predictions.items():
+    #             classification_int = classification_mapping.get(result['class'], -1)
+    #             FileUpload.objects.create(
+    #                 upload=upload_record,
+    #                 file_url=os.path.join(folder_name, file_name),
+    #                 classification_result=classification_int,
+    #                 confidence=result['probability']
+    #             )
+    #
+    #         return JsonResponse({'message': 'Upload successful'}, status=200)
+    # except UserRole.DoesNotExist:
+    #     return JsonResponse({'error': 'User role not found'}, status=404)
+    # except OSError as e:
+    #     return JsonResponse({'error': f'File system error: {e}'}, status=500)
+    # except Exception as e:
+    #     return JsonResponse({'error': f'An unexpected error occurred: {e}'}, status=501)
+    #
+    # return JsonResponse({'error': 'Invalid request'}, status=400)
+    if request.method == 'POST':
+        # print(request.user.id)
+        user_role = UserRole.objects.get(user=request.user)
+        user_id = user_role.id
+        # 设置北京时区并获取当前时间
+        tz = pytz.timezone('Asia/Shanghai')
+        upload_time = timezone.now().astimezone(tz)
+        folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
+        os.makedirs(folder_name, exist_ok=True)
+
+        # 从表单数据中获取 imageInfo
+        image_info = {
+            'title': request.POST.get('title', ''),
+            'road': request.POST.get('road', '')
+        }
+
+        upload_count = sum(len(request.FILES.getlist(field_name)) for field_name in request.FILES)
+
+        upload_record = UploadRecord.objects.create(
+            upload_time=upload_time,
+            folder_url=folder_name,
+            uploader_id=user_id,
+            road_id=image_info['road'],
+            upload_name=image_info['title'],
+            upload_count=upload_count
+        )
+
+        for field_name, files in request.FILES.lists():
+            for file in files:
+                original_name = file.name
+                # file_name = uuid.uuid4().hex                    # 使用uuid作为文件名
+                file_name = os.path.splitext(original_name)[0]  # 使用上传的文件的原始文件名
+                extension = os.path.splitext(original_name)[1]  # 提取文件后缀
+                file_path = os.path.join(folder_name, file_name + extension)  # 使用上传的文件的原始文件名
+
+                handle_uploaded_file(file, file_path)
+
+        # predictions = {}
+        predictions = predict(user=user_id, time=upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
+        for file_name, result in predictions.items():
+            classification_int = classification_mapping.get(result['class'], -1)
+            FileUpload.objects.create(
+                upload=upload_record,
+                file_url=os.path.join(folder_name, file_name),
+                classification_result=classification_int,
+                confidence=result['probability']
+            )
+
+        return JsonResponse({'message': 'Upload successful'}, status=200)
 
 
 def handle_uploaded_file(f, file_name):
@@ -577,11 +612,24 @@ def upload_avatar(request):
 
             # 检查是否有文件被上传
             if 'avatar' in request.FILES:
+                user_id = user_role.id
                 avatar_file = request.FILES['avatar']
                 folder_name = 'avatars/'
                 file_extension = os.path.splitext(avatar_file.name)[1]
                 unique_file_name = uuid.uuid4().hex + file_extension
-                file_path = os.path.join(folder_name, unique_file_name)
+
+                # 创建用户的头像存储目录
+                user_avatar_folder = os.path.join(folder_name, str(user_id))
+                os.makedirs(user_avatar_folder, exist_ok=True)
+
+                file_path = os.path.join(user_avatar_folder, unique_file_name)
+
+                # 删除旧头像文件
+                old_avatar_path = user_role.avatar_url
+                if old_avatar_path:
+                    full_old_avatar_path = os.path.join(settings.MEDIA_ROOT, old_avatar_path)
+                    if os.path.isfile(full_old_avatar_path):
+                        os.remove(full_old_avatar_path)
 
                 # 保存文件
                 handle_uploaded_file(avatar_file, file_path)
@@ -696,6 +744,28 @@ def get_upload_records(request):
     )
 
     return JsonResponse(list(records), safe=False)
+
+
+@require_http_methods(["DELETE"])
+def delete_upload_record(request, upload_id):
+    if request.method == 'DELETE':
+        # 检查上传记录是否存在
+        try:
+            upload_record = UploadRecord.objects.get(upload_id=upload_id)
+        except ObjectDoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Upload record not found'}, status=404)
+
+        # 获取文件夹URL并删除本地文件夹
+        folder_url = upload_record.folder_url
+        if os.path.exists(folder_url):
+            shutil.rmtree(folder_url)
+
+        # 删除上传记录及相关文件上传数据
+        upload_record.delete()  # 这会级联删除关联的FileUpload记录
+
+        return JsonResponse({'status': 'success', 'message': 'Upload record and files deleted successfully'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
 def get_subordinate_user_ids(user):
