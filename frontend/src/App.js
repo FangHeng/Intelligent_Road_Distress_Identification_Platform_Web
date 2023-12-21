@@ -3,7 +3,7 @@ import './index.css';
 import './App.css';
 import 'antd/dist/reset.css';
 import zhCN from 'antd/lib/locale/zh_CN';
-import {ConfigProvider, Switch} from 'antd';
+import {ConfigProvider} from 'antd';
 // import {HashRouter, Routes, Route} from 'react-router-dom';
 import Login from './pages/Login/login';
 import SideBarLayout from './components/SideBarLayout/SideBarLayout';
@@ -22,7 +22,7 @@ import AddRoad from "./pages/settings/AddRoad";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 // import {theme} from "antd";
-//
+// //
 // const { darkAlgorithm, compactAlgorithm } = theme;
 
 function App() {
@@ -55,6 +55,7 @@ function App() {
               <Route path="/pages/settings/AddRoad" element={<AddRoad/>}/>
               <Route path="/pages/about" element={<About/>}/>
             </Route>
+
           </Routes>
 
         </ConfigProvider>

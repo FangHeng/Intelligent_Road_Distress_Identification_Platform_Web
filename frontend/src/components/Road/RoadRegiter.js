@@ -1,4 +1,4 @@
-import {Alert, AutoComplete, Button, Card, Cascader, Col, Form, message, Row, Space} from "antd";
+import {Alert, AutoComplete, Button, Card, Cascader, Col, Form, message, Row, Space, Spin} from "antd";
 import React, {useEffect, useState} from "react";
 import initSettingMap from "../Graph/SettingMap";
 import {Marker, Popup} from "@antv/l7";
@@ -39,6 +39,8 @@ const RoadRegister = observer(() => {
     const [extractedData, setExtractedData] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
     const [currentMarker, setCurrentMarker] = useState(null);
+    // 加载地图
+    const [loading, setLoading] = useState(true);
 
     // useEffect(() => {
     //     if (roadStore.hint.message) {
@@ -64,18 +66,18 @@ const RoadRegister = observer(() => {
             position => {
                 // 成功获取位置
                 const { latitude, longitude } = position.coords;
-                const mapScene =  initSettingMap(latitude, longitude);
+                const mapScene =  initSettingMap(setLoading, latitude, longitude);
                 setScene(mapScene)
             },
             error => {
                 // 错误处理
                 console.error("Error acquiring position: ", error);
-                const mapScene = initSettingMap(); // 使用默认位置
+                const mapScene = initSettingMap(setLoading); // 使用默认位置
                 setScene(mapScene)
             },
             () => {
                 // 用户拒绝共享位置或获取位置失败
-                const mapScene = initSettingMap(); // 使用默认位置
+                const mapScene = initSettingMap(setLoading); // 使用默认位置
                 setScene(mapScene)
             }
         );
@@ -260,7 +262,12 @@ const RoadRegister = observer(() => {
                         </Form.Item>
                     </Form>
                 </Card>
-                <div style={{height: "55vh", justifyContent:"center", position: "relative"}} id="settingMap"/>
+                <div style={{ height: "55vh", justifyContent: "center", position: "relative" }}>
+                    {loading && (
+                        <Spin className='spin'/>
+                    )}
+                    <div id="settingMap" style={{ height: "100%" }} />
+                </div>
             </Space>
         </>
     )

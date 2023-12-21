@@ -1,8 +1,7 @@
-import { makeAutoObservable } from 'mobx';
+import {action, makeAutoObservable} from 'mobx';
 import MaleAvatar from '../assets/img/Male.png'
 import FemaleAvatar from '../assets/img/Female.png'
 import axiosInstance from "../utils/AxiosInstance";
-// import {fetchWithToken, getCookie} from "../utils/utils";
 
 class UserStore {
     userInfo = {
@@ -16,16 +15,28 @@ class UserStore {
         company_name: '',
         avatar: '',
         upload_count: 0,
+        selected_model : 'WSPLIN-IP',
     };
     isLoggedIn = false;
     isLoading = false;
     loginHint = {message:'', status:'error'};
-    infoChangeHint = {message:'', status:'error'}
-    getInfoHint = {message:'', status:'error'}
+    infoChangeHint = { status: null, message: '' };
+    getInfoHint = {message:'', status:'error'};
+    subordinatesInfo = {};
+    errorsubordinatesInfo = true
 
     constructor() {
         makeAutoObservable(this);
     }
+
+    setUserInfo(userData) {
+        this.userInfo = {
+            ...this.userInfo,
+            ...userData,
+        };
+        console.log(this.userInfo)
+    }
+
 
     async login(companyID, jobNumber, password) {
         try {
@@ -53,7 +64,7 @@ class UserStore {
             this.isLoggedIn = true;
             this.loginHint.message = '登陆成功！';
             this.loginHint.status = 'success';
-            // ...之后的代码...
+            localStorage.setItem('isLoggedIn', 'true');
         } catch (error) {
             this.isLoggedIn = false;
             this.loginHint.message = '工号或密码错误！';
@@ -63,55 +74,6 @@ class UserStore {
             this.isLoading = false;
         }
     }
-    // async login(companyID, jobNumber, password) {
-    //     try {
-    //         this.isLoading = true;
-    //         this.loginError = '';
-    //
-    //         const csrfToken = getCookie('csrftoken'); // 从cookie中获取CSRF token
-    //         console.log(csrfToken)
-    //
-    //         // 使用FormData来发送数据
-    //         const formData = new FormData();
-    //         formData.append('company_id', companyID);
-    //         formData.append('employee_number', jobNumber);
-    //         formData.append('password', password);
-    //
-    //         const response = await fetchWithToken('/irdip/login/', {
-    //             method: 'POST',
-    //             credentials: 'include',
-    //             body: formData, // 发送FormData
-    //         });
-    //
-    //         console.log(response)
-    //
-    //         // 使用.entries()方法遍历并打印FormData中的内容
-    //         for (let [key, value] of formData.entries()) {
-    //             console.log(key, value);
-    //         }
-    //
-    //         if (response.ok) {
-    //             const data = await response.json();
-    //             console.log(data)
-    //             this.isLoggedIn = true;
-    //             this.loginHint.message = '登陆成功！';
-    //             this.loginHint.status = 'success';
-    //             // 可以在这里设置token，保存在localStorage等
-    //             // 注意：不要存储密码
-    //         } else {
-    //             this.isLoggedIn = false;
-    //             this.loginHint.message = '工号或密码错误！';
-    //             this.loginHint.status = 'error';
-    //         }
-    //     } catch (error) {
-    //         this.isLoggedIn = false;
-    //         this.loginHint.message = '网络似乎出现了错误，请稍后再试！';
-    //         this.loginHint.status = 'error';
-    //         console.error('There has been a problem with your fetch operation:', error);
-    //     } finally {
-    //         this.isLoading = false;
-    //     }
-    // }
 
     async logout() {
         try {
@@ -119,6 +81,8 @@ class UserStore {
             if (response.data.status === 'success') {
                 // 登出成功的逻辑处理
                 console.log('Logged out successfully');
+                this.isLoggedIn = false;
+                localStorage.removeItem('isLoggedIn');
             } else {
                 // 处理错误情况
                 console.error('Logout failed:', response.data.message);
@@ -133,7 +97,14 @@ class UserStore {
     async fetchUserInfo(callback) {
         const userData = await fetchUserFromDatabase();
         if (userData) {
-            this.setUserInfo(userData);
+            // 如果 userData 中的 avatar 为空，则根据性别设置默认头像
+            if (!userData.avatar) {
+                userData.avatar = this.getDefaultAvatar(userData.gender);
+            }
+
+            // 更新 userInfo，但保留刚设置的 avatar
+            const avatarImageSrc = `data:image/jpeg;base64,${userData.avatar}`;
+            this.setUserInfo({ ...this.userInfo, ...userData, avatar: avatarImageSrc });
         } else {
             this.getInfoHint.status = 'error'
             this.getInfoHint.message = '获取用户信息失败！'
@@ -141,14 +112,8 @@ class UserStore {
         }
     }
 
-    getAvatarUrl() {
-        // 如果 userInfo.avatar 不为空，则返回它
-        if (this.userInfo.avatar) {
-            return this.userInfo.avatar;
-        }
-
-        // 根据性别返回默认头像
-        switch (this.userInfo.gender) {
+    getDefaultAvatar(gender) {
+        switch (gender) {
             case 'Male':
                 return MaleAvatar;
             case 'Female':
@@ -160,43 +125,143 @@ class UserStore {
 
     async updateUserInfo(data) {
         try {
-            // 发送POST请求到后端API
-            const response = await fetch('/irdip/change_user_info/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: data.email,
-                    phone_number: data.phone,
-                    username: data.nickname,
-                    gender: data.gender,
-                }),
-            });
+            console.log(data)
+            const formData = new FormData();
+            formData.append('email', data.email);
+            formData.append('phone_number', data.phone);
+            formData.append('username', data.nickname);
+            formData.append('gender', data.gender);
 
-            // 检查响应状态
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            // 打印FormData中的内容
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
             }
 
-            // 解析JSON响应
-            const responseData = await response.json();
+            const response = await axiosInstance.post('/irdip/change_user_info/', formData);
 
-            // 处理响应数据
-            return responseData;
+            // 根据响应更新 userStore 中的 infoChangeHint
+            if (response.status === 200) {
+                // 成功更新用户信息
+                this.infoChangeHint = {
+                    message: response.data.message,
+                    status: 'success'
+                };
+                this.fetchUserInfo();
+            }else{
+                this.infoChangeHint = {
+                    message: response.data.message,
+                    status: 'error'
+                };
+            }
+            return response.data;
         } catch (error) {
+            // 错误处理
             console.error('Updating user info failed:', error);
-            // 在错误情况下，可能需要返回一个错误标记或默认值
+            this.infoChangeHint = {
+                message: error.response?.data?.error || '更新用户信息时出现错误',
+                status: 'error'
+            };
             return null;
         }
     }
 
-    setUserInfo(userData) {
-        this.userInfo = {
-            ...this.userInfo,
-            ...userData,
-        };
+    setPreferredModel(model) {
+        this.userInfo.selected_model = model;
+        console.log(this.userInfo.selected_model)
     }
+
+    async changePassword(oldPassword, newPassword) {
+        try {
+            const formData = new FormData();
+            formData.append('old_password', oldPassword);
+            formData.append('new_password', newPassword);
+
+            const response = await axiosInstance.post('/irdip/change_password/', formData);
+
+            if (response.data.status === 'success') {
+                // 密码修改成功
+                return { success: true, message: '密码修改成功！' };
+            } else {
+                // 密码修改失败
+                return { success: false, message: '密码修改失败！'};
+            }
+        } catch (error) {
+            // 网络或其他错误
+            return { success: false, message: '网络错误或服务器错误' };
+        }
+    }
+
+    changeAvatar = async (file) => {
+        try {
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            // 打印FormData中的内容
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
+            // 使用axios发送请求
+            const response = await axiosInstance.post('/irdip/upload_avatar/', formData);
+
+            // 根据响应内容更新状态
+            if (response.status === 200) {
+                this.fetchUserInfo();
+                this.infoChangeHint = {
+                    message: '头像上传成功！',
+                    status: 'success'
+                };
+            } else {
+                this.infoChangeHint = {
+                    message: response.data.error || '上传失败',
+                    status: 'error'
+                };
+            }
+        } catch (error) {
+            this.infoChangeHint = {
+                message: '服务器出了问题，请稍后再试！',
+                status: 'error'
+            };
+        }
+    }
+
+    async fetchSubordinatesInfo() {
+        // 检查用户级别
+        if (this.userInfo.user_level === 'Level 0' || this.userInfo.user_level === 'Level 1') {
+            try {
+                const response = await axiosInstance.get('/irdip/get_subordinates_info/');
+                if (response.status === 200) {
+                    this.errorsubordinatesInfo = false;
+                    this.subordinatesInfo = response.data;
+                } else {
+                    this.errorsubordinatesInfo = true;
+                    console.error('Error during fetch: ', response);
+                }
+            } catch (error) {
+                this.errorsubordinatesInfo = true;
+                console.error('Error during fetch: ', error);
+            }
+        } else {
+            this.errorsubordinatesInfo = true;
+            console.log('Unauthorized to access subordinates information');
+        }
+    }
+
+
+    sendPreferredModel = async (selectedModel) => {
+        const formData = new FormData();
+        formData.append('update_model', selectedModel);
+
+        try {
+            const response = await axiosInstance.post('/irdip/change_selected_model/', formData);
+
+            console.log('Model updated successfully:', response.data);
+        } catch (error) {
+            console.error('Error updating model:', error.response?.data || error.message);
+        }
+    };
+
+
 }
 
 // 异步函数，用于从数据库获取用户信息

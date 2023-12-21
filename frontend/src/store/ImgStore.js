@@ -10,23 +10,8 @@ class ImageStore {
     };
     lastUploadId = [];
     selectedUploadId = [];
-    resultData = {};
+    resultData = [];
     isLastUploadIdFetched = false;
-    // resultData = {
-    //     "1": {
-    //         "uploader": "admin",
-    //         "road_name": "test",
-    //         "files": [
-    //             {
-    //                 "file_id": 1,
-    //                 "file_name": "cementation_fissures_0.jpg",
-    //                 "classification_result": 6,
-    //                 "confidence": 0.9999998807907104,
-    //                 "img": "iVBORw0KGgoAAAANSUhEUgAAASwAAACW",
-    //             }
-    //         ]
-    //     },
-    // }
 
     constructor() {
         makeAutoObservable(this);

@@ -46,3 +46,14 @@ export const fetchWithToken = async (url, options = {}) => {
     return response;
 };
 
+// 密码复杂度检查函数
+export const checkComplexity = (password) => {
+    const minLength = 8;
+    const hasNumber = /\d/;
+    const hasUpper = /[A-Z]/;
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+
+    return password.length >= minLength && hasNumber.test(password) && hasUpper.test(password) && hasSpecialChar.test(password);
+};
+
+

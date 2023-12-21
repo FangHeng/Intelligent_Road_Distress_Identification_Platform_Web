@@ -13,13 +13,17 @@ import {
     Select,
     message, Descriptions,
 } from 'antd';
-import {EditOutlined, UserOutlined,} from "@ant-design/icons";
+import {EditOutlined} from "@ant-design/icons";
 import userStore from '../../store/UserStore'
 import companyStore from "../../store/CompanyStore";
 import { observer } from 'mobx-react-lite'
+import {checkComplexity} from "../../utils/utils";
+import {useNavigate} from "react-router-dom";
+import {reaction} from "mobx";
 
 
 const {Option} = Select;
+
 const formItemLayout = {
     labelCol: {
         xs: {span: 24},
@@ -72,6 +76,8 @@ const UserSetting = observer(() => {
     const {userInfo, infoChangeHint} = userStore;
     const {employeeNumber} = companyStore;
 
+    const navigate = useNavigate()
+
     useEffect(() => {
         // 添加性别映射逻辑
         const genderMapping = {
@@ -114,49 +120,26 @@ const UserSetting = observer(() => {
         },
     ];
 
-    const onFinish = async (values) => {
+    const onInfoFinish = async (values) => {
         console.log('Received values of form: ', values);
-        const response = await userStore.updateUserInfo(values);
-        if (response && response.message === "用户信息已更新") {
-            // 成功更新
-            message.success('用户信息已更新！')
-            userStore.updateUserInfo(values);
-        } else {
-            // 更新失败，处理错误
-            message.error('用户信息更新失败！')
-        }
+
+        // 调用 updateUserInfo 来更新用户信息
+        await userStore.updateUserInfo(values);
 
     };
 
+    const onPasswordFormFinish = async (values) => {
+        const { oldPassword, newPassword } = values;
+        const result = await userStore.changePassword(oldPassword, newPassword);
 
-    const handleUpload = async ({ file }) => {
-        try{
-            // 创建一个 FormData 对象来存储文件
-            const formData = new FormData();
-            formData.append('avatar', file);
-
-            // 上传文件到服务器
-            const response = await fetch('http://your-backend-url/api/upload-avatar', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                // 假设服务器返回的数据中包含了新的头像的 URL
-                userStore.updateUserInfo({ avatar: data.avatar });
-                if (infoChangeHint.status === 'success'){
-                    message.success(infoChangeHint.message)
-                }else{
-                    message.error(infoChangeHint.message)
-                }
-            } else {
-                message.error('头像更新失败！')
-                console.error('Failed to upload file.');
-            }
-        }catch (error) {
-            message.error('头像更新失败！')
-            console.log(error)
+        if (result.success) {
+            // 显示成功消息
+            message.success(result.message);
+            await userStore.logout()
+            navigate('/');
+        } else {
+            // 显示错误消息
+            message.error(result.message);
         }
     };
 
@@ -173,20 +156,53 @@ const UserSetting = observer(() => {
         </Form.Item>
     );
 
+    const handleFileChange = (info) => {
+        if (info.file.status !== 'uploading') {
+            console.log(info.file, info.fileList);
+        }
+        if (info.file.status === 'done') {
+            console.log(`${info.file.name} file uploaded successfully`);
+        } else if (info.file.status === 'error') {
+            console.log(`${info.file.name} file upload failed.`);
+        }
+    };
+
     const uploadButton = (
         <div>
-            <Avatar size={128} src={userStore.getAvatarUrl()}/>
+            <Avatar size={128} src={userInfo.avatar}/>
             <div style={{position: 'absolute', right: 0, top: 0}}>
                 <Upload
                     accept="image/*"
                     showUploadList={false}
-                    onChange={handleUpload}
+                    beforeUpload={(file) => {
+                        userStore.changeAvatar(file);
+                        return false;
+                    }}
+                    onChange={handleFileChange}
                 >
                     <Button shape="circle" icon={<EditOutlined/>}/>
                 </Upload>
             </div>
         </div>
     );
+
+    useEffect(() => {
+        const dispose = reaction(
+            () => infoChangeHint,
+            (infoChangeHint) => {
+                console.log('Reaction triggered:', infoChangeHint);
+                if (infoChangeHint.status === 'success') {
+                    message.success(infoChangeHint.message);
+                } else if (infoChangeHint.status === 'error') {
+                    message.error(infoChangeHint.message);
+                } else {
+                    message.warning(infoChangeHint.message);
+                }
+            }
+        );
+
+        return () => dispose(); // 在组件卸载时清理
+    }, []);
 
     return (
         <Space
@@ -220,7 +236,7 @@ const UserSetting = observer(() => {
                             {...formItemLayout}
                             form={formPersonalInfo}
                             name="userSetting"
-                            onFinish={onFinish}
+                            onFinish={onInfoFinish}
                             initialValues={{
                                 prefix: '86',
                             }}
@@ -286,9 +302,9 @@ const UserSetting = observer(() => {
                                 ]}
                             >
                                 <Select placeholder="请选择性别">
-                                    <Option value="male">男</Option>
-                                    <Option value="female">女</Option>
-                                    <Option value="other">其他</Option>
+                                    <Option value="Male">男</Option>
+                                    <Option value="Female">女</Option>
+                                    <Option value="Other">其他</Option>
                                 </Select>
                             </Form.Item>
 
@@ -313,17 +329,37 @@ const UserSetting = observer(() => {
                             {...colformItemLayout}
                             form={formPasswordSet}
                             name="passwordSetting"
-                            onFinish={onFinish}
+                            onFinish={onPasswordFormFinish}
                             initialValues={{
                                 prefix: '86',
                             }}
                             scrollToFirstError
                         >
-                            <Form.Item name="password" label="密码" rules={[
+                            <Form.Item name="oldPassword" label="旧密码" rules={[
                                 {
                                     required: true,
                                     message: '请输入您的密码！',
                                 },
+                            ]}
+                                   >
+                                <Input.Password/>
+                            </Form.Item>
+                            <Form.Item name="newPassword" label="新密码" rules={[
+                                {
+                                    required: true,
+                                    message: '请输入您的新密码！',
+                                },
+                                ({getFieldValue}) => ({
+                                    validator(_, value) {
+                                        if (!value || !checkComplexity(value)) {
+                                            return Promise.reject(new Error('密码过于简单，请包含大写字母、数字和特殊字符'));
+                                        }
+                                        if (value === getFieldValue('oldPassword')) {
+                                            return Promise.reject(new Error('新密码不能与旧密码相同'));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                }),
                             ]}
                                        hasFeedback>
                                 <Input.Password/>
@@ -331,9 +367,9 @@ const UserSetting = observer(() => {
 
 
                             <Form.Item
-                                name="confirm"
-                                label="确认密码"
-                                dependencies={['password']}
+                                name="confirmPassword"
+                                label="确认新密码"
+                                dependencies={['newPassword']}
                                 hasFeedback
                                 rules={[
                                     {
@@ -342,7 +378,7 @@ const UserSetting = observer(() => {
                                     },
                                     ({getFieldValue}) => ({
                                         validator(_, value) {
-                                            if (!value || getFieldValue('password') === value) {
+                                            if (!value || getFieldValue('newPassword') === value) {
                                                 return Promise.resolve();
                                             }
                                             return Promise.reject(new Error('您输入的新密码不匹配！'));

@@ -2,7 +2,7 @@ import {Fullscreen, GeoLocate, Scene, Zoom} from '@antv/l7';
 import {GaodeMap} from '@antv/l7-maps';
 import gcoord from 'gcoord';
 
-function initSettingMap(latitude = 39.90374, longitude = 116.397827){
+function initSettingMap(setLoading, latitude = 39.90374, longitude = 116.397827){
     const scene = new Scene({
         id: 'settingMap',
         logoVisible: false,
@@ -36,6 +36,7 @@ function initSettingMap(latitude = 39.90374, longitude = 116.397827){
     });
 
     scene.on('loaded', () => {
+        setLoading(false);
         const zoom = new Zoom();
         scene.addControl(zoom);
     });

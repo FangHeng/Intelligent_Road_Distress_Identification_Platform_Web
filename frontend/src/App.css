@@ -50,3 +50,9 @@
   border-radius: 4px;
 }
 
+/* CSS 样式 */
+.radio-button-min-width {
+  min-width: 150px; /* 根据实际需求调整这个值 */
+  text-align: center;
+}
+
