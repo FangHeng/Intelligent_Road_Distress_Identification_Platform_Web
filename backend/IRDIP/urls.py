@@ -26,11 +26,12 @@ urlpatterns = [
     path("get_road_info/", views.get_road_info, name="get_road_info"),
     path("get_user_info/", views.get_user_info, name="get_user_info"),
     path("change_user_info/", views.change_user_info, name="change_user_info"),
+    path("upload_avatar/", views.upload_avatar, name="upload_avatar"),
     path("change_password/", views.change_password, name="change_password"),
     path("get_employee_number_length/", views.get_employee_number_length, name="get_employee_number_length"),
     # path("change_employee_number_length/", views.change_employee_number_length, name="change_employee_number_length"),
     path("get_upload_records/", views.get_upload_records, name="get_upload_records"),
-    path("update_selected_model/", views.update_selected_model, name="update_selected_model"),
     path("get_selected_model/", views.get_selected_model, name="get_selected_model"),
+    path("change_selected_model/", views.change_selected_model, name="change_selected_model"),
 
 ]
