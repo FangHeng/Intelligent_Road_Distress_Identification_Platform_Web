@@ -18,7 +18,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.db.models import Sum, Count
 from django.core.files.base import ContentFile
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from PDC_predict.predict import predict
 
@@ -93,7 +93,16 @@ def register_subordinate(request):
             return JsonResponse({'status': 'error', 'message': 'Employee number already exists in the company'}, status=400)
 
         # 创建新用户
-        new_user = User.objects.create_user(username, password)
+        new_user = User.objects.create_user(username=username)
+
+        # 尝试设置密码，如果不符合Django的安全标准则返回错误
+        try:
+            new_user.set_password(password)
+            new_user.save()
+        except ValidationError as e:
+            new_user.delete()  # 如果密码无效，删除创建的用户
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
         new_user_role = UserRole.objects.create(
             user=new_user,
             employee_number=employee_number,
