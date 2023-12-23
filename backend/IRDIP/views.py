@@ -4,20 +4,24 @@ import uuid
 import pytz
 import base64
 import shutil
+import random
+import pandas
+from openpyxl import Workbook
 
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from .models import UserRole, UploadRecord, FileUpload, Company, Road
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.conf import settings
-from django.db.models import Sum, Count
-from django.core.files.base import ContentFile
+from django.db.models import Sum, Count, Q
+from django.core.mail import EmailMessage
+from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from PDC_predict.predict import predict
@@ -141,9 +145,9 @@ def delete_subordinate(request, user_id):
 
             subordinate_user_role.user.delete()  # 这会级联删除UserRole
         except ObjectDoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+            return JsonResponse({'status': 'error', 'message': '用户没发现！'}, status=404)
 
-        return JsonResponse({'status': 'success', 'message': 'User deleted successfully'})
+        return JsonResponse({'status': 'success', 'message': '删除成功！'})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
@@ -232,7 +236,8 @@ def upload(request):
     #             uploader_id=user_id,
     #             road_id=image_info['road'],
     #             upload_name=image_info['title'],
-    #             upload_count=upload_count
+    #             upload_count=upload_count,
+    #             selected_model=user_role.selected_model,
     #         )
     #
     #         for field_name, files in request.FILES.lists():
@@ -268,7 +273,7 @@ def upload(request):
         # print(request.user.id)
         user_role = UserRole.objects.get(user=request.user)
         user_id = user_role.id
-        # 设置北京时区并获取当前时间
+        # 设置中国时区并获取当前时间
         tz = pytz.timezone('Asia/Shanghai')
         upload_time = timezone.now().astimezone(tz)
         folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
@@ -288,7 +293,8 @@ def upload(request):
             uploader_id=user_id,
             road_id=image_info['road'],
             upload_name=image_info['title'],
-            upload_count=upload_count
+            upload_count=upload_count,
+            selected_model=user_role.selected_model,
         )
 
         for field_name, files in request.FILES.lists():
@@ -346,6 +352,7 @@ def get_result(request):
             "road_name": upload_record.road.road_name,
             "upload_name": upload_record.upload_name,
             "upload_count": upload_record.upload_count,
+            "selected_model": upload_record.get_selected_model_display(),
             "files": [
                 {
                     "file_id": file.file_id,
@@ -603,6 +610,11 @@ def change_user_info(request):
 
         user_role.save()
 
+        # 如果电子邮件发生变化，也更新User表中的电子邮件
+        if new_email != current_user.email:
+            current_user.email = new_email
+            current_user.save()
+
     if user_changes:
         # 更新User信息
         current_user.username = new_username
@@ -747,12 +759,22 @@ def get_upload_records(request):
     user_ids = [user_role.id] + get_subordinate_user_ids(user_role)
 
     # 查询对应的上传记录
-    records = UploadRecord.objects.filter(uploader_id__in=user_ids).values(
-        'upload_id', 'upload_time', 'uploader__user__username', 'road__road_id',
-        'road__road_name', 'upload_name', 'upload_count'
+    records = UploadRecord.objects.filter(uploader_id__in=user_ids).annotate(
+        intact_count=Count('fileupload', filter=Q(fileupload__classification_result=6))
+    ).values(
+        'upload_id', 'upload_time', 'uploader__user__username',
+        'road__road_id', 'road__road_name', 'upload_name', 'upload_count',
+        'road__gps_longitude', 'road__gps_latitude', 'selected_model', 'intact_count'
     )
 
-    return JsonResponse(list(records), safe=False)
+    # 将查询结果转换为列表并更新模型名称，同时计算完好比例（integrity）
+    records_list = list(records)
+    for record in records_list:
+        upload_record_instance = UploadRecord.objects.get(upload_id=record['upload_id'])
+        record['selected_model'] = upload_record_instance.get_selected_model_display()
+        record['integrity'] = (record['intact_count'] / record['upload_count'] * 100) if record['upload_count'] > 0 else 0
+
+    return JsonResponse(records_list, safe=False)
 
 
 @require_http_methods(["DELETE"])
@@ -772,7 +794,7 @@ def delete_upload_record(request, upload_id):
         # 删除上传记录及相关文件上传数据
         upload_record.delete()  # 这会级联删除关联的FileUpload记录
 
-        return JsonResponse({'status': 'success', 'message': 'Upload record and files deleted successfully'})
+        return JsonResponse({'status': 'success', 'message': '删除成功！'})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
@@ -843,3 +865,150 @@ def change_selected_model(request):
         return JsonResponse({'status': 'error', 'message': 'User role not found'}, status=404)
 
     return JsonResponse({'status': 'success', 'message': 'Model updated successfully'}, status=200)
+
+
+@require_http_methods(["POST"])
+def send_email_verification(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        user = User.objects.filter(email=email).first()
+        if user:
+            # 生成随机验证码
+            verification_code = str(random.randint(100000, 999999))
+            # 设置验证码在缓存中的有效期为30分钟
+            cache.set(f'verification_code_{email}', verification_code, timeout=600)
+
+            # 邮件内容
+            subject = '您的智能路面病害分析平台账户验证码'
+            message = f"""
+                尊敬的 {user.username},
+                
+                我们收到了一个请求，用于重置您在智能路面病害分析平台的账户密码。要继续重置密码，请使用以下验证码：
+                
+                验证码: {verification_code}
+                
+                请在密码重置页面输入此验证码。该验证码将在10分钟后过期。
+                
+                如果您未请求重置密码，请忽略此邮件或在认为有未经授权的操作时立即通过 hengfang2002@qq.com 与我们联系。
+                
+                为了您的安全，请不要与他人分享您的验证码。
+                
+                感谢您使用智能路面病害分析平台。我们致力于为您提供最可靠、最安全的道路病害分析服务。
+                
+                此致，
+                您的智能路面病害分析平台团队
+            """
+            # 发送邮件
+            mail = EmailMessage(
+                subject=subject,
+                body=message,
+                from_email=settings.EMAIL_HOST_USER,
+                to=[email],
+                reply_to=[email]
+            )
+            mail.encoding = 'utf-8'  # 指定编码为 UTF-8，否则默认的ascii编码会导致错误
+            mail.send()
+
+            return JsonResponse({'status': 'success', 'message': '验证码已发送'}, status=200)
+        else:
+            return JsonResponse({'status': 'error', 'message': '未注册的邮箱'}, status=400)
+
+
+@require_http_methods(["POST"])
+def change_password_with_email_verification(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        user = User.objects.filter(email=email).first()
+
+        if user:
+            submitted_code = request.POST.get('code')
+            new_password = request.POST.get('new_password')
+
+            # 从缓存中获取验证码
+            cached_code = cache.get(f'verification_code_{email}')
+
+            if cached_code and submitted_code == cached_code:
+                user.set_password(new_password)
+                user.save()
+                # 成功更新密码，清除缓存中的验证码
+                cache.delete(f'verification_code_{email}')
+                return JsonResponse({'message': '成功更新密码'}, status=200)
+            else:
+                # 验证码不匹配或已过期
+                return JsonResponse({'error': '验证码不匹配或已过期'}, status=400)
+        else:
+            # 邮箱未注册
+            return JsonResponse({'error': '邮箱未注册'}, status=444)
+    else:
+        # 错误的请求方法
+        return JsonResponse({'error': '错误的请求'}, status=405)
+
+
+@require_http_methods(["GET"])
+def export_to_excel(request):
+    try:
+        upload_ids = request.GET.getlist('upload_id')
+        request_user = request.user
+
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = 'attachment; filename=exported_data.xlsx'
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = 'Upload Records'
+
+        column_titles = ["Upload ID", "Uploader", "Employee number", "Road Name", "Upload Name",
+                         "File ID", "File Name", "Classification Result", "Confidence"]
+        sheet.append(column_titles)
+
+        # 分类结果映射
+        classification_mapping = {
+            0: "cementation_fissures",
+            1: "crack",
+            2: "longitudinal_crack",
+            3: "loose",
+            4: "massive_crack",
+            5: "mending",
+            6: "normal",
+            7: "transverse_crack"
+        }
+
+        upload_records = UploadRecord.objects.filter(upload_id__in=upload_ids).select_related('uploader', 'road')
+
+        if not upload_records:
+            raise ObjectDoesNotExist("No upload records found for the provided IDs.")
+
+        for upload_record in upload_records:
+            uploader = upload_record.uploader.user
+
+            if not is_upload_accessible_by_user(uploader, request_user):
+                continue
+
+            files = FileUpload.objects.filter(upload=upload_record).select_related('upload')
+
+            for file in files:
+                row = [
+                    str(upload_record.upload_id),
+                    upload_record.uploader.user.username,
+                    upload_record.uploader.employee_number,
+                    upload_record.road.road_name,
+                    upload_record.upload_name,
+                    file.file_id,
+                    os.path.basename(file.file_url),
+                    classification_mapping.get(file.classification_result, "Unknown"),
+                    float(file.confidence),
+                ]
+                sheet.append(row)
+
+        workbook.save(response)
+        return response
+
+    except ObjectDoesNotExist as e:
+        return JsonResponse({"error": str(e)}, status=404)
+
+    except Exception as e:
+        # 捕获其他所有未预期的错误
+        return JsonResponse({"error": "An unexpected error occurred: " + str(e)}, status=500)
+
+

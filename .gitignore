@@ -31,3 +31,6 @@ backend/IRDIP/__pycache__/
 backend/backend/__pycache__/
 
 .idea/
+
+
+backend/IRDIP/migrations/__pycache__/

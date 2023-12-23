@@ -9,3 +9,5 @@ torch==2.0.1
 torchvision
 numpy==1.24.1
 matplotlib
+pandas
+openpyxl

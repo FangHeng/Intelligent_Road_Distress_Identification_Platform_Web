@@ -26,6 +26,7 @@ class UploadRecord(models.Model):
     road = models.ForeignKey('Road', on_delete=models.CASCADE)
     upload_name = models.CharField(max_length=255)
     upload_count = models.IntegerField()
+    selected_model = models.IntegerField(choices=[(0, 'Swin'), (1, 'WSPLIN-IP'), (2, 'WSPLIN-SS'),(3, "PicT")], default=0)
 
 # 文件上传表
 class FileUpload(models.Model):
