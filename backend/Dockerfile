@@ -6,7 +6,9 @@ WORKDIR /
 
 # 复制依赖文件并安装依赖
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+# RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt -i https://pypi.mirrors.ustc.edu.cn/simple/
+
 
 # 复制项目文件
 COPY . .
