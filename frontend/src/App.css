@@ -50,9 +50,76 @@
   border-radius: 4px;
 }
 
-/* CSS 样式 */
+
 .radio-button-min-width {
   min-width: 150px; /* 根据实际需求调整这个值 */
   text-align: center;
 }
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-history {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.chat-message {
+  display: flex;
+  align-items: flex-start; /* 调整为 flex-start 使头像与消息的顶部对齐 */
+  margin-bottom: 10px;
+}
+
+.user-message .message-avatar,
+.gpt-message .message-avatar {
+  margin-right: 2px;
+}
+
+.gpt-avatar{
+  margin-right: 5px;
+}
+
+.user-message {
+  justify-content: flex-start;
+}
+
+.gpt-message {
+  justify-content: flex-end;
+}
+
+.message-avatar {
+  /* 调整头像大小和形状 */
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.message-content {
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #f0f0f0; /* 可以根据需要调整背景颜色 */
+  max-width: 70%;
+}
+
+.message-input {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-top: 1px solid #e0e0e0; /* 输入区上方的边框 */
+}
+
+.message-input .ant-input {
+  flex-grow: 1;
+}
+
+.message-input button {
+  margin-left: 10px;
+}
+
+
 

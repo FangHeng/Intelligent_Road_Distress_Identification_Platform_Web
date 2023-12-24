@@ -1,10 +1,16 @@
 import {makeObservable} from "mobx";
 import axiosInstance from "../utils/AxiosInstance";
-import {message, Progress, Space, Tag} from 'antd'
-import listIcon from "../assets/icons/list.svg";
+import {message} from "antd";
 
 class HistoryStore {
-    uploadRecords = []; // 用于存储上传记录的数组
+    cameFromDetect = false;
+    navigateRef = null;
+    uploadRecords = [];
+    isLoading = false;
+
+    setNavigate(navigateRef) {
+        this.navigateRef = navigateRef;
+    }
 
     // 从后端获取数据的方法
     constructor() {
@@ -12,52 +18,64 @@ class HistoryStore {
     }
 
     fetchUploadRecords() {
-        return axiosInstance.get('/irdip/get_upload_records')
+        this.isLoading = true; // 设置加载标志
+        // 返回一个 Promise 对象
+        return axiosInstance.get('/irdip/get_upload_records/')
             .then(response => {
-                const data = response.data.map(item => ({
-                    id:item.upload_id,
-                    title: item.upload_name,
-                    road: item.road__road_name,
-                    subTitle: <Space ><Tag color="geekblue">{item.road__road_name}</Tag><Tag color="blue">{item.uploader__user__username}</Tag></Space>,
-                    actions: [
-                        <a key="invite">删除</a>,
-                        <a key="operate">查看</a>,
-                    ],
-                    description: (
-                        <div>
-                            <div>共上传{item.upload_count}张照片</div>
-                            <div>上传时间：{item.upload_time}</div>
-                        </div>
-                    ),
-                    avatar: listIcon,
-                    uploader: item.uploader__user__username,
-                    content: (
-                        <div
-                            style={{
-                                flex: 1,
-                                display: 'flex',
-                                justifyContent: 'flex-end',
-                            }}
-                        >
-                            <div
-                                style={{
-                                    width: 200,
-                                }}
-                            >
-                                <div style={{marginBottom:'5px'}}>完好程度：</div>
-                                <Progress percent={parseFloat(item.Integrity) } />
-                            </div>
-                        </div>
-                    ),
-                }));
-                return data; // 返回处理后的数据
+                console.log('获取历史数据成功:', response.data);
+                this.uploadRecords = response.data;
+                this.isLoading = false; // 设置加载标志
+                return response.data; // 返回获取的数据
             })
             .catch(error => {
                 message.error('获取历史数据失败!');
                 console.error('Error fetching data:', error);
+                this.isLoading = false; // 设置加载标志
                 return []; // 在错误情况下返回空数组
             });
     }
+
+    setCameFromDetect(value) {
+        this.cameFromDetect = value;
+    }
+
+
+    deleteUploadRecord(uploadId) {
+        return axiosInstance.delete(`/irdip/delete_upload_record/${uploadId}/`)
+            // .then(response => response.data.status === 'success' ? message.success('删除成功！')
+            //     : message.error('删除失败！'))
+            .then(response => {
+                if (response.data.status === 'success') {
+
+                    // this.fetchUploadRecords();
+                    return { success: true, message: response.data.message };
+                } else {
+                    return { success: false, message: '删除失败！' };
+                }
+            })
+            .catch(error => {
+                console.log('删除失败:', error)
+                return { success: false, message: '删除失败！' };
+                // throw error.response?.data?.message || '删除失败';
+            });
+    }
+
+     countClass6 = (data) => {
+        let totalFiles = 0;
+        let totalClass6 = 0;
+
+        Object.values(data).forEach(entry => {
+            entry.files.forEach(file => {
+                totalFiles += 1;
+                if (file.classification_result === 6) {
+                    totalClass6 += 1;
+                }
+            });
+        });
+
+        return totalFiles > 0 ? totalClass6 / totalFiles : 0;
+    };
+
 
 }
 

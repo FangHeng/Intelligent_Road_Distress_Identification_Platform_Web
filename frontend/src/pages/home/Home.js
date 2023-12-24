@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './home.css'
-import {Card, Button, Row, Col, Avatar, Empty, Spin, Tag, Space,} from 'antd'
+import {Card, Button, Row, Col, Avatar, Empty, Spin, Tag, Space, message,} from 'antd'
 import {
   IdcardOutlined,
   PictureOutlined, ReconciliationOutlined,
@@ -12,21 +12,37 @@ import { observer } from 'mobx-react-lite'
 import { Link } from 'react-router-dom'
 import NoticeEmpty from '../../assets/img/empty.png'
 import initHomeMap from '../../components/Graph/HomeMap'
-import DemoBar from '../../components/Graph/BarGraph'
-import DemoScatter from '../../components/Graph/ScatterGraph'
+import HomeRoadCard from "../../components/Card/HomeRoadCard";
+import historyStore from "../../store/HistoryStore";
 
 const { Meta } = Card
 const Home = observer(() => {
   const [scene, setScene] = useState(null)
-  const [mapLoading, setMapLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
+  const userInfo = userStore.userInfo
+
+  const [isMapInitialized, setMapInitialized] = useState(false);
+
+  // 加载历史记录
   useEffect(() => {
-    const newScene = initHomeMap();
-    setMapLoading(false);
-    setScene(newScene);
+    const loadData = async () => {
+      setIsLoading(true);
+      await historyStore.fetchUploadRecords();
+      setIsLoading(false);
+    };
+    loadData();
+  }, []);
 
-  }, [])
-  const { userInfo } = userStore
+  // 初始化地图
+  useEffect(() => {
+    if (!historyStore.isLoading && !isMapInitialized) {
+      const newScene = initHomeMap(historyStore.uploadRecords);
+      setScene(newScene);
+      setMapInitialized(true); // 设置地图初始化状态
+    }
+  }, [historyStore.isLoading, historyStore.uploadRecords]);
+
   return (
     <div className="site-layout-content">
       <Row gutter={16}>
@@ -110,22 +126,15 @@ const Home = observer(() => {
       <Row gutter={16} style={{ marginTop: 16 }}>
         <Col span={16}>
           <Card bordered={false} className="secondRowCard">
-            {mapLoading ? (
-                <div style={{ height: "65vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <Spin tip={'正在加载...'}>
-                      <div className='content'></div>
-                    </Spin>
-
-                </div>
-            ) : (
+            {isLoading ? <Spin className='spin'></Spin> :
                 <div style={{ height: "65vh", justifyContent: "center", position: "relative" }} id="homeMap" />
-            )}
+            }
           </Card>
         </Col>
         <Col span={8}>
-          <Card className='secondRowCard'>
-
-          </Card>
+            {isLoading ? <Card title='最近上传' className='secondRowCard' style={{ overflow: 'auto' }}>
+                  <Spin className='spin'></Spin></Card>
+              : <HomeRoadCard />}
         </Col>
       </Row>
     </div>

@@ -1,5 +1,6 @@
 import { makeAutoObservable } from 'mobx';
 import axiosInstance from "../utils/AxiosInstance";
+import { message } from 'antd';
 
 class ImageStore {
     images = [];
@@ -12,6 +13,7 @@ class ImageStore {
     selectedUploadId = [];
     resultData = [];
     isLastUploadIdFetched = false;
+    reportData = [];
 
     constructor() {
         makeAutoObservable(this);
@@ -68,33 +70,63 @@ class ImageStore {
         this.isLastUploadIdFetched = true;
     }
 
+    resetIsLastUploadIdFetched() {
+        this.isLastUploadIdFetched = false;
+    }
+
     async fetchLastUploadId() {
-        axiosInstance.get('/irdip/get_lasted_upload_id/')
+        return axiosInstance.get('/irdip/get_lasted_upload_id/')
             .then(response => {
                 const uploadId = response.data.upload_id;
                 if (uploadId) {
                     this.setLastUploadId(uploadId);
                     console.log('Last upload id:', uploadId);
                 }
+                return uploadId; // 返回 uploadId，以便在 Promise 解决时使用
             })
             .catch(error => {
                 console.error('Error fetching data: ', error);
+                throw error; // 抛出错误，以便在调用链上捕获
             });
     }
 
-    fetchResultData() {
+    // fetchResultData(ids) {
+    //     const params = new URLSearchParams();
+    //     ids.forEach(id => params.append('upload_id', id));
+    //
+    //     axiosInstance.get('/irdip/get_result', { params })
+    //         .then(response => {
+    //             console.log(response.data);
+    //             this.resultData = response.data;
+    //         })
+    //         .catch(error => {
+    //             console.error('Error fetching upload data: ', error);
+    //         });
+    // }
+    fetchResultData(ids) {
         const params = new URLSearchParams();
-        this.lastUploadId.forEach(id => params.append('upload_id', id));
+        ids.forEach(id => params.append('upload_id', id));
 
-        axiosInstance.get('/irdip/get_result', { params })
+        // 返回 axios 请求的 Promise
+        return axiosInstance.get('/irdip/get_result/', { params })
             .then(response => {
                 console.log(response.data);
                 this.resultData = response.data;
             })
             .catch(error => {
                 console.error('Error fetching upload data: ', error);
+                message.error('获取数据失败!');
+                // 可以选择在这里处理错误，或者把它抛出让调用者处理
+                // throw error;
             });
     }
+
+    setReportData(data) {
+        this.reportData = data;
+    }
+
+
+
 }
 
 
