@@ -1,3 +1,5 @@
+import OpenAI from "openai";
+
 // utils.js
 //获取cookie token
 export function getCookie(name) {
@@ -56,4 +58,43 @@ export const checkComplexity = (password) => {
     return password.length >= minLength && hasNumber.test(password) && hasUpper.test(password) && hasSpecialChar.test(password);
 };
 
+export const classification_mapping = {
+    0: "胶结裂隙",
+    1: "裂纹",
+    2: "纵向裂纹",
+    3: "松散",
+    4: "大裂缝",
+    5: "修补",
+    6: "正常",
+    7: "横向裂纹"
+};
+
+export const formatDateTime = (dateTimeStr) => {
+    const date = new Date(dateTimeStr);
+    // 使用 toLocaleString 方法格式化日期时间
+    // 您可以根据需要更改 'zh-CN' 为其他区域设置
+    return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false // 使用24小时制
+    });
+}
+
+// 使用您的 API key 创建 OpenAI 实例
+// const openai = new OpenAI("sk-GkthFvMA4DRMaInHE1B7F0E775A0406fBf8a31E44aF9D267");
+//
+// async function chatWithGPT() {
+//     const stream = await openai.chat.completions.create({
+//         model: "gpt-3.5-turbo",
+//         messages: [{ role: "user", content: "Say this is a test" }],
+//         stream: true,
+//     });
+//     for await (const chunk of stream) {
+//         process.stdout.write(chunk.choices[0]?.delta?.content || "");
+//     }
+// }
 

@@ -1,4 +1,4 @@
-import {action, makeAutoObservable} from 'mobx';
+import {makeAutoObservable} from 'mobx';
 import MaleAvatar from '../assets/img/Male.png'
 import FemaleAvatar from '../assets/img/Female.png'
 import axiosInstance from "../utils/AxiosInstance";
@@ -23,7 +23,7 @@ class UserStore {
     infoChangeHint = { status: null, message: '' };
     getInfoHint = {message:'', status:'error'};
     subordinatesInfo = {};
-    errorsubordinatesInfo = true
+    errorsubordinatesInfo = false;
 
     constructor() {
         makeAutoObservable(this);
@@ -77,7 +77,7 @@ class UserStore {
 
     async logout() {
         try {
-            const response = await axiosInstance.post('/irdip/logout/'); // 确保这里的 URL 与后端视图的 URL 匹配
+            const response = await axiosInstance.post('/irdip/logout/');
             if (response.data.status === 'success') {
                 // 登出成功的逻辑处理
                 console.log('Logged out successfully');
@@ -99,27 +99,18 @@ class UserStore {
         if (userData) {
             // 如果 userData 中的 avatar 为空，则根据性别设置默认头像
             if (!userData.avatar) {
-                userData.avatar = this.getDefaultAvatar(userData.gender);
+                userData.avatar = getDefaultAvatar(userData.gender);
+            } else {
+                // 否则，将 avatar 转换为 base64 格式
+                userData.avatar = `data:image/jpeg;base64,${userData.avatar}`;
             }
 
-            // 更新 userInfo，但保留刚设置的 avatar
-            const avatarImageSrc = `data:image/jpeg;base64,${userData.avatar}`;
-            this.setUserInfo({ ...this.userInfo, ...userData, avatar: avatarImageSrc });
+
+            this.setUserInfo({ ...this.userInfo, ...userData });
         } else {
             this.getInfoHint.status = 'error'
             this.getInfoHint.message = '获取用户信息失败！'
             callback();
-        }
-    }
-
-    getDefaultAvatar(gender) {
-        switch (gender) {
-            case 'Male':
-                return MaleAvatar;
-            case 'Female':
-                return FemaleAvatar;
-            default:
-                return MaleAvatar; // 或者是一个通用的默认头像
         }
     }
 
@@ -261,6 +252,22 @@ class UserStore {
         }
     };
 
+    deleteSubordinate(userId) {
+        return axiosInstance.delete(`/irdip/delete_subordinate/${userId}`)
+            .then(response => {
+                if (response.data.status === 'success') {
+                    // 返回成功的消息
+                    return { success: true, message: response.data.message };
+                } else {
+                    // 返回失败的消息
+                    return { success: false, message: response.data.message };
+                }
+            })
+            .catch(error => {
+                // 返回错误的消息
+                return { success: false, message: error.response?.data?.message || '删除用户失败' };
+            });
+    }
 
 }
 
@@ -290,6 +297,17 @@ async function fetchUserFromDatabase() {
         console.error('Fetching user data failed:', error);
         // 在错误情况下，可能需要返回一个错误标记或默认值
         return null;
+    }
+}
+
+const getDefaultAvatar = (gender) => {
+    switch (gender) {
+        case 'Male':
+            return MaleAvatar;
+        case 'Female':
+            return FemaleAvatar;
+        default:
+            return MaleAvatar; // 或者是一个通用的默认头像
     }
 }
 

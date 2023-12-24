@@ -1,6 +1,6 @@
 import {Button, Layout, Menu, theme, message, Divider, Tooltip, Avatar, Typography, FloatButton} from 'antd'
 import { useState, useEffect } from 'react'
-import {Navigate, useNavigate} from 'react-router-dom'
+import {useNavigate} from 'react-router-dom'
 import logo from '../../assets/img/logo.png'
 import logo_mini from '../../assets/img/logo-mini.png'
 import { Outlet } from 'react-router-dom'
@@ -49,6 +49,23 @@ const SideBarLayout = observer(() => {
     useEffect(() => {
         roadStore.fetchRoadData();
     }, []);
+
+    // // 加载历史记录
+    // useEffect(() => {
+    //     const loadData = async () => {
+    //         historyStore.fetchUploadRecords()
+    //             .then(() => {
+    //                     const newScene = initHomeMap(historyStore.uploadRecords); // 确保 initHomeMap 使用这些数据
+    //                     setScene(newScene);
+    //                 }
+    //             )
+    //             .catch(error => {
+    //                 message.error("获取上传记录失败！");
+    //                 console.error("Error fetching upload records:", error);
+    //             });
+    //     };
+    //     loadData();
+    // }, []);
 
     // const handleNavigate = (path) => {
     //     uiStore.startLoading();

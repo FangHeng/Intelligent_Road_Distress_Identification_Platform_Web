@@ -153,7 +153,11 @@
 
 "@ant-design/pro-card@2.5.27":
   version "2.5.27"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@ant-design/pro-card/-/pro-card-2.5.27.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@ant-design/pro-card/-/pro-card-2.5.27.tgz"
+>>>>>>> Stashed changes
   integrity sha512-KHsX/VD5jsVKxUU/szFPayD2FhdVQ2lob7BlAG03Pn8GG2F9hEPk3vHM5WWyn0w+11g4XmvTlujeNxFeaQQV6Q==
   dependencies:
     "@ant-design/icons" "^5.0.0"
@@ -167,7 +171,11 @@
 
 "@ant-design/pro-components@^2.6.43":
   version "2.6.43"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@ant-design/pro-components/-/pro-components-2.6.43.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@ant-design/pro-components/-/pro-components-2.6.43.tgz"
+>>>>>>> Stashed changes
   integrity sha512-l/xy4dRaS3IXU8urq6btyHD+YeRrSgYVW/L0VaeK79Mllk2i4cKVcxPkV2/EcM9tjsnScS1bUFYvtc2RU4qsig==
   dependencies:
     "@ant-design/pro-card" "2.5.27"
@@ -184,7 +192,11 @@
 
 "@ant-design/pro-descriptions@2.5.27":
   version "2.5.27"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@ant-design/pro-descriptions/-/pro-descriptions-2.5.27.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@ant-design/pro-descriptions/-/pro-descriptions-2.5.27.tgz"
+>>>>>>> Stashed changes
   integrity sha512-H1KEtDSPuuie3v8vnE9T2nSuAU9KPBHosUlN4Iyf4jWOBLmOKJ9n0RGmM496wMPPwei2BxVZVl4a9qczTvdGsA==
   dependencies:
     "@ant-design/pro-field" "2.14.2"
@@ -197,7 +209,11 @@
 
 "@ant-design/pro-field@2.14.2":
   version "2.14.2"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@ant-design/pro-field/-/pro-field-2.14.2.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@ant-design/pro-field/-/pro-field-2.14.2.tgz"
+>>>>>>> Stashed changes
   integrity sha512-G4p8hVBA+D2HiscWMPi3eQt/8nyq9Ylqm270LEpxPcFFPXMTKDda/iDI+ZwBktWEd9FjBsfe0iyq6iIheuDXvw==
   dependencies:
     "@ant-design/icons" "^5.0.0"
@@ -214,7 +230,11 @@
 
 "@ant-design/pro-form@2.23.1":
   version "2.23.1"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@ant-design/pro-form/-/pro-form-2.23.1.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@ant-design/pro-form/-/pro-form-2.23.1.tgz"
+>>>>>>> Stashed changes
   integrity sha512-ia4obGA/AmjSm74Fg2fyd+4AI1VyM9Dpu6VYiiAvkO8ZxfyhDzAT1V9zHSCzU9M7Pu/G2hw/8bhovwy5waVtFg==
   dependencies:
     "@ant-design/icons" "^5.0.0"
@@ -233,7 +253,11 @@
 
 "@ant-design/pro-layout@7.17.16":
   version "7.17.16"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@ant-design/pro-layout/-/pro-layout-7.17.16.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@ant-design/pro-layout/-/pro-layout-7.17.16.tgz"
+>>>>>>> Stashed changes
   integrity sha512-nBQbAJEUkGqQNBqT30FcbcNXHepxySj/O7est1+2iXPXeVeyQYLHBJXcdvCrUrMty6ev3loG8K+6L3DXQkJ/5Q==
   dependencies:
     "@ant-design/icons" "^5.0.0"
@@ -253,7 +277,11 @@
 
 "@ant-design/pro-list@2.5.42":
   version "2.5.42"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@ant-design/pro-list/-/pro-list-2.5.42.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@ant-design/pro-list/-/pro-list-2.5.42.tgz"
+>>>>>>> Stashed changes
   integrity sha512-wuWQ6+gv9fPY3H6QfXNuaXy+3WjaBvGDIyc3larC3dzkLuuGL6gFZUC3M38srwzXmVHxTEHcGHH4zamraGNFCg==
   dependencies:
     "@ant-design/icons" "^5.0.0"
@@ -269,7 +297,11 @@
 
 "@ant-design/pro-provider@2.13.5":
   version "2.13.5"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@ant-design/pro-provider/-/pro-provider-2.13.5.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@ant-design/pro-provider/-/pro-provider-2.13.5.tgz"
+>>>>>>> Stashed changes
   integrity sha512-ZVmzY2cq4nUvgmAlfgyCAaSZYV2l3n/upIQPXPj8sYcT+N/Pt1CeSVkkgW6By3EqokF6apWdIFU7hZMK2rNhrg==
   dependencies:
     "@ant-design/cssinjs" "^1.11.1"
@@ -280,14 +312,22 @@
 
 "@ant-design/pro-skeleton@2.1.10":
   version "2.1.10"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@ant-design/pro-skeleton/-/pro-skeleton-2.1.10.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@ant-design/pro-skeleton/-/pro-skeleton-2.1.10.tgz"
+>>>>>>> Stashed changes
   integrity sha512-mrT0lqrwdcAKGWsh8CIiPBnVCwQOg8pNNLUeuVg3zpaKxw6lloUgkrqapmYANHLByamsbrmKNXhR9/OdMOerJw==
   dependencies:
     "@babel/runtime" "^7.18.0"
 
 "@ant-design/pro-table@3.13.11":
   version "3.13.11"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@ant-design/pro-table/-/pro-table-3.13.11.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@ant-design/pro-table/-/pro-table-3.13.11.tgz"
+>>>>>>> Stashed changes
   integrity sha512-H8vIApenqscN6zTvtN5SX70WOy9JTCAFwYmQrVHNGQxyrsGZC89AltNdQIw/9JpwOjGYR03icrs7SZAnrmZTag==
   dependencies:
     "@ant-design/icons" "^5.0.0"
@@ -309,7 +349,11 @@
 
 "@ant-design/pro-utils@2.15.2":
   version "2.15.2"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@ant-design/pro-utils/-/pro-utils-2.15.2.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@ant-design/pro-utils/-/pro-utils-2.15.2.tgz"
+>>>>>>> Stashed changes
   integrity sha512-kzMT658CGrQqoihKPlZhbnRioovwMhM59vqqVXuT6A+IuyxJhs5pxN73C6sN2+ZoeYCo/Gewnfn9v1/2vHU2Zg==
   dependencies:
     "@ant-design/icons" "^5.0.0"
@@ -348,10 +392,10 @@
   dependencies:
     async "^3.1.1"
 
-"@antv/component@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.npmmirror.com/@antv/component/-/component-1.0.0.tgz"
-  integrity sha512-LSM6NZJqfnev/TYUvYsmQNHUUjw5gtrXFS4TjavstYSBIbQoCWa0BtE6lR9QblA1MBC+B5CTNc8MqiZRRzKogA==
+"@antv/component@^1.0.1-beta.0":
+  version "1.0.1-beta.0"
+  resolved "https://registry.npmmirror.com/@antv/component/-/component-1.0.1-beta.0.tgz"
+  integrity sha512-syonGLy7bcpe+4qqKjtwBZMUUfZU8TKJRQAeYOB4pEiz2kr1Ky/qZLteT12QDQRugeMz9KnrUXMF+nAvUErKww==
   dependencies:
     "@antv/g" "^5.18.6"
     "@antv/scale" "^0.4.3"
@@ -673,12 +717,12 @@
     d3-array "^3.2.4"
     d3-hierarchy "^3.1.2"
 
-"@antv/g2@^5.1.8", "@antv/g2@^5.1.9":
-  version "5.1.11"
-  resolved "https://registry.npmmirror.com/@antv/g2/-/g2-5.1.11.tgz"
-  integrity sha512-zxWWgFxkmflNAHdbwQ03emMKIz0+UBbhXV2gCpDfntKkkC2AEd+Mb9L3VEZst4kcG1QalvDxAWyz3ePrpB11XA==
+"@antv/g2@^5.1.13", "@antv/g2@^5.1.8", "@antv/g2@^5.1.9":
+  version "5.1.13"
+  resolved "https://registry.npmmirror.com/@antv/g2/-/g2-5.1.13.tgz"
+  integrity sha512-Ak2QY9buhScqoII1pSlmtM4V6ubkp14IF5mYumiBun11sblKBtBFemBV/mmsYaWw/Eoq+hz3jmYbRX2zdb7pQw==
   dependencies:
-    "@antv/component" "^1.0.0"
+    "@antv/component" "^1.0.1-beta.0"
     "@antv/coord" "^0.4.6"
     "@antv/event-emitter" "^0.1.3"
     "@antv/g" "^5.18.19"
@@ -2233,7 +2277,11 @@
 
 "@chenshuai2144/sketch-color@^1.0.7", "@chenshuai2144/sketch-color@^1.0.8":
   version "1.0.9"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@chenshuai2144/sketch-color/-/sketch-color-1.0.9.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@chenshuai2144/sketch-color/-/sketch-color-1.0.9.tgz"
+>>>>>>> Stashed changes
   integrity sha512-obzSy26cb7Pm7OprWyVpgMpIlrZpZ0B7vbrU0RMbvRg0YAI890S5Xy02Aj1Nhl4+KTbi1lVYHt6HQP8Hm9s+1w==
   dependencies:
     reactcss "^1.2.3"
@@ -2369,14 +2417,22 @@
 
 "@dnd-kit/accessibility@^3.1.0":
   version "3.1.0"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@dnd-kit/accessibility/-/accessibility-3.1.0.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@dnd-kit/accessibility/-/accessibility-3.1.0.tgz"
+>>>>>>> Stashed changes
   integrity sha512-ea7IkhKvlJUv9iSHJOnxinBcoOI3ppGnnL+VDJ75O45Nss6HtZd8IdN8touXPDtASfeI2T2LImb8VOZcL47wjQ==
   dependencies:
     tslib "^2.0.0"
 
 "@dnd-kit/core@^6.0.6", "@dnd-kit/core@^6.0.7", "@dnd-kit/core@^6.0.8":
   version "6.1.0"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@dnd-kit/core/-/core-6.1.0.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@dnd-kit/core/-/core-6.1.0.tgz"
+>>>>>>> Stashed changes
   integrity sha512-J3cQBClB4TVxwGo3KEjssGEXNJqGVWx17aRTZ1ob0FliR5IjYgTxl5YJbKTzA6IzrtelotH19v6y7uoIRUZPSg==
   dependencies:
     "@dnd-kit/accessibility" "^3.1.0"
@@ -2385,7 +2441,11 @@
 
 "@dnd-kit/modifiers@^6.0.1":
   version "6.0.1"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@dnd-kit/modifiers/-/modifiers-6.0.1.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@dnd-kit/modifiers/-/modifiers-6.0.1.tgz"
+>>>>>>> Stashed changes
   integrity sha512-rbxcsg3HhzlcMHVHWDuh9LCjpOVAgqbV78wLGI8tziXY3+qcMQ61qVXIvNKQFuhj75dSfD+o+PYZQ/NUk2A23A==
   dependencies:
     "@dnd-kit/utilities" "^3.2.1"
@@ -2393,7 +2453,11 @@
 
 "@dnd-kit/sortable@^7.0.2":
   version "7.0.2"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@dnd-kit/sortable/-/sortable-7.0.2.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@dnd-kit/sortable/-/sortable-7.0.2.tgz"
+>>>>>>> Stashed changes
   integrity sha512-wDkBHHf9iCi1veM834Gbk1429bd4lHX4RpAwT0y2cHLf246GAvU2sVw/oxWNpPKQNQRQaeGXhAVgrOl1IT+iyA==
   dependencies:
     "@dnd-kit/utilities" "^3.2.0"
@@ -2401,7 +2465,11 @@
 
 "@dnd-kit/utilities@^3.2.0", "@dnd-kit/utilities@^3.2.1", "@dnd-kit/utilities@^3.2.2":
   version "3.2.2"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@dnd-kit/utilities/-/utilities-3.2.2.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@dnd-kit/utilities/-/utilities-3.2.2.tgz"
+>>>>>>> Stashed changes
   integrity sha512-+MKAJEOfaBe5SmV6t34p80MMKhjvUz0vRrvVJbPT0WElzaOJ/1xs+D+KDv+tD/NE5ujfrChEcshd4fLn0wpiqg==
   dependencies:
     tslib "^2.0.0"
@@ -3588,6 +3656,14 @@
   resolved "https://registry.npmmirror.com/@types/mime/-/mime-1.3.5.tgz"
   integrity sha512-/pyBZWSLD2n0dcHE3hq8s8ZvcETHtEuF+3E7XVt0Ig2nvsVQXdghHVcEkIWjy9A0wKfTn97a/PSDYohKIlnP/w==
 
+"@types/node-fetch@^2.6.4":
+  version "2.6.9"
+  resolved "https://registry.npmmirror.com/@types/node-fetch/-/node-fetch-2.6.9.tgz"
+  integrity sha512-bQVlnMLFJ2d35DkPNjEPmd9ueO/rh5EiaZt2bhqiSarPjZIuIV6bPQVqcrEyvNo+AfTrRGVazle1tl597w3gfA==
+  dependencies:
+    "@types/node" "*"
+    form-data "^4.0.0"
+
 "@types/node-forge@^1.3.0":
   version "1.3.10"
   resolved "https://registry.npmmirror.com/@types/node-forge/-/node-forge-1.3.10.tgz"
@@ -3599,6 +3675,13 @@
   version "20.10.3"
   resolved "https://registry.npmmirror.com/@types/node/-/node-20.10.3.tgz"
   integrity sha512-XJavIpZqiXID5Yxnxv3RUDKTN5b81ddNC3ecsA0SoFXz/QU8OGBwZGMomiq0zw+uuqbL/krztv/DINAQ/EV4gg==
+  dependencies:
+    undici-types "~5.26.4"
+
+"@types/node@^18.11.18":
+  version "18.19.3"
+  resolved "https://registry.npmmirror.com/@types/node/-/node-18.19.3.tgz"
+  integrity sha512-k5fggr14DwAytoA/t8rPrIz++lXK7/DqckthCmoZOKNsEbJkId4Z//BqgApXBUGrGddrigYa1oqheo/7YmW4rg==
   dependencies:
     undici-types "~5.26.4"
 
@@ -3849,12 +3932,20 @@
 
 "@umijs/route-utils@^4.0.0":
   version "4.0.1"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@umijs/route-utils/-/route-utils-4.0.1.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@umijs/route-utils/-/route-utils-4.0.1.tgz"
+>>>>>>> Stashed changes
   integrity sha512-+1ixf1BTOLuH+ORb4x8vYMPeIt38n9q0fJDwhv9nSxrV46mxbLF0nmELIo9CKQB2gHfuC4+hww6xejJ6VYnBHQ==
 
 "@umijs/use-params@^1.0.9":
   version "1.0.9"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/@umijs/use-params/-/use-params-1.0.9.tgz"
+=======
+  resolved "https://registry.npmmirror.com/@umijs/use-params/-/use-params-1.0.9.tgz"
+>>>>>>> Stashed changes
   integrity sha512-QlN0RJSBVQBwLRNxbxjQ5qzqYIGn+K7USppMoIOVlf7fxXHsnQZ2bEsa6Pm74bt6DVQxpUE8HqvdStn6Y9FV1w==
 
 "@ungap/structured-clone@^1.2.0":
@@ -4013,6 +4104,13 @@ abab@^2.0.3, abab@^2.0.5:
   resolved "https://registry.npmmirror.com/abab/-/abab-2.0.6.tgz"
   integrity sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA==
 
+abort-controller@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmmirror.com/abort-controller/-/abort-controller-3.0.0.tgz"
+  integrity sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==
+  dependencies:
+    event-target-shim "^5.0.0"
+
 accepts@~1.3.4, accepts@~1.3.5, accepts@~1.3.8:
   version "1.3.8"
   resolved "https://registry.npmmirror.com/accepts/-/accepts-1.3.8.tgz"
@@ -4061,7 +4159,11 @@ acorn@^7.1.1:
 
 add-dom-event-listener@^1.1.0:
   version "1.1.0"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/add-dom-event-listener/-/add-dom-event-listener-1.1.0.tgz"
+=======
+  resolved "https://registry.npmmirror.com/add-dom-event-listener/-/add-dom-event-listener-1.1.0.tgz"
+>>>>>>> Stashed changes
   integrity sha512-WCxx1ixHT0GQU9hb0KI/mhgRQhnU+U3GvwY6ZvVjYq8rsihIGoaIOUbY0yMPBxLH5MDtr0kz3fisWGNcbWW7Jw==
   dependencies:
     object-assign "4.x"
@@ -4085,6 +4187,13 @@ agent-base@6:
   integrity sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==
   dependencies:
     debug "4"
+
+agentkeepalive@^4.2.1:
+  version "4.5.0"
+  resolved "https://registry.npmmirror.com/agentkeepalive/-/agentkeepalive-4.5.0.tgz"
+  integrity sha512-5GG/5IbQQpC9FpkRGsSvZI5QYeSCzlJHdpBQntCsuTOxhKD8lqKhrleg2Yi7yvMIf82Ycmmqln9U8V9qwEiJew==
+  dependencies:
+    humanize-ms "^1.2.1"
 
 ajv-formats@^2.1.1:
   version "2.1.1"
@@ -4644,6 +4753,11 @@ balanced-match@^1.0.0:
   resolved "https://registry.npmmirror.com/balanced-match/-/balanced-match-1.0.2.tgz"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
+base-64@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.npmmirror.com/base-64/-/base-64-0.1.0.tgz"
+  integrity sha512-Y5gU45svrR5tI2Vt/X9GPd3L0HNIKzGu202EjxrXMpuc2V2CiKgemAbUUsqYmZJvPtCXoUKjNZwBJzsNScUbXA==
+
 batch@0.6.1:
   version "0.6.1"
   resolved "https://registry.npmmirror.com/batch/-/batch-0.6.1.tgz"
@@ -4912,6 +5026,11 @@ char-regex@^2.0.0:
   resolved "https://registry.npmmirror.com/char-regex/-/char-regex-2.0.1.tgz"
   integrity sha512-oSvEeo6ZUD7NepqAat3RqoucZ5SeqLJgOvVIwkafu6IP3V0pO38s/ypdVUmDDK6qIIHNlYHJAKX9E7R7HoKElw==
 
+charenc@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.npmmirror.com/charenc/-/charenc-0.0.2.tgz"
+  integrity sha512-yrLQ/yVUFXkzg7EDQsPieE/53+0RlaWTs+wBrvW36cyilJ2SaDWfl4Yj7MtLTXleV9uEKefbAGUPv2/iWSooRA==
+
 check-types@^11.2.3:
   version "11.2.3"
   resolved "https://registry.npmmirror.com/check-types/-/check-types-11.2.3.tgz"
@@ -4961,7 +5080,11 @@ clean-css@^5.2.2:
 
 client-only@^0.0.1:
   version "0.0.1"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/client-only/-/client-only-0.0.1.tgz"
+=======
+  resolved "https://registry.npmmirror.com/client-only/-/client-only-0.0.1.tgz"
+>>>>>>> Stashed changes
   integrity sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==
 
 cliui@^2.1.0:
@@ -5251,6 +5374,11 @@ cross-spawn@^7.0.2, cross-spawn@^7.0.3:
     path-key "^3.1.0"
     shebang-command "^2.0.0"
     which "^2.0.1"
+
+crypt@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.npmmirror.com/crypt/-/crypt-0.0.2.tgz"
+  integrity sha512-mCxBlsHFYh9C+HVpiEacem8FEBnMXgU9gy4zmNC+SXAZNB/1idgp/aulFJ4FgCi7GPEVbfyng092GqL2k2rmow==
 
 crypto-random-string@^2.0.0:
   version "2.0.0"
@@ -5879,6 +6007,14 @@ diff-sequences@^29.6.3:
   resolved "https://registry.npmmirror.com/diff-sequences/-/diff-sequences-29.6.3.tgz"
   integrity sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==
 
+digest-fetch@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.npmmirror.com/digest-fetch/-/digest-fetch-1.3.0.tgz"
+  integrity sha512-CGJuv6iKNM7QyZlM2T3sPAdZWd/p9zQiRNS9G+9COUCwzWFTs0Xp8NF5iePx7wtvhDykReiRRrSeNb4oMmB8lA==
+  dependencies:
+    base-64 "^0.1.0"
+    md5 "^2.3.0"
+
 dir-glob@^3.0.1:
   version "3.0.1"
   resolved "https://registry.npmmirror.com/dir-glob/-/dir-glob-3.0.1.tgz"
@@ -6004,6 +6140,11 @@ dotenv@^10.0.0:
   version "10.0.0"
   resolved "https://registry.npmmirror.com/dotenv/-/dotenv-10.0.0.tgz"
   integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
+
+dotenv@^16.3.1:
+  version "16.3.1"
+  resolved "https://registry.npmmirror.com/dotenv/-/dotenv-16.3.1.tgz"
+  integrity sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==
 
 dotignore@~0.1.2:
   version "0.1.2"
@@ -6551,6 +6692,7 @@ etag@~1.8.1:
   resolved "https://registry.npmmirror.com/etag/-/etag-1.8.1.tgz"
   integrity sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==
 
+<<<<<<< Updated upstream
 eventemitter3@^4.0.0:
   version "4.0.7"
   resolved "https://registry.npmmirror.com/eventemitter3/-/eventemitter3-4.0.7.tgz"
@@ -6562,6 +6704,14 @@ eventemitter3@^4.0.4:
   integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
 
 eventemitter3@^4.0.7:
+=======
+event-target-shim@^5.0.0:
+  version "5.0.1"
+  resolved "https://registry.npmmirror.com/event-target-shim/-/event-target-shim-5.0.1.tgz"
+  integrity sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==
+
+eventemitter3@^4.0.0, eventemitter3@^4.0.4, eventemitter3@^4.0.7:
+>>>>>>> Stashed changes
   version "4.0.7"
   resolved "https://registry.npmmirror.com/eventemitter3/-/eventemitter3-4.0.7.tgz"
   integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
@@ -6878,6 +7028,11 @@ fork-ts-checker-webpack-plugin@^6.5.0:
     semver "^7.3.2"
     tapable "^1.0.0"
 
+form-data-encoder@1.7.2:
+  version "1.7.2"
+  resolved "https://registry.npmmirror.com/form-data-encoder/-/form-data-encoder-1.7.2.tgz"
+  integrity sha512-qfqtYan3rxrnCk1VYaA4H+Ms9xdpPqvLZa6xmMgFvhO32x7/3J/ExcTd6qpxM0vH2GdMI+poehyBZvqfMTto8A==
+
 form-data@^3.0.0:
   version "3.0.1"
   resolved "https://registry.npmmirror.com/form-data/-/form-data-3.0.1.tgz"
@@ -6895,6 +7050,14 @@ form-data@^4.0.0:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
     mime-types "^2.1.12"
+
+formdata-node@^4.3.2:
+  version "4.4.1"
+  resolved "https://registry.npmmirror.com/formdata-node/-/formdata-node-4.4.1.tgz"
+  integrity sha512-0iirZp3uVDjVGt9p49aTaqjk84TrglENEDuqfdlZQ1roC9CWlPk6Avf8EEnZNcAqPonwkG35x4n3ww/1THYAeQ==
+  dependencies:
+    node-domexception "1.0.0"
+    web-streams-polyfill "4.0.0-beta.3"
 
 forwarded@0.2.0:
   version "0.2.0"
@@ -6952,7 +7115,7 @@ fs.realpath@^1.0.0:
 
 fsevents@^2.3.2, fsevents@~2.3.2:
   version "2.3.3"
-  resolved "https://registry.npmmirror.com/fsevents/-/fsevents-2.3.3.tgz"
+  resolved "https://registry.npmmirror.com/fsevents/-/fsevents-2.3.3.tgz#cac6407785d03675a2a5e1a5305c697b347d90d6"
   integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
 function-bind@^1.1.1, function-bind@^1.1.2:
@@ -7256,7 +7419,11 @@ he@^1.2.0:
 
 highlight-words-core@^1.2.0:
   version "1.2.2"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/highlight-words-core/-/highlight-words-core-1.2.2.tgz"
+=======
+  resolved "https://registry.npmmirror.com/highlight-words-core/-/highlight-words-core-1.2.2.tgz"
+>>>>>>> Stashed changes
   integrity sha512-BXUKIkUuh6cmmxzi5OIbUJxrG8OAk2MqoL1DtO3Wo9D2faJg2ph5ntyuQeLqaHJmzER6H5tllCDA9ZnNe9BVGg==
 
 hoopy@^0.1.4:
@@ -7398,6 +7565,7 @@ human-signals@^2.1.0:
   resolved "https://registry.npmmirror.com/human-signals/-/human-signals-2.1.0.tgz"
   integrity sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==
 
+<<<<<<< Updated upstream
 iconv-lite@^0.6.3, iconv-lite@0.6:
   version "0.6.3"
   resolved "https://registry.npmmirror.com/iconv-lite/-/iconv-lite-0.6.3.tgz"
@@ -7406,6 +7574,16 @@ iconv-lite@^0.6.3, iconv-lite@0.6:
     safer-buffer ">= 2.1.2 < 3.0.0"
 
 iconv-lite@0.4:
+=======
+humanize-ms@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.npmmirror.com/humanize-ms/-/humanize-ms-1.2.1.tgz"
+  integrity sha512-Fl70vYtsAFb/C06PTS9dZBo7ihau+Tu/DNCk/OyHhea07S+aeMWpFFkUaXRa8fI+ScZbEI8dfSxwY7gxZ9SAVQ==
+  dependencies:
+    ms "^2.0.0"
+
+iconv-lite@0.4, iconv-lite@0.4.24:
+>>>>>>> Stashed changes
   version "0.4.24"
   resolved "https://registry.npmmirror.com/iconv-lite/-/iconv-lite-0.4.24.tgz"
   integrity sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==
@@ -7600,7 +7778,7 @@ is-boolean-object@^1.1.0:
     call-bind "^1.0.2"
     has-tostringtag "^1.0.0"
 
-is-buffer@^1.1.5:
+is-buffer@^1.1.5, is-buffer@~1.1.6:
   version "1.1.6"
   resolved "https://registry.npmmirror.com/is-buffer/-/is-buffer-1.1.6.tgz"
   integrity sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==
@@ -8776,7 +8954,11 @@ lodash.sortby@^4.7.0:
 
 lodash.tonumber@^4.0.3:
   version "4.0.3"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/lodash.tonumber/-/lodash.tonumber-4.0.3.tgz"
+=======
+  resolved "https://registry.npmmirror.com/lodash.tonumber/-/lodash.tonumber-4.0.3.tgz"
+>>>>>>> Stashed changes
   integrity sha512-SY0SwuPOHRwKcCNTdsntPYb+Zddz5mDUIVFABzRMqmAiL41pMeyoQFGxYAw5zdc9NnH4pbJqiqqp5ckfxa+zSA==
 
 lodash.uniq@^4.5.0:
@@ -8919,6 +9101,15 @@ mapvgl@^1.0.0-beta.188:
   resolved "https://registry.npmmirror.com/mapvgl/-/mapvgl-1.0.0-beta.188.tgz"
   integrity sha512-nROfH5DwE2+RQJ8rs0bksXuY0u9is135eT2/HOWIIo+2aJWygyv9buV2WxmUoZDkt8Z9fSsz7ltiFiUHSsgklw==
 
+md5@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.npmmirror.com/md5/-/md5-2.3.0.tgz"
+  integrity sha512-T1GITYmFaKuO91vxyoQMFETst+O71VUPEU3ze5GNzDm0OWdP8v1ziTaAEPUr/3kLsY3Sftgz242A1SetQiDL7g==
+  dependencies:
+    charenc "0.0.2"
+    crypt "0.0.2"
+    is-buffer "~1.1.6"
+
 mdn-data@2.0.14:
   version "2.0.14"
   resolved "https://registry.npmmirror.com/mdn-data/-/mdn-data-2.0.14.tgz"
@@ -8943,7 +9134,11 @@ memfs@^3.1.2, memfs@^3.4.3:
 
 memoize-one@^4.0.0:
   version "4.0.3"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/memoize-one/-/memoize-one-4.0.3.tgz"
+=======
+  resolved "https://registry.npmmirror.com/memoize-one/-/memoize-one-4.0.3.tgz"
+>>>>>>> Stashed changes
   integrity sha512-QmpUu4KqDmX0plH4u+tf0riMc1KHE1+lw95cMrLlXQAFOx/xnBtwhZ52XJxd9X2O6kwKBqX32kmhbhlobD0cuw==
 
 merge-descriptors@1.0.1:
@@ -9116,6 +9311,14 @@ ms@2.0.0:
   resolved "https://registry.npmmirror.com/ms/-/ms-2.0.0.tgz"
   integrity sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==
 
+<<<<<<< Updated upstream
+=======
+ms@2.1.2, ms@^2.0.0, ms@^2.1.1:
+  version "2.1.2"
+  resolved "https://registry.npmmirror.com/ms/-/ms-2.1.2.tgz"
+  integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
+
+>>>>>>> Stashed changes
 ms@2.1.3:
   version "2.1.3"
   resolved "https://registry.npmmirror.com/ms/-/ms-2.1.3.tgz"
@@ -9175,6 +9378,18 @@ no-case@^3.0.4:
   dependencies:
     lower-case "^2.0.2"
     tslib "^2.0.3"
+
+node-domexception@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmmirror.com/node-domexception/-/node-domexception-1.0.0.tgz"
+  integrity sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==
+
+node-fetch@^2.6.7:
+  version "2.7.0"
+  resolved "https://registry.npmmirror.com/node-fetch/-/node-fetch-2.7.0.tgz"
+  integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==
+  dependencies:
+    whatwg-url "^5.0.0"
 
 node-forge@^1:
   version "1.3.1"
@@ -9343,7 +9558,11 @@ obuf@^1.0.0, obuf@^1.1.2:
 
 omit.js@^2.0.2:
   version "2.0.2"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/omit.js/-/omit.js-2.0.2.tgz"
+=======
+  resolved "https://registry.npmmirror.com/omit.js/-/omit.js-2.0.2.tgz"
+>>>>>>> Stashed changes
   integrity sha512-hJmu9D+bNB40YpL9jYebQl4lsTW6yEHRTroJzNLqQJYHm7c+NQnJGfZmIWh8S3q3KoaxV1aLhV6B3+0N0/kyJg==
 
 on-finished@2.4.1:
@@ -9380,6 +9599,21 @@ open@^8.0.9, open@^8.4.0:
     define-lazy-prop "^2.0.0"
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
+
+openai@^4.24.1:
+  version "4.24.1"
+  resolved "https://registry.npmmirror.com/openai/-/openai-4.24.1.tgz"
+  integrity sha512-ezm/O3eiZMnyBqirUnWm9N6INJU1WhNtz+nK/Zj/2oyKvRz9pgpViDxa5wYOtyGYXPn1sIKBV0I/S4BDhtydqw==
+  dependencies:
+    "@types/node" "^18.11.18"
+    "@types/node-fetch" "^2.6.4"
+    abort-controller "^3.0.0"
+    agentkeepalive "^4.2.1"
+    digest-fetch "^1.3.0"
+    form-data-encoder "1.7.2"
+    formdata-node "^4.3.2"
+    node-fetch "^2.6.7"
+    web-streams-polyfill "^3.2.1"
 
 opener@^1.5.2:
   version "1.5.2"
@@ -9540,7 +9774,11 @@ path-to-regexp@0.1.7:
 
 path-to-regexp@2.4.0:
   version "2.4.0"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-2.4.0.tgz"
+=======
+  resolved "https://registry.npmmirror.com/path-to-regexp/-/path-to-regexp-2.4.0.tgz"
+>>>>>>> Stashed changes
   integrity sha512-G6zHoVqC6GGTQkZwF4lkuEyMbVOjoBKAEybQUypI1WTkqinCOrq2x6U2+phkJ1XsEMTy4LjtwPI7HW+NVrRR2w==
 
 path-type@^4.0.0:
@@ -10580,7 +10818,11 @@ rc-rate@~2.12.0:
 
 rc-resize-observer@^0.2.3:
   version "0.2.6"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/rc-resize-observer/-/rc-resize-observer-0.2.6.tgz"
+=======
+  resolved "https://registry.npmmirror.com/rc-resize-observer/-/rc-resize-observer-0.2.6.tgz"
+>>>>>>> Stashed changes
   integrity sha512-YX6nYnd6fk7zbuvT6oSDMKiZjyngjHoy+fz+vL3Tez38d/G5iGdaDJa2yE7345G6sc4Mm1IGRUIwclvltddhmA==
   dependencies:
     "@babel/runtime" "^7.10.1"
@@ -10726,7 +10968,11 @@ rc-upload@~4.3.5:
 
 rc-util@^4.19.0:
   version "4.21.1"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/rc-util/-/rc-util-4.21.1.tgz"
+=======
+  resolved "https://registry.npmmirror.com/rc-util/-/rc-util-4.21.1.tgz"
+>>>>>>> Stashed changes
   integrity sha512-Z+vlkSQVc1l8O2UjR3WQ+XdWlhj5q9BMQNLk2iOBch75CqPfrJyGtcWMcnhRlNuDu0Ndtt4kLVO8JI8BrABobg==
   dependencies:
     add-dom-event-listener "^1.1.0"
@@ -10823,7 +11069,11 @@ react-error-overlay@^6.0.11:
 
 react-highlight-words@^0.20.0:
   version "0.20.0"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/react-highlight-words/-/react-highlight-words-0.20.0.tgz"
+=======
+  resolved "https://registry.npmmirror.com/react-highlight-words/-/react-highlight-words-0.20.0.tgz"
+>>>>>>> Stashed changes
   integrity sha512-asCxy+jCehDVhusNmCBoxDf2mm1AJ//D+EzDx1m5K7EqsMBIHdZ5G4LdwbSEXqZq1Ros0G0UySWmAtntSph7XA==
   dependencies:
     highlight-words-core "^1.2.0"
@@ -10857,7 +11107,11 @@ react-is@^18.2.0:
 
 react-lifecycles-compat@^3.0.4:
   version "3.0.4"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz"
+=======
+  resolved "https://registry.npmmirror.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz"
+>>>>>>> Stashed changes
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
 react-refresh@^0.11.0, "react-refresh@>=0.10.0 <1.0.0":
@@ -10944,7 +11198,11 @@ react@*, "react@^0.14.0 || ^15.0.0 || ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0", "rea
 
 reactcss@^1.2.3:
   version "1.2.3"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/reactcss/-/reactcss-1.2.3.tgz"
+=======
+  resolved "https://registry.npmmirror.com/reactcss/-/reactcss-1.2.3.tgz"
+>>>>>>> Stashed changes
   integrity sha512-KiwVUcFu1RErkI97ywr8nvx8dNOpT03rbnma0SSalTYjkrPYaEajR4a/MRt6DZ46K6arDRbWMNHF+xH7G7n/8A==
   dependencies:
     lodash "^4.0.1"
@@ -11291,7 +11549,11 @@ safe-regex-test@^1.0.0:
 
 safe-stable-stringify@^2.4.3:
   version "2.4.3"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/safe-stable-stringify/-/safe-stable-stringify-2.4.3.tgz"
+=======
+  resolved "https://registry.npmmirror.com/safe-stable-stringify/-/safe-stable-stringify-2.4.3.tgz"
+>>>>>>> Stashed changes
   integrity sha512-e2bDA2WJT0wxseVd4lsDP4+3ONX6HpMXQa1ZhFQ7SU+GjvORCmShbCMltrtIDfkYhVHrOcPtj+KhmDBdPdZD1g==
 
 "safer-buffer@>= 2.1.2 < 3", "safer-buffer@>= 2.1.2 < 3.0.0":
@@ -12048,7 +12310,11 @@ svgo@^2.7.0:
 
 swr@^2.0.0:
   version "2.2.4"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/swr/-/swr-2.2.4.tgz"
+=======
+  resolved "https://registry.npmmirror.com/swr/-/swr-2.2.4.tgz"
+>>>>>>> Stashed changes
   integrity sha512-njiZ/4RiIhoOlAaLYDqwz5qH/KZXVilRLvomrx83HjzCWTfa+InyfAjv05PSFxnmLzZkNO9ZfvgoqzAaEI4sGQ==
   dependencies:
     client-only "^0.0.1"
@@ -12271,6 +12537,11 @@ tr46@^2.1.0:
   integrity sha512-15Ih7phfcdP5YxqiB+iDtLoaTz4Nd35+IiAv0kQ5FNKHzXgdWqPoTIqEDDJmXceQt4JZk6lVPT8lnDlPpGDppw==
   dependencies:
     punycode "^2.1.1"
+
+tr46@~0.0.3:
+  version "0.0.3"
+  resolved "https://registry.npmmirror.com/tr46/-/tr46-0.0.3.tgz"
+  integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
 
 tryer@^1.0.1:
   version "1.0.1"
@@ -12626,7 +12897,11 @@ walker@^1.0.7:
 
 warning@^4.0.3:
   version "4.0.3"
+<<<<<<< Updated upstream
   resolved "https://registry.npmjs.org/warning/-/warning-4.0.3.tgz"
+=======
+  resolved "https://registry.npmmirror.com/warning/-/warning-4.0.3.tgz"
+>>>>>>> Stashed changes
   integrity sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==
   dependencies:
     loose-envify "^1.0.0"
@@ -12646,6 +12921,16 @@ wbuf@^1.1.0, wbuf@^1.7.3:
   dependencies:
     minimalistic-assert "^1.0.0"
 
+web-streams-polyfill@4.0.0-beta.3:
+  version "4.0.0-beta.3"
+  resolved "https://registry.npmmirror.com/web-streams-polyfill/-/web-streams-polyfill-4.0.0-beta.3.tgz"
+  integrity sha512-QW95TCTaHmsYfHDybGMwO5IJIM93I/6vTRk+daHTWFPhwh+C8Cg7j7XyKrwrj8Ib6vYXe0ocYNrmzY4xAAN6ug==
+
+web-streams-polyfill@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.npmmirror.com/web-streams-polyfill/-/web-streams-polyfill-3.2.1.tgz"
+  integrity sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==
+
 web-vitals@^2.1.4:
   version "2.1.4"
   resolved "https://registry.npmmirror.com/web-vitals/-/web-vitals-2.1.4.tgz"
@@ -12655,6 +12940,11 @@ web-worker-helper@^0.0.3:
   version "0.0.3"
   resolved "https://registry.npmmirror.com/web-worker-helper/-/web-worker-helper-0.0.3.tgz"
   integrity sha512-/TllNPjGenDwjE67M16TD9ALwuY847/zIoH7r+e5rSeG4kEa3HiMTAsUDj80yzIzhtshkv215KfsnQ/RXR3nVA==
+
+webidl-conversions@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.npmmirror.com/webidl-conversions/-/webidl-conversions-3.0.1.tgz"
+  integrity sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==
 
 webidl-conversions@^4.0.2:
   version "4.0.2"
@@ -12826,6 +13116,14 @@ whatwg-mimetype@^2.3.0:
   version "2.3.0"
   resolved "https://registry.npmmirror.com/whatwg-mimetype/-/whatwg-mimetype-2.3.0.tgz"
   integrity sha512-M4yMwr6mAnQz76TbJm914+gPpB/nCwvZbJU28cUD6dR004SAxDLOOSUaB1JDRqLtaOV/vi0IC5lEAGFgrjGv/g==
+
+whatwg-url@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmmirror.com/whatwg-url/-/whatwg-url-5.0.0.tgz"
+  integrity sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==
+  dependencies:
+    tr46 "~0.0.3"
+    webidl-conversions "^3.0.0"
 
 whatwg-url@^7.0.0:
   version "7.1.0"
