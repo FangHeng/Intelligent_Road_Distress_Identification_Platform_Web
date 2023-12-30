@@ -342,6 +342,7 @@ def get_result(request):
 
         # 检查是否有权访问此上传记录
         if not is_upload_accessible_by_user(uploader, request_user):
+            # print("unable to access")
             continue
 
         files = FileUpload.objects.filter(upload=upload_record).select_related('upload')
@@ -385,10 +386,10 @@ def is_upload_accessible_by_user(upload_user, request_user):
     # 根据请求者的用户等级进行检查
     if request_user.userrole.user_level == 0:
         # 检查上传者的上级用户
-        if upload_user.userrole.supervisor == request_user:
+        if upload_user.userrole.supervisor.id == request_user.userrole.id:
             return True
         # 检查上传者的上级的上级用户
-        if upload_user.userrole.supervisor and upload_user.userrole.supervisor.supervisor == request_user:
+        if upload_user.userrole.supervisor.id and upload_user.userrole.supervisor.supervisor.id == request_user.userrole.id:
             return True
     elif request_user.userrole.user_level == 1:
         # 检查上传者的上级用户
@@ -558,7 +559,7 @@ def get_user_info(request):
             "employee_number": user_role.employee_number,
             "phone_number": user_role.phone_number,
             "user_level": user_role.get_user_level_display(),
-            "gender": user_role.get_gender_display(),
+            "gender": user_role.gender,
             "email": user_role.email,
             "company_name": company.company_name,
             "avatar": avatar,
@@ -762,7 +763,7 @@ def get_upload_records(request):
     # 查询对应的上传记录
     records = UploadRecord.objects.filter(uploader_id__in=user_ids).annotate(
         intact_count=Count('fileupload', filter=Q(fileupload__classification_result=6))
-    ).values(
+    ).order_by('-upload_time').values(
         'upload_id', 'upload_time', 'uploader__user__username',
         'road__road_id', 'road__road_name', 'upload_name', 'upload_count',
         'road__gps_longitude', 'road__gps_latitude', 'selected_model', 'intact_count'
