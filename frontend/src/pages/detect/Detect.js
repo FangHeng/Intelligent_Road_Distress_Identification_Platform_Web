@@ -85,7 +85,7 @@ const Detect = observer(() => {
                             }}
                         >
                             <div style={{marginBottom:'5px'}}>完好程度：</div>
-                            <Progress percent={parseFloat(item.integrity) } />
+                            <Progress percent={Math.round(parseFloat(item.integrity)) } />
                         </div>
                     </div>
                 ),

@@ -50,6 +50,7 @@ const HomeRoadCard = observer(() => {
                     {/*<p>道路ID: {record.road__road_id}</p>*/}
                     <p>上传数量: {record.upload_count}</p>
                     <p>使用的模型：{record.selected_model}</p>
+                    <p>完好度: {Math.round(record.integrity)+'%'}</p>
                 </div>
             ),
             style: panelStyle,

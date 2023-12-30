@@ -44,6 +44,8 @@ const ClassRadarGraph = observer(() => {
 
     const radarData = processData(resultData);
 
+    console.log(radarData)
+
     const maxScore = Math.max(...radarData.map(item => item.score));
 
     const config = {
