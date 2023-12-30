@@ -5,7 +5,7 @@ import {classification_mapping} from "../../utils/utils";
 import {observer} from "mobx-react-lite";
 import imgStore from "../../store/ImgStore";
 
-const processStackedData = (data) => {
+export const processStackedData = (data) => {
     const stackedData = [];
 
     // 对每个 upload 计算分类的占比
@@ -45,12 +45,10 @@ const wrapLabelAtDash = (label) => {
 
 const ClassStackedBarGraph = observer(() => {
     const {resultData} = imgStore;
-    console.log(resultData);
     const stackedChartData  = processStackedData(resultData);
-    console.log(stackedChartData)
     useEffect(() => {
         const chart = new Chart({
-            container: 'container',
+            container: 'stackedDataContainer',
             autoFit: true,
         });
 
@@ -66,6 +64,7 @@ const ClassStackedBarGraph = observer(() => {
             .encode('x', 'typeName') // 使用 typeName 作为 x 轴的编码
             .encode('y', 'percentage') // 使用 percentage 作为 y 轴的编码
             .encode('color', 'classification') // 使用 classification 作为颜色的编码
+
             .axis(
                 'y', {labelFormatter: '.0%'},
             ) // y 轴的标签格式化为百分比
@@ -73,13 +72,20 @@ const ClassStackedBarGraph = observer(() => {
             .tooltip({
                 title: 'typeName',
                 items: [{channel: 'y0', valueFormatter: '.0%'}, {channel: 'color' }]
-            }); // 工具提示显示百分比
+            }) // 工具提示显示百分比
+            .animate('enter', { type: 'scaleInX' });
+
 
         chart.options({
             axis: {
                 x:{
                     labelFormatter: wrapLabelAtDash,
+                    title: '路段-上传'
+                },
+                y:{
+                    title: '百分比'
                 }
+
             }
 
         })
@@ -88,7 +94,7 @@ const ClassStackedBarGraph = observer(() => {
 
     return (
         <Card title='堆叠条形图' >
-        <div id="container" style={{ height:'30vh' }}></div>
+        <div id="stackedDataContainer" style={{ height:'30vh' }}></div>
         </Card>
     );
 });

@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+// import OpenAI from "openai";
 
 // utils.js
 //获取cookie token
@@ -89,7 +89,7 @@ export const formatDateTime = (dateTimeStr) => {
 //
 // async function chatWithGPT() {
 //     const stream = await openai.chat.completions.create({
-//         model: "gpt-3.5-turbo",
+//         modelStructure: "gpt-3.5-turbo",
 //         messages: [{ role: "user", content: "Say this is a test" }],
 //         stream: true,
 //     });

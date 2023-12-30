@@ -248,7 +248,7 @@ class UserStore {
 
             console.log('Model updated successfully:', response.data);
         } catch (error) {
-            console.error('Error updating model:', error.response?.data || error.message);
+            console.error('Error updating modelStructure:', error.response?.data || error.message);
         }
     };
 

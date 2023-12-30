@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { Bullet } from '@ant-design/plots';
-import {Card} from "antd";
 
 const DemoBullet = () => {
     const data = [
@@ -41,13 +41,7 @@ const DemoBullet = () => {
         color,
     };
 
-    return (
-        <Card title="Bullet Chart" style={{ width: '100%' }}>
-            <Bullet {...config}
-                containerStyle={{width: '100%', height: '30vh'}}
-            />
-        </Card>
-    );
+    return <Bullet {...config} />;
 };
 
 export default DemoBullet;

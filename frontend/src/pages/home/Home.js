@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './home.css'
-import {Card, Button, Row, Col, Avatar, Empty, Spin, Tag, Space, message,} from 'antd'
+import {Card, Button, Row, Col, Avatar, Empty, Spin, Tag, Space,} from 'antd'
 import {
   IdcardOutlined,
   PictureOutlined, ReconciliationOutlined,
@@ -98,7 +98,7 @@ const Home = observer(() => {
           <Card title="常用服务" bordered={false} className="card">
             <Row gutter={16}>
               {services.map((service, index) => (
-                <Col key={index} span={12} style={{ marginBottom: 16 }}>
+                <Col key={index} span={12} style={{ marginBottom: 8 }}>
                   <Link to={service.link}>
                     <Button type="link" style={{ color: 'black' }}>
                       <service.icon className="service-icon" />

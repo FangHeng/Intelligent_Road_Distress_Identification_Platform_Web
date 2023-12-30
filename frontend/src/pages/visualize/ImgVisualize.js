@@ -496,6 +496,7 @@ const ImgVisualize = observer(() => {
             .then(response => {
                 // 处理响应数据
                 const report = response.data;
+                console.log(report)
                 message.success('报告生成成功!');
                 setIsReportLoading(false);
                 showReportDrawer();
@@ -523,14 +524,14 @@ const ImgVisualize = observer(() => {
                             <strong>
                                 导出检测结果：
                             </strong>
-                            <p style={{ marginTop: '2vh' }}>
+                            <p style={{marginTop: '2vh'}}>
                                 通过”纹影探路”平台，您可以上传道路的照片进行智能分析。此功能允许您导出每一条路的每一张照片的详细分析结果。点击下方按钮，即可下载包含所有检测数据和分析的报告（excel文件），助您全面了解道路状况。
                             </p>
                         </div>
                         <Space style={{width: '100%', flexDirection: 'column'}}>
-                        <Button onClick={handleExport} type='primary' style={{ marginTop: '3vh' }}>
-                            下载检测结果
-                        </Button>
+                            <Button onClick={handleExport} type='primary' style={{marginTop: '3vh'}}>
+                                下载检测结果
+                            </Button>
                         </Space>
                     </>
                 );
@@ -541,14 +542,14 @@ const ImgVisualize = observer(() => {
                             <strong>
                                 交互式对话查询：
                             </strong>
-                            <p style={{ marginTop: '2vh' }}>
+                            <p style={{marginTop: '2vh'}}>
                                 利用大型语言模型的能力，我们的系统不仅能分析道路照片，还能提供交互式的查询服务。在这里，您可以直接与我们的智能系统对话，查询道路检测的具体结果和分析细节。点击下方按钮打开对话界面，开始您的交互式查询体验。
                             </p>
                         </div>
                         <Space style={{width: '100%', flexDirection: 'column'}}>
-                        <Button type="primary" onClick={showDrawer} style={{ marginTop: '3vh' }}>
-                            打开对话界面
-                        </Button>
+                            <Button type="primary" onClick={showDrawer} style={{marginTop: '3vh'}}>
+                                打开对话界面
+                            </Button>
                         </Space>
                     </>
                 );
@@ -557,11 +558,11 @@ const ImgVisualize = observer(() => {
 
                 return (
                     <div>
-                        <div style={{ marginBottom: '2vh' }}>
+                        <div style={{marginBottom: '2vh'}}>
                             <strong>通过选择以下几个道路方面，我们将为你提供一个总体的报告：</strong>
                         </div>
                         <>
-                            <strong style={{ marginRight: 8 }}>
+                            <strong style={{marginRight: 8}}>
                                 方面:
                             </strong>
                             <Space size={[0, 8]} wrap>
@@ -577,12 +578,13 @@ const ImgVisualize = observer(() => {
                             </Space>
                         </>
                         <Space style={{width: '100%', flexDirection: 'column', marginTop: '1vh'}}>
-                            <Button type="primary" onClick={generateReport} style={{marginTop: '20px'}} loading={isReportLoading}>
+                            <Button type="primary" onClick={generateReport} style={{marginTop: '20px'}}
+                                    loading={isReportLoading}>
                                 生成报告
                             </Button>
                         </Space>
                         {selectedTagInfo && (
-                            <div style={{ marginTop: '20px' }}>
+                            <div style={{marginTop: '20px'}}>
                                 <p>{selectedTagInfo}</p>
                             </div>
                         )}
@@ -720,7 +722,7 @@ const ImgVisualize = observer(() => {
                             onCancel={handleModalCancel}
                             width={800}
                             footer={null}
-                            style={{ top: '25%' }} // 控制 Modal 在垂直方向上的位置
+                            style={{top: '25%'}} // 控制 Modal 在垂直方向上的位置
                         >
                             {/*<div style={{ height: '50vh' }}>*/}
                             <Row>
@@ -733,7 +735,7 @@ const ImgVisualize = observer(() => {
                                         items={menuItems}
                                     />
                                 </Col>
-                                <Col span={16} style={{ height: '30vh' }}>
+                                <Col span={16} style={{height: '30vh'}}>
                                     {renderContent()}
                                 </Col>
                             </Row>
@@ -757,29 +759,30 @@ const ImgVisualize = observer(() => {
                         <div className="chat-container">
                             {/* 聊天历史 */}
                             <div className="chat-history">
-                                {chatStore.messages.map((message, index) => (
-                                    <div
-                                        key={index}
-                                        className={`chat-message ${message.role === 'user' ? 'user-message' : 'gpt-message'}`}
-                                    >
-                                        {message.role === 'user' && (
-                                            <div className="message-avatar">
-                                                {/* 用户头像，可以使用 Ant Design 的 Avatar 组件 */}
-                                                <Avatar src={userStore.userInfo.avatar}/>
+                                {chatStore.messages
+                                    .filter(message => message.role !== 'analysis') // 过滤掉 role 为 'analysis' 的消息
+                                    .map((message, index) => (
+                                        <div
+                                            key={index}
+                                            className={`chat-message ${message.role === 'user' ? 'user-message' : 'gpt-message'}`}
+                                        >
+                                            {message.role === 'user' && (
+                                                <div className="message-avatar">
+                                                    {/* 用户头像 */}
+                                                    <Avatar src={userStore.userInfo.avatar}/>
+                                                </div>
+                                            )}
+                                            <div className="message-content">
+                                                {message.content}
                                             </div>
-                                        )}
-                                        <div className="message-content">
-                                            {message.content}
+                                            {message.role === 'gpt' && (
+                                                <div className="message-avatar">
+                                                    {/* GPT头像 */}
+                                                    <Avatar src={logoMini} size={48}/> {/* GPT 头像的 URL */}
+                                                </div>
+                                            )}
                                         </div>
-                                        {message.role === 'gpt' && (
-                                            <div className="message-avatar">
-                                                {/* GPT头像，可以是一个图标或者图片 */}
-                                                <Avatar src={logoMini}
-                                                        size={48}/> {/* 例如 gptAvatarUrl 是 GPT 头像的 URL */}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                                    ))}
                             </div>
 
                             {/* 输入区 */}
@@ -793,7 +796,9 @@ const ImgVisualize = observer(() => {
                                 />
                                 <Button
                                     type="primary"
-                                    onClick={handleSendClick}>
+                                    onClick={handleSendClick}
+                                    disabled={chatStore.isSending}
+                                >
                                     <FontAwesomeIcon icon={faPaperPlane} style={{marginRight: '5px'}}/>
                                     发送
                                 </Button>
@@ -818,7 +823,8 @@ const ImgVisualize = observer(() => {
                                             <Descriptions.Item label="路名">{item.road_name}</Descriptions.Item>
                                             <Descriptions.Item label="上传数量">{item.upload_count}</Descriptions.Item>
                                             <Descriptions.Item label="损坏比例">{item.damage_ratio}</Descriptions.Item>
-                                            <Descriptions.Item label="选用模型">{item.selected_model}</Descriptions.Item>
+                                            <Descriptions.Item
+                                                label="选用模型">{item.selected_model}</Descriptions.Item>
                                             <Descriptions.Item label="所在区域" span={2}>
                                                 {`${item.province} ${item.city} ${item.district}`}
                                             </Descriptions.Item>

@@ -42,11 +42,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-<<<<<<< Updated upstream
-  "proxy": "http://10.236.101.25:8000",
-=======
-  "proxy": "http://10.234.114.66:8000",
->>>>>>> Stashed changes
+  "proxy": "http://10.234.114.37:8000",
   "eslintConfig": {
     "extends": [
       "react-app",

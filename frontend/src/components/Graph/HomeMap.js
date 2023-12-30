@@ -1,4 +1,4 @@
-import {GaodeMap, LayerPopup, PointLayer, Scene, TencentMap, Zoom} from '@antv/l7';
+import {GaodeMap, LayerPopup, PointLayer, Scene, Zoom} from '@antv/l7';
 import {formatDateTime} from "../../utils/utils";
 
 function calculateCenter(uploadRecords) {
@@ -38,7 +38,8 @@ function initHomeMap(uploadRecords) {
             name: record.road__road_name,
             uploader: record.uploader__user__username,
             uploadTime: record.upload_time,
-            uploadCount: record.upload_count
+            uploadCount: record.upload_count,
+            integrity: record.integrity,
         }));
 
         const pointLayer = new PointLayer({})
@@ -49,8 +50,8 @@ function initHomeMap(uploadRecords) {
                     y: 'lat',
                 },
             })
-            // .color('uploadCount', ['#FFCCC6', '#CF1421'])
-            .color('#CF1421')
+            .color('integrity', ['#CF1421', '#fa796a', "#FFCCC6"])
+            // .color('#CF1421')
             .size(10)
             .shape('circle');
 
@@ -68,6 +69,7 @@ function initHomeMap(uploadRecords) {
                         {field: 'uploadCount', formatField: () => '上传数量', formatValue: (val) => val.toString()},
                         {field: 'lng', formatField: () => '经度'},
                         {field: 'lat', formatField: () => '纬度'},
+                        {field: 'integrity', formatField: () => '完好度', formatValue: (val) => `${Math.round(val * 100) / 100}%`},
                     ],
                 },
             ],

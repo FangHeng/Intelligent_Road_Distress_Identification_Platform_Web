@@ -25,7 +25,7 @@ chatWithGPT();
 
 // const axios = require('axios');
 // let data = JSON.stringify({
-//     "model": "gpt-3.5-turbo",
+//     "modelStructure": "gpt-3.5-turbo",
 //     "messages": [
 //         {
 //             "role": "user",
@@ -59,7 +59,7 @@ chatWithGPT();
 //
 // function chatWithGPT(userMessage) {
 //     let data = JSON.stringify({
-//         "model": "gpt-3.5-turbo",
+//         "modelStructure": "gpt-3.5-turbo",
 //         "messages": [
 //             {
 //                 "role": "user",

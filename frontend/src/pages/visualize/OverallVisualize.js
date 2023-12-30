@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {Col, Row, Spin} from "antd";
-import DemoGauge from "../../components/Graph/GaugeGraph";
-import DemoLine from "../../components/Graph/LineGraph";
-import DemoBullet from "../../components/Graph/BulletGraph";
 import ClassRadarGraph from "../../components/Graph/ClassRadarGraph";
 import historyStore from "../../store/HistoryStore";
 import imgStore from "../../store/ImgStore";
 import ClassStackedBarGraph from "../../components/Graph/ClassStackedBarChart";
+import RoadWithTimeGraph from "../../components/Graph/RoadWithTimeGraph";
+import IntegrityBulletGraph from "../../components/Graph/IntegrityBulletGraph";
 
 const OverallVisualize = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -38,11 +37,11 @@ const OverallVisualize = () => {
         <div>
             <Row gutter={16}>
                 {/* 第一行的卡片 */}
-                <Col span={16}>
-                    <DemoLine />
+                <Col span={12}>
+                    <RoadWithTimeGraph />
                 </Col>
-                <Col span={8}>
-                    <DemoGauge />
+                <Col span={12}>
+                    <IntegrityBulletGraph />
                 </Col>
             </Row>
             <Row gutter={16} style={{ marginTop: '20px' }}>

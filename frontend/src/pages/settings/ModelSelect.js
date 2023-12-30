@@ -2,13 +2,16 @@ import React, {useState} from 'react';
 import {
     Card,
     Radio,
-    Descriptions,
-    Dropdown
+    Dropdown, Space, Image
 } from 'antd';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBolt, faWandMagicSparkles} from "@fortawesome/free-solid-svg-icons";
 import userStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
+import Swin from '../../assets/modelStructure/Swin.png';
+import WSPLIN from '../../assets/modelStructure/WSPLIN.png';
+import PicT from '../../assets/modelStructure/PicT.png';
+
 
 // 用于根据selectedSubModel的值映射相应的显示标签
 const advancedModelLabels = {
@@ -58,7 +61,8 @@ const ModelSelect = observer(() => {
     const selectedSubModelLabel = advancedModelLabels[selectedSubModel] || '高级模型';
 
     return (
-        <Card title="首选模型设置" style={{ width: '100%' }}>
+        <Card title="首选模型设置" style={{ width: '100%', height:'95vh' }}>
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <Radio.Group onChange={handleModelChange} value={preferredModel} size="large">
                     <Radio.Button value="Swin"  className="radio-button-min-width">
@@ -77,12 +81,45 @@ const ModelSelect = observer(() => {
                 </Radio.Group>
             </div>
 
-            <Descriptions title="模型详情">
-                {preferredModel === 'Swin' && <Descriptions.Item label="Default Model">采用 Swin Transformer 对病害图像进行分类</Descriptions.Item>}
-                {selectedSubModel === 'WSPLIN-IP' && <Descriptions.Item label="WSPLIN-IP">Advanced Model - WSPLIN-IP 详情</Descriptions.Item>}
-                {selectedSubModel === 'WSPLIN-SS' && <Descriptions.Item label="WSPLIN-SS">Advanced Model - WSPLIN-SS 详情</Descriptions.Item>}
-                {selectedSubModel === 'PicT' && <Descriptions.Item label="PicT">Advanced Model - PicT 详情</Descriptions.Item>}
-            </Descriptions>
+            <div>
+                {preferredModel === 'Swin' && (
+                    <Card title="默认模型 - Swin 详情" style={{ width:'100%' }}>
+                        <p>采用 Swin Transformer 对病害图像进行分类，适用于日常的道路检测。</p>
+                        <p>模型结构如下图所示：</p>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <Image src={Swin} alt="Swin Image" height={500}/>
+                        </div>
+                    </Card>
+                )}
+                {selectedSubModel === 'WSPLIN-IP' && (
+                    <Card title="高级模型 - WSPLIN-IP 详情" style={{ width:'100%' }}>
+                        <p>高级模型 - WSPLIN-IP 用于更好性能地检测道路。</p>
+                        <p>模型结构如下图所示：</p>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <Image src={WSPLIN} alt="WSPLIN_IP Image" height={500}/>
+                        </div>
+                    </Card>
+                )}
+                {selectedSubModel === 'WSPLIN-SS' && (
+                    <Card title="高级模型 - WSPLIN-SS 详情" style={{ width:'100%' }}>
+                        <p>高级模型 - WSPLIN-SS 用于更好性能地检测道路。</p>
+                        <p>模型结构如下图所示：</p>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <Image src={WSPLIN} alt="WSPLIN_SS Image" height={500}/>
+                        </div>
+                    </Card>
+                )}
+                {selectedSubModel === 'PicT' && (
+                    <Card title="高级模型 - PicT 详情" style={{ width:'100%' }}>
+                        <p>高级模型 - PicT 我们推荐使用的高级模型，适用于复杂的道路病害检测。</p>
+                        <p>模型结构如下图所示：</p>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <Image src={PicT} alt="PicT Image" height={500}/>
+                        </div>
+                    </Card>
+                )}
+            </div>
+            </Space>
         </Card>
     );
 });

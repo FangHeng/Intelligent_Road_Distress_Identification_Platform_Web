@@ -1,6 +1,8 @@
 import { makeAutoObservable } from 'mobx';
 import axiosInstance from "../utils/AxiosInstance";
+import {processStackedData} from "../components/Graph/ClassStackedBarChart";
 import { message } from 'antd';
+import chatStore from "./ChatStore";
 
 class ImageStore {
     images = [];
@@ -14,6 +16,7 @@ class ImageStore {
     resultData = [];
     isLastUploadIdFetched = false;
     reportData = [];
+    analysisResult = [];
 
     constructor() {
         makeAutoObservable(this);
@@ -112,6 +115,9 @@ class ImageStore {
             .then(response => {
                 console.log(response.data);
                 this.resultData = response.data;
+                this.analysisResult = processStackedData(this.resultData);
+                // 确保 ChatStore 使用最新的 analysisResult
+                chatStore.updateAnalysisResult(this.analysisResult);
             })
             .catch(error => {
                 console.error('Error fetching upload data: ', error);
