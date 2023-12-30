@@ -10,3 +10,4 @@ torchvision
 numpy
 pandas
 openpyxl
+openai

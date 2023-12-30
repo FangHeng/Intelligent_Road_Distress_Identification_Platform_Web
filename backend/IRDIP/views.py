@@ -25,6 +25,7 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from PDC_predict.predict import predict
+from IRDIP.LLM import format_report
 
 # 定义映射字典
 classification_mapping = {
@@ -1012,3 +1013,98 @@ def export_to_excel(request):
         return JsonResponse({"error": "An unexpected error occurred: " + str(e)}, status=500)
 
 
+def get_result_by_upload_ids(upload_ids, request_user):
+    response_data = {}
+
+    upload_records = UploadRecord.objects.filter(upload_id__in=upload_ids).select_related('uploader', 'road')
+
+    for upload_record in upload_records:
+        uploader = upload_record.uploader.user
+
+        # 检查是否有权访问此上传记录
+        if not is_upload_accessible_by_user(uploader, request_user):
+            continue
+
+        files = FileUpload.objects.filter(upload=upload_record).select_related('upload')
+
+        # 计算破损比例
+        total_files_count = FileUpload.objects.filter(upload=upload_record).count()
+        damaged_files_count = FileUpload.objects.filter(upload=upload_record).exclude(classification_result=6).count()
+        damage_ratio = damaged_files_count / total_files_count if total_files_count else 0
+
+        road_info = upload_record.road
+
+        # 构建响应数据
+        upload_data = {
+            "uploader": upload_record.uploader.user.username,
+            "upload_time": upload_record.upload_time,
+            "road_info": {
+                "road_id": road_info.road_id,
+                "road_name": road_info.road_name,
+                "gps_longitude": road_info.gps_longitude,
+                "gps_latitude": road_info.gps_latitude,
+                "administrative_province": road_info.administrative_province,
+                "administrative_city": road_info.administrative_city,
+                "administrative_district": road_info.administrative_district
+            },
+            "upload_name": upload_record.upload_name,
+            "upload_count": upload_record.upload_count,
+            "selected_model": upload_record.get_selected_model_display(),
+            "damage_ratio": damage_ratio
+        }
+
+        response_data[str(upload_record.upload_id)] = upload_data
+
+    # 处理不存在的 upload_id
+    missing_ids = set(upload_ids) - set(str(upload.upload_id) for upload in upload_records)
+    for missing_id in missing_ids:
+        response_data[missing_id] = "Upload record not found"
+
+    return response_data
+
+
+@require_http_methods(["GET"])
+def generate_report(request):
+    try:
+        # 获取上传ID列表
+        upload_ids = request.GET.getlist('upload_id')
+        request_user = request.user
+
+        # 获取先验信息
+        prior_information = get_result_by_upload_ids(upload_ids, request_user)
+
+        # 准备报告所需的信息
+        report_data = []
+        for upload_id, info in prior_information.items():
+            if info != "Upload record not found":
+                report_data.append({
+                    "theme": f"Upload Report for {info['upload_name']}",
+                    "uploader": info["uploader"],
+                    "upload_time": info["upload_time"].strftime("%Y-%m-%d %H:%M:%S"),
+                    "road_name": info["road_info"]["road_name"],
+                    "province": info["road_info"]["administrative_province"],
+                    "city": info["road_info"]["administrative_city"],
+                    "district": info["road_info"]["administrative_district"],
+                    "gps_longitude": info["road_info"]["gps_longitude"],
+                    "gps_latitude": info["road_info"]["gps_latitude"],
+                    "upload_count": info["upload_count"],
+                    "damage_ratio": info["damage_ratio"],
+                    "selected_model": info["selected_model"]
+                })
+            else:
+                report_data.append({"upload_id": upload_id, "error": "Upload record not found"})
+
+        # 生成格式化报告
+        formatted_report = format_report(prior_information=report_data)
+
+        print(report_data)
+
+        # 合并两部分信息
+        combined_response = report_data + formatted_report
+
+        # 返回成功响应
+        return JsonResponse(combined_response, safe=False)
+
+    except Exception as e:
+        error_message = {"error": str(e)}
+        return JsonResponse(error_message, status=500)

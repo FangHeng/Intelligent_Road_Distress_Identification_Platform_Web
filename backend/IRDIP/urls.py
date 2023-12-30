@@ -38,5 +38,6 @@ urlpatterns = [
     path("send_email_verification/", views.send_email_verification, name="send_email_verification"),
     path("change_password_with_email_verification/", views.change_password_with_email_verification, name="change_password_with_email_verification"),
     path("export_to_excel/", views.export_to_excel, name="export_to_excel"),
+    path("generate_report/", views.generate_report, name="generate_report"),
 
 ]
