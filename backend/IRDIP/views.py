@@ -50,7 +50,7 @@ def login(request):
         employee_number = request.POST.get('employee_number')
         password = request.POST.get('password')
 
-        # print(company_id, employee_number, password)
+        print(company_id, employee_number, password)
 
         try:
             user_role = UserRole.objects.get(employee_number=employee_number, company_id=company_id)

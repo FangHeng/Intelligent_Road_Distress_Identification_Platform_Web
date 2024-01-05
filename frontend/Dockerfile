@@ -4,8 +4,13 @@ FROM node:18.19-alpine
 # 设置工作目录
 WORKDIR /app
 
-# 安装依赖
+# 复制npm配置文件
 COPY package*.json ./
+
+# 设置npm源
+RUN npm config set registry https://registry.npmmirror.com
+
+# 安装依赖
 RUN npm install
 
 # 复制项目文件并构建应用
