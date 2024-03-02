@@ -1,0 +1,122 @@
+.clickable-item:hover {
+    cursor: pointer;
+    background-color: #f0f0f0;
+}
+
+/* 默认样式 */
+/* 默认样式 */
+.imgCard {
+    width: 230px; /* 默认宽度 */
+    margin: 10px; /* 默认外边距 */
+}
+
+/* 小于768px宽的屏幕，通常是手机 */
+@media (max-width: 768px) {
+    .imgCard {
+        width: 230px; /* 手机屏幕上的卡片宽度更小 */
+        margin: 5px; /* 减小外边距 */
+    }
+}
+
+/* 小于1024px但大于768px宽的屏幕，通常是平板 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .imgCard {
+        width: 230px; /* 平板屏幕上的卡片宽度 */
+        margin: 8px; /* 调整外边距 */
+    }
+}
+
+/* 大于1024px宽的屏幕，通常是桌面 */
+@media (min-width: 1025px) {
+    .imgCard {
+        width: 230px; /* 桌面屏幕上的卡片宽度可以更大 */
+        margin: 10px; /* 维持默认外边距 */
+    }
+}
+
+
+/*!* 小屏幕 *!*/
+/*@media (max-width: 600px) {*/
+/*    .card {*/
+/*        width: 150px;*/
+/*        margin: 1vw;*/
+/*    }*/
+/*}*/
+
+/*!* 中等屏幕 *!*/
+/*@media (min-width: 601px) and (max-width: 1024px) {*/
+/*    .card {*/
+/*        width: 200px;*/
+/*        margin: 1vw;*/
+/*    }*/
+/*}*/
+
+/*!* 大屏幕 *!*/
+/*@media (min-width: 1025px) {*/
+/*    .card {*/
+/*        width: 240px;*/
+/*        margin: 1vw;*/
+/*    }*/
+/*}*/
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chat-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.chat-message {
+    display: flex;
+    align-items: flex-start; /* 调整为 flex-start 使头像与消息的顶部对齐 */
+    margin-bottom: 10px;
+}
+
+.user-message .message-avatar,
+.gpt-message .message-avatar {
+    margin-right: 2px;
+}
+
+.gpt-avatar{
+    margin-right: 5px;
+}
+
+.user-message {
+    justify-content: flex-start;
+}
+
+.gpt-message {
+    justify-content: flex-end;
+}
+
+.message-content {
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #f0f0f0; /* 可以根据需要调整背景颜色 */
+    max-width: 70%;
+}
+
+.message-input {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-top: 1px solid #e0e0e0; /* 输入区上方的边框 */
+}
+
+.message-input .ant-input {
+    flex-grow: 1;
+}
+
+.message-input button {
+    margin-left: 10px;
+}
+
+
+.custom-editor .ant-input {
+    min-width: 38vw;
+}

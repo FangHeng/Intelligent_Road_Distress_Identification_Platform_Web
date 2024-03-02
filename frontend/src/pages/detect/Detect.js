@@ -1,5 +1,6 @@
-import {Badge, Card, Button, Select, Spin, Space, Tag, Progress, message} from 'antd';
-import { ProList } from '@ant-design/pro-components';
+//  Detect.js: 检测记录页面
+import {Badge, Card, Button, Select, Space, Tag, Progress, App, Skeleton} from 'antd';
+import {PageContainer, ProList} from '@ant-design/pro-components';
 import React, {useEffect, useState} from 'react';
 import {observer} from "mobx-react-lite";
 import userStore from "../../store/UserStore";
@@ -31,6 +32,9 @@ const Detect = observer(() => {
     const [isLoading, setIsLoading] = useState(true)
 
     const navigate = useNavigate();
+
+    const {message} = App.useApp();
+
     const viewUpload = (uploadIdOrIds) => {
         historyStore.setCameFromDetect(true);
         imgStore.resetIsLastUploadIdFetched(false);
@@ -39,24 +43,26 @@ const Detect = observer(() => {
         navigate('/pages/visualize/ImgVisualize');
     }
 
-
-    useEffect(() => {
-        historyStore.fetchUploadRecords().then(loadedData => {
+    const fetchDataAndUpdate = () => {
+        historyStore.fetchUploadRecords().then(() => {
             const data = historyStore.uploadRecords.map(item => ({
-                id:item.upload_id,
+                id: item.upload_id,
                 title: item.upload_name,
                 road: item.road__road_name,
-                subTitle: <Space ><Tag color="geekblue">{item.road__road_name}</Tag><Tag color="blue">{item.uploader__user__username}</Tag></Space>,
+                subTitle: <Space><Tag color="geekblue">{item.road__road_name}</Tag><Tag
+                    color="blue">{item.uploader__user__username}</Tag></Space>,
                 actions: [
-                    <Button key="delete" type="link" onClick={() => historyStore.deleteUploadRecord(item.upload_id).then(
-                        response => {
-                            if (response.success) {
-                                message.success(response.message);
-                            } else {
-                                message.error(response.message);
-                            }
-                        }
-                    )}>
+                    <Button key="delete" type="link"
+                            onClick={() => historyStore.deleteUploadRecord(item.upload_id).then(
+                                response => {
+                                    if (response.success) {
+                                        fetchDataAndUpdate();
+                                        message.success(response.message);
+                                    } else {
+                                        message.error(response.message);
+                                    }
+                                }
+                            )}>
                         删除
                     </Button>,
 
@@ -84,8 +90,8 @@ const Detect = observer(() => {
                                 width: 200,
                             }}
                         >
-                            <div style={{marginBottom:'5px'}}>完好程度：</div>
-                            <Progress percent={Math.round(parseFloat(item.integrity)) } />
+                            <div style={{marginBottom: '5px'}}>完好程度：</div>
+                            <Progress percent={Math.round(parseFloat(item.integrity))}/>
                         </div>
                     </div>
                 ),
@@ -97,7 +103,14 @@ const Detect = observer(() => {
             setMyRecords(data.filter(item => item.uploader === userInfo.username).length);
             const roads = new Set(data.map(item => item.road));
             setRoadOptions(['全部', ...roads]);
+        }).catch(error => {
+            message.error('获取历史数据失败!');
         });
+    };
+
+
+    useEffect(() => {
+        fetchDataAndUpdate();
     }, []);
 
     useEffect(() => {
@@ -143,7 +156,7 @@ const Detect = observer(() => {
 
 
     const renderBadge = (count, active) => {
-        return active ? <Badge count={count} style={{ marginLeft: 8 }} /> : null;
+        return active ? <Badge count={count} style={{marginLeft: 8}}/> : null;
     };
 
     const rowSelection = {
@@ -162,85 +175,94 @@ const Detect = observer(() => {
 
 
     return (
-        <Card title='检测记录' style={{ height: '95vh', overflow: 'auto' }}>
-            <Spin spinning={isLoading} className='spin'>
-            </Spin>
-            <ProList
-                metas={{
-                    title: {},
-                    subTitle: {},
-                    type: {},
-                    description: {},
-                    avatar: {},
-                    content: {},
-                    actions: {},
+        <App>
+            <PageContainer
+                header={{
+                    title: '检测记录',
                 }}
-                toolbar={{
-                    menu: {
-                        activeKey,
-                        items: [
-                            {
-                                key: 'tab1',
-                                label: (
-                                    <span>全部上传记录{renderBadge(totalRecords, activeKey === 'tab1')}</span>
-                                ),
-                            },
-                            {
-                                key: 'tab2',
-                                label: (
-                                    <span>
+            >
+                <Card style={{minHeight: '90vh'}}>
+                {
+                    isLoading ? <Skeleton active/> :
+                        <ProList
+                            metas={{
+                                title: {},
+                                subTitle: {},
+                                type: {},
+                                description: {},
+                                avatar: {},
+                                content: {},
+                                actions: {},
+                            }}
+                            toolbar={{
+                                menu: {
+                                    activeKey,
+                                    items: [
+                                        {
+                                            key: 'tab1',
+                                            label: (
+                                                <span>全部上传记录{renderBadge(totalRecords, activeKey === 'tab1')}</span>
+                                            ),
+                                        },
+                                        {
+                                            key: 'tab2',
+                                            label: (
+                                                <span>
                                     我上传的记录{renderBadge(myRecords, activeKey === 'tab2')}
                                     </span>
-                                ),
-                            },
-                        ],
-                        onChange: (key) => setActiveKey(key),
-                    },
-                    actions: [
-                        <Select
-                            key="roadSelect"
-                            showSearch
-                            style={{ width: 200, marginLeft: 8 }}
-                            placeholder="选择道路"
-                            optionFilterProp="children"
-                            onChange={handleRoadChange}
-                            filterOption={(input, option) =>
-                                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                            }
-                        >
-                            {roadOptions.map(road => (
-                                <Select.Option key={road} value={road}>{road}</Select.Option>
-                            ))}
-                        </Select>,
-                        <Button key="selectAll" onClick={handleSelectAll}>
-                            全选
-                        </Button>,
-                        selectedRowKeys.length ? (
-                            <Button key="customAction" onClick={handleClick}>
-                                查看所选记录
-                            </Button>
-                        ) : null,
-                    ],
-                    search: {
-                        onSearch: (value) => {
-                            setSearchValue(value);
-                        },
-                    },
-                }}
-                rowKey="id"
-                // headerTitle="预设的列状态"
-                rowSelection={rowSelection}
-                dataSource={dataSource}
-                expandable={{
-                    expandedRowKeys,
-                    onExpandedRowsChange: setExpandedRowKeys,
-                }}
-                size={'large'}
-                pagination={{
-                    pageSize: 10,
-                }}
-            />
-        </Card>
+                                            ),
+                                        },
+                                    ],
+                                    onChange: (key) => setActiveKey(key),
+                                },
+                                actions: [
+                                    <Select
+                                        key="roadSelect"
+                                        showSearch
+                                        style={{width: 200, marginLeft: 8}}
+                                        placeholder="选择道路"
+                                        optionFilterProp="children"
+                                        onChange={handleRoadChange}
+                                        filterOption={(input, option) =>
+                                            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                        }
+                                    >
+                                        {roadOptions.map(road => (
+                                            <Select.Option key={road} value={road}>{road}</Select.Option>
+                                        ))}
+                                    </Select>,
+                                    <Button key="selectAll" onClick={handleSelectAll} type='link'>
+                                        全选
+                                    </Button>,
+                                    selectedRowKeys.length ? (
+                                        <Button key="customAction" onClick={handleClick} type='link'>
+                                            查看所选记录
+                                        </Button>
+                                    ) : null,
+                                ],
+                                search: {
+                                    onSearch: (value) => {
+                                        setSearchValue(value);
+                                    },
+                                },
+                            }}
+                            rowKey="id"
+                            // headerTitle="预设的列状态"
+                            rowSelection={rowSelection}
+                            dataSource={dataSource}
+                            expandable={{
+                                expandedRowKeys,
+                                onExpandedRowsChange: setExpandedRowKeys,
+                            }}
+                            size={'large'}
+                            pagination={{
+                                pageSize: 20,
+                            }}
+                        />
+                }
+                </Card>
+            </PageContainer>
+        </App>
     );
 });
 

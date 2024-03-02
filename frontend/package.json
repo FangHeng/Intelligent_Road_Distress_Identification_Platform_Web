@@ -9,6 +9,7 @@
     "@ant-design/plots": "^2.1.0",
     "@ant-design/pro-components": "^2.6.43",
     "@antv/g2": "^5.1.13",
+    "@antv/g2plot": "^2.4.31",
     "@antv/l7": "^2.20.5",
     "@antv/l7-composite-layers": "^0.16.4",
     "@antv/l7-maps": "^2.20.5",
@@ -23,11 +24,13 @@
     "dotenv": "^16.3.1",
     "gcoord": "^1.0.5",
     "js-cookie": "^3.0.5",
+    "jspdf": "^2.5.1",
     "lodash-es": "^4.17.20",
     "mobx": "^6.12.0",
     "mobx-react-lite": "^4.0.5",
     "nprogress": "^0.2.0",
     "openai": "^4.24.1",
+    "rc-resize-observer": "^1.4.0",
     "react": "^18.2.0",
     "react-bmapgl": "^0.2.26",
     "react-dom": "^18.2.0",
@@ -38,12 +41,11 @@
     "yarn": "^1.22.21"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://10.236.101.25:8000",
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -61,5 +63,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "customize-cra": "^1.0.0",
+    "less": "^4.2.0",
+    "less-loader": "^12.1.0",
+    "react-app-rewired": "^2.2.1"
   }
 }

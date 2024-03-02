@@ -1,14 +1,19 @@
 /* 设置卡片的高度和其他通用样式 */
-.card {
-    height: 25vh;
-    /* 添加其他样式，如果需要的话 */
+.row-flex-container {
+    display: flex;
+    align-items: stretch;
 }
 
-/* 如果你想对第二排的卡片应用不同的样式，你可以创建另一个类 */
-.secondRowCard {
-    height: 70vh;
+.card {
+    min-height: 250px;
+}
+
+.firstRowCard {
+    height: 60vh;
+    min-height: 600px;
     /* 添加其他样式 */
 }
+
 
 .secondRowColCard {
     height: 34vh;
@@ -16,31 +21,61 @@
 }
 
 .welcomeCard {
-    height: 25vh;
+    height: 20vh;
 }
 
 .info-title {
     display: flex;
     align-items: center;
-    color: rgba(0, 0, 0, 0.45);
-    padding: 0.1vh 0;
-    margin-bottom: 0.2vh;
+    padding: 0.0625em 0; /* 1px / 16px */
 }
 
 .info-content {
     color: #3f8600;
-    font-size: 2.6vh;
+    font-size: 1.625em; /* 26px / 16px */
 }
 
-.service-icon{
-    width: 2.5vh;
-    height: 2.5vh;
+.service-icon {
+    width: 1.5625em; /* 25px / 16px */
+    height: 1.5625em; /* 25px / 16px */
     vertical-align: middle;
-    margin-right:0.5vh
+    margin-right: 0.3125em; /* 5px / 16px */
 }
-
 
 .info-content-img{
     color: #cf1322;
-    font-size: 2.6vh;
+    font-size: 1.625em;
 }
+
+.inner-card {
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.greeting-title{
+    font-size: 18px;
+    font-weight: bold
+}
+
+.sun-icon {
+    color: #FFD43B;
+}
+
+.moon-icon {
+    color: #B197FC;
+}
+
+.responsive-col {
+    margin-bottom: 16px;
+}
+
+/* 对小屏幕进行特别处理的媒体查询 */
+@media screen and (max-width: 768px) {
+.info-content, .info-content-img {
+    font-size: 1.2em; /* 在小屏幕上减小字体大小 */
+}}
+
+
+

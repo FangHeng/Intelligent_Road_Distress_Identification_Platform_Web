@@ -1,10 +1,16 @@
-import {Badge, Button, message, Space, Table, Tag} from "antd";
+// UserTable.js: 下属用户表格
+import {App, Badge, Button, Space, Table, Tag} from "antd";
 import {UserDeleteOutlined} from "@ant-design/icons";
 import React, {useEffect, useState} from "react";
 import userStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
 
 const adaptDataForTable = (dataFromBackend) => {
+    if (!Array.isArray(dataFromBackend)) {
+        console.error('Expected an array for adaptDataForTable, received:', dataFromBackend);
+        return [];
+    }
+
     return dataFromBackend.map(item => ({
         key: item.user_id,
         jobNumber: item.employee_number,
@@ -19,18 +25,22 @@ const adaptDataForTable = (dataFromBackend) => {
 
 const UserTable = observer(() => {
     const [data, setData] = useState([]);
+    const {message} = App.useApp();
+
     useEffect(() => {
-        userStore.fetchSubordinatesInfo();
+        const fetchInfo = async () => {
+            const result = await userStore.fetchSubordinatesInfo();
+            if (!result.success && result.message) {
+                message.error(result.message);
+            }
+        };
+
+        fetchInfo();
     }, []);
 
     useEffect(() => {
-        if (userStore.errorsubordinatesInfo) {
-            message.error('获取下属用户信息失败');
-        } else if (userStore.subordinatesInfo && Array.isArray(userStore.subordinatesInfo)) {
-            const adaptedData = adaptDataForTable(userStore.subordinatesInfo);
-            setData(adaptedData);
-        }
-    }, [userStore.subordinatesInfo, userStore.errorsubordinatesInfo]);
+        setData(adaptDataForTable(userStore.subordinatesInfo));
+    }, [userStore.subordinatesInfo]);
 
     const columns = [
         {
@@ -84,23 +94,26 @@ const UserTable = observer(() => {
     ];
 
     const handleDelete = (userId) => {
-        userStore.deleteSubordinate(userId)
-            .then(result => {
-                if (result.success) {
-                    message.success(result.message);
-                    // 在这里更新组件的状态，从列表中移除用户
-                    setData(data.filter(item => item.userId !== userId));
-                } else {
-                    message.error(result.message);
-                }
-            })
-            .catch(error => {
-                message.error('操作失败');
-            });
+        userStore.deleteSubordinate(userId).then((result) => {
+            if (result.success) {
+                message.success('用户删除成功！');
+                // 过滤掉被删除的用户
+                const filteredData = data.filter(item => item.userId !== userId);
+                setData(filteredData);
+            } else {
+                message.error(result.message);
+            }
+        });
     };
 
     return(
-        <Table columns={columns} dataSource={data} />
+        <App>
+            <Table
+                columns={columns}
+                dataSource={data}
+                pagination={{ pageSize: 10 }}
+            />
+        </App>
     )
 });
 

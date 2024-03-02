@@ -1,39 +1,30 @@
-import React, {useEffect, useState} from 'react';
+// ImgVisualize.js: 检测结果可视化页面
+import React, {useEffect, useRef, useState} from 'react';
 import {
-    Card,
-    Col,
-    Row,
-    Checkbox,
-    Select,
-    Image,
-    Divider,
-    Space,
-    Modal,
-    List,
-    Segmented,
-    Button,
-    Drawer, Pagination, Tag, Slider, InputNumber, Spin, message, Input, Avatar, Menu, Descriptions
+    Card, Col, Row, Checkbox, Select, Image, Divider, Space, Modal, List, Segmented, Button, Drawer, Pagination, Tag, Slider, InputNumber, Spin, Input, Avatar, Menu, Progress, Empty, App,
 } from 'antd';
 import DecimalStep from "../../components/Slider/DecimalStep";
 import '../detect/css/checkbox.css';
 import {
     AppstoreOutlined,
-    BarsOutlined,
+    BarsOutlined, HistoryOutlined,
     PictureOutlined,
-    VerticalAlignBottomOutlined
+    VerticalAlignBottomOutlined,
 } from "@ant-design/icons";
-import './CSS/Visualize.css';
+import './Visualize.css';
 import '../detect/css/checkbox.css';
 import imgStore from "../../store/ImgStore";
 import {observer} from "mobx-react-lite";
 import historyStore from "../../store/HistoryStore";
 import axiosInstance from "../../utils/AxiosInstance";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPaperPlane} from "@fortawesome/free-solid-svg-icons";
+import { faPaperPlane} from "@fortawesome/free-solid-svg-icons";
 import chatStore from "../../store/ChatStore";
 import userStore from "../../store/UserStore";
-import logoMini from "../../assets/img/logo-mini.png";
-
+import logoMini from "../../assets/img/logo/logo-mini.png";
+import {PageContainer, ProDescriptions} from "@ant-design/pro-components";
+import {useNavigate} from "react-router-dom";
+import {classification_mapping} from "../../utils/utils";
 
 const {Option} = Select;
 const {CheckableTag} = Tag;
@@ -41,19 +32,6 @@ const options = [
     '胶结裂隙', '裂纹', '纵向裂纹', '松散',
     '大裂缝', '修补', '正常', '横向裂纹'
 ];
-
-const classification_mapping = {
-    0: "胶结裂隙",
-    1: "裂纹",
-    2: "纵向裂纹",
-    3: "松散",
-    4: "大裂缝",
-    5: "修补",
-    6: "正常",
-    7: "横向裂纹"
-};
-
-
 const ImgVisualize = observer(() => {
     const [viewMode, setViewMode] = useState('grid');
     const [previewVisible, setPreviewVisible] = useState(false);
@@ -63,15 +41,16 @@ const ImgVisualize = observer(() => {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSizeGrid, setPageSizeGrid] = useState(8);
     const [pageSizeList, setPageSizeList] = useState(9);
+    const [filteredPhotos, setFilteredPhotos] = useState([]);
     // 选择图片类型：
     const [checkedList, setCheckedList] = useState([]);
     const [indeterminate, setIndeterminate] = useState(true);
     const [checkAll, setCheckAll] = useState(false);
     const [photos, setPhotos] = useState([]);
 
-    //抽屉
-    const [open, setOpen] = useState(false);
-    const [placement, setPlacement] = useState('right');
+    // 对话抽屉
+    const [openChatDrawer, setOpenChatDrawer] = useState(false);
+    const [placement, ] = useState('right');
 
     // 调参阈值
     const [confidenceThreshold, setConfidenceThreshold] = useState(0.7);
@@ -80,18 +59,29 @@ const ImgVisualize = observer(() => {
     const [isLoading, setIsLoading] = useState(false);
 
     // 下载报告的id
-    const [reportIds, setReportIds] = useState([]);
+    // const [reportIds, ] = useState([imgStore.reportIds]);
+    const reportIds = imgStore.reportIds;
+
+    const actionRef = useRef();
+
+    // 导出报告为PDF
+    const [pdfData, setPdfData] = useState(imgStore.reportData);
+
+    const {message} = App.useApp();
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (imgStore.selectedUploadId.length === 0) {
+            console.log("No upload id selected!")
             const fetchData = async () => {
-                setIsLoading(true);
                 if (!historyStore.cameFromDetect) {
                     try {
+                        setIsLoading(true);
                         const lastUploadId = await imgStore.fetchLastUploadId();
                         if (lastUploadId) {
                             await imgStore.fetchResultData([lastUploadId]);
-                            setReportIds([lastUploadId])
+                            imgStore.setReportIds([lastUploadId]);
                         }
                     } catch (error) {
                         console.error("Error during data fetching:", error);
@@ -110,13 +100,14 @@ const ImgVisualize = observer(() => {
             if (imgStore.selectedUploadId.length > 0) {
                 imgStore.fetchResultData(imgStore.selectedUploadId)
                     .then(() => {
-                        setReportIds(imgStore.selectedUploadId);
+
+                        imgStore.setReportIds(imgStore.selectedUploadId);
                     })
                     .finally(() => setIsLoading(false));
             }
             historyStore.setCameFromDetect(false);
         }
-    }, [historyStore.cameFromDetect]);
+    }, []);
 
     useEffect(() => {
         if (imgStore.resultData) {
@@ -144,25 +135,52 @@ const ImgVisualize = observer(() => {
         }
     }, [imgStore.resultData]);
 
+    useEffect(() => {
+        function updatePageSize() {
+            const width = window.innerWidth;
+            if (width < 768) { // 假设小于768px为手机屏幕
+                setPageSizeGrid(4);
+                setPageSizeList(5);
+            } else if (width < 1024) { // 假设小于1024px为平板屏幕
+                setPageSizeGrid(6);
+                setPageSizeList(7);
+            } else { // 大于等于1024px为桌面屏幕
+                setPageSizeGrid(8);
+                setPageSizeList(10);
+            }
+        }
+
+        // 在组件加载和窗口大小改变时调用
+        window.addEventListener('resize', updatePageSize);
+        updatePageSize(); // 初次渲染时也调用一次
+
+        // 组件卸载时移除事件监听
+        return () => {
+            window.removeEventListener('resize', updatePageSize);
+        };
+    }, []);
+
+    // 处理点击图片
     const handleCardClick = (image) => {
         setSelectedImage(image);
         setPreviewImage(image.imgUrl);
         setPreviewVisible(true);
     };
 
-    const handleCancel = () => {
+    // 打开图像预览modal
+    const handleImgCancel = () => {
         setPreviewVisible(false);
         setSelectedImage(null);
         setPreviewImage('');
     };
 
-    const showDrawer = () => {
-        setOpen(true);
+    const showChatDrawer = () => {
+        setOpenChatDrawer(true);
         handleModalCancel();
     };
 
-    const onClose = () => {
-        setOpen(false);
+    const onChatDrawerClose = () => {
+        setOpenChatDrawer(false);
     };
 
     // 处理Segmented选择变化
@@ -174,23 +192,28 @@ const ImgVisualize = observer(() => {
         return viewMode === 'grid' ? pageSizeGrid : pageSizeList;
     };
 
-    const getCurrentPhotos = () => {
-        const pageSize = getCurrentPageSize();
-        const indexOfLastPhoto = currentPage * pageSize;
-        const indexOfFirstPhoto = indexOfLastPhoto - pageSize;
+    useEffect(() => {
+        let newFilteredPhotos = photos; // 默认不过滤，使用原始列表
 
-        let filteredPhotos = photos;
         // 根据 filterOption 过滤
         if (filterOption === 'disease') {
-            filteredPhotos = filteredPhotos.filter(photo => photo.classificationResult !== 6);
+            newFilteredPhotos = newFilteredPhotos.filter(photo => photo.classificationResult !== 6);
         } else if (filterOption === 'normal') {
-            filteredPhotos = filteredPhotos.filter(photo => photo.classificationResult === 6);
+            newFilteredPhotos = newFilteredPhotos.filter(photo => photo.classificationResult === 6);
         }
 
         // 根据 checkedList 进一步过滤
         if (checkedList.length > 0 && !checkAll) {
-            filteredPhotos = filteredPhotos.filter(photo => checkedList.includes(classification_mapping[photo.classificationResult]));
+            newFilteredPhotos = newFilteredPhotos.filter(photo => checkedList.includes(classification_mapping[photo.classificationResult]));
         }
+
+        setFilteredPhotos(newFilteredPhotos); // 更新状态
+    }, [photos, filterOption, checkedList, checkAll]); // 依赖项列表
+
+    const getCurrentPhotos = () => {
+        const pageSize = getCurrentPageSize();
+        const indexOfLastPhoto = currentPage * pageSize;
+        const indexOfFirstPhoto = indexOfLastPhoto - pageSize;
 
         return filteredPhotos.slice(indexOfFirstPhoto, indexOfLastPhoto);
     };
@@ -261,25 +284,6 @@ const ImgVisualize = observer(() => {
         setConfidenceThreshold(value);
     };
 
-    const cardTitle = (
-        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-            <span>检测结果</span>
-            <Segmented
-                options={[
-                    {
-                        value: 'Kanban',
-                        icon: <AppstoreOutlined/>,
-                    },
-                    {
-                        value: 'List',
-                        icon: <BarsOutlined/>,
-                    },
-                ]}
-                onChange={handleSegmentChange}
-            />
-        </div>
-    );
-
     // 更新 renderTags 函数，使其根据 viewMode 来调整 Space 组件的方向
     const renderTags = (photo) => {
         const isGreen = photo.classificationResult === 6 || photo.confidence < confidenceThreshold;
@@ -300,13 +304,12 @@ const ImgVisualize = observer(() => {
     const listView = (
         <>
             <List
-                size="large"
                 bordered
                 dataSource={getCurrentPhotos()}
                 renderItem={item => (
                     <List.Item key={item.id} onClick={() => handleCardClick(item)} className="clickable-item">
                         <List.Item.Meta
-                            avatar={item.imgUrl ? <img src={item.imgUrl} alt={item.title} style={{width: '5vw'}}/> :
+                            avatar={item.imgUrl ? <img src={item.imgUrl} alt={item.title} style={{width: '45px'}}/> :
                                 <PictureOutlined/>}
                             title={item.imageName}
                             description={
@@ -326,7 +329,7 @@ const ImgVisualize = observer(() => {
                 <Card
                     key={photo.id}
                     hoverable
-                    style={{width: 240, margin: '1vw'}}
+                    className={'imgCard'}
                     cover={<img alt={photo.name} src={photo.imgUrl}/>}
                     onClick={() => handleCardClick(photo)}
                 >
@@ -344,21 +347,23 @@ const ImgVisualize = observer(() => {
             current={currentPage}
             onChange={handlePageChange}
             onShowSizeChange={handleSizeChange}
-            total={photos.length}
+            total={filteredPhotos.length}
             pageSize={getCurrentPageSize()}
             showQuickJumper
             showSizeChanger={true}
             showTotal={total => `总共 ${total} 张`}
-            pageSizeOptions={['8', '9', '20', '50']}
+            pageSizeOptions={['8', '10', '20', '50']}
         />
     );
 
     const handleExport = () => {
         // 确保 reportIds 是一个数组且不为空
         if (!Array.isArray(reportIds) || reportIds.length === 0) {
-            message.error("没有报告ID可供下载!");
+            message.error("没有报告ID可供下载！");
             return;
         }
+
+        console.log('reportIds:', reportIds)
 
         // 将 reportIds 转换为查询字符串参数
         const params = new URLSearchParams();
@@ -404,7 +409,8 @@ const ImgVisualize = observer(() => {
             setUserInput('');
         }
     };
-
+    
+    // 处理回车键
     const handleKeyPress = (event) => {
         if (event.key === 'Enter' && event.shiftKey === false) {
             event.preventDefault(); // 阻止默认的换行行为
@@ -420,7 +426,7 @@ const ImgVisualize = observer(() => {
         setIsModalVisible(true);
     };
 
-    const handleOk = () => {
+    const handleModalOk = () => {
         setIsModalVisible(false);
     };
 
@@ -514,6 +520,38 @@ const ImgVisualize = observer(() => {
             });
     };
 
+    const handleSave = async (keypath, newInfo, oriInfo) => {
+        // 找到需要更新的数据项
+        const dataIndex = imgStore.reportData.findIndex(item => item.theme === keypath);
+
+        if (dataIndex !== -1) {
+            // 创建数据的副本
+            const updatedData = [...imgStore.reportData];
+            updatedData[dataIndex] = { ...updatedData[dataIndex], answer: newInfo[keypath] };
+
+            // 更新 reportData 状态
+            imgStore.setReportData(updatedData);
+            console.log(imgStore.reportData)
+
+            // 创建 pdfData 副本并更新
+            const newPdfData = [updatedData[0], ...updatedData.slice(1).filter(item => selectedTags.includes(item.theme))];
+            setPdfData(newPdfData);
+        }
+    };
+
+
+    // const exportPDF = () => {
+    //     const doc = new jsPDF();
+    //     console.log(pdfData)
+    //     // 添加文本到 PDF，您可以根据需要格式化和定位文本
+    //     pdfData.forEach((item, index) => {
+    //         doc.text(`${item.theme}: ${item.answer}`, 10, 10 + (10 * index));
+    //     });
+    //
+    //     // 保存 PDF
+    //     doc.save('report.pdf');
+    // };
+
 
     const renderContent = () => {
         switch (activeMenu) {
@@ -547,7 +585,7 @@ const ImgVisualize = observer(() => {
                             </p>
                         </div>
                         <Space style={{width: '100%', flexDirection: 'column'}}>
-                            <Button type="primary" onClick={showDrawer} style={{marginTop: '3vh'}}>
+                            <Button type="primary" onClick={showChatDrawer} style={{marginTop: '3vh'}}>
                                 打开对话界面
                             </Button>
                         </Space>
@@ -579,6 +617,7 @@ const ImgVisualize = observer(() => {
                         </>
                         <Space style={{width: '100%', flexDirection: 'column', marginTop: '1vh'}}>
                             <Button type="primary" onClick={generateReport} style={{marginTop: '20px'}}
+
                                     loading={isReportLoading}>
                                 生成报告
                             </Button>
@@ -596,259 +635,354 @@ const ImgVisualize = observer(() => {
     };
 
     return (
-        <Row gutter={24}>
-            <Col span={18}>
-                <Card title={cardTitle} style={{height: '95vh', overflow: 'auto'}}>
-                    <Spin spinning={isLoading} className='spin'>
-                    </Spin>
-                    <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                        <div style={{flex: 1}}> {/* Content area */}
-                            {viewMode === 'grid' ? gridView : listView}
-                        </div>
-                        <div style={{display: 'flex', justifyContent: 'flex-end'}}> {/* Pagination area */}
-                            {pagination}
-                        </div>
-                    </div>
-                </Card>
-            </Col>
-            <Modal
-                open={previewVisible}
-                title="图片预览与参数调整"
-                width={800} // 设置一个更大的宽度以适应左右布局
-                height={600}
-                onCancel={handleCancel}
-                footer={[
-                    <Button key="confirm" onClick={handleCancel}>
-                        确定
-                    </Button>,
-                ]}
-            >
-                <Row gutter={16}>
-                    <Col span={12}>
-                        <Image alt="example" style={{width: '100%'}} src={previewImage}/>
+        <App>
+            <PageContainer
+                header={{
+                title: '检测结果',
+                ghost: true,
+                    extra:[
+                            <Space split={<Divider type="vertical" />}>
+                                <div>
+                                    展示方式：
+                                    <Segmented
+                                        options={[
+                                            {
+                                                value: 'Kanban',
+                                                icon: <AppstoreOutlined style={{ color: '#1890ff' }}/>,
+                                            },
+                                            {
+                                                value: 'List',
+                                                icon: <BarsOutlined style={{ color: '#1890ff' }}/>,
+                                            },
+                                        ]}
+                                        onChange={handleSegmentChange}
+                                    />
+                                </div>
+                                <div>
+                                    <Button type="link"
+                                            onClick={showModal}
+                                    >
+                                        <VerticalAlignBottomOutlined/>
+                                        导出结果
+                                    </Button>
+                                    <Modal
+                                        title="导出结果"
+                                        open={isModalVisible}
+                                        onOk={handleModalOk}
+                                        onCancel={handleModalCancel}
+                                        width={800}
+                                        footer={null}
+                                        style={{top: '25%'}} // 控制 Modal 在垂直方向上的位置
+                                    >
+                                        <Row>
+                                            <Col span={8}>
+                                                <Menu
+                                                    onClick={handleMenuClick}
+                                                    style={{width: 200}}
+                                                    defaultSelectedKeys={['1']}
+                                                    mode="inline"
+                                                    items={menuItems}
+                                                />
+                                            </Col>
+                                            <Col span={16} style={{height: '30vh'}}>
+                                                {renderContent()}
+                                            </Col>
+                                        </Row>
+                                    </Modal>
+                                </div>
+                                <Button key="1" type='link' onClick={() => navigate('/pages/detect/Detect')}>
+                                    <HistoryOutlined />
+                                    去历史记录选择
+                                </Button>
+                            </Space>
+                    ],
+                }}
+                >
+                <Row gutter={24}>
+                    <Col xs={24} sm={24} md={24} lg={18} xl={18}>
+                        <Card style={{height: '90vh', overflow: 'auto'}}>
+                            <Spin spinning={isLoading} className='spin'>
+                            </Spin>
+                            <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+                                <div style={{flex: 1}}>
+                                    {viewMode === 'grid' ? gridView : listView}
+                                </div>
+                                <div style={{display: 'flex', justifyContent: 'flex-end'}}> {/* Pagination area */}
+                                    {pagination}
+                                </div>
+                            </div>
+                        </Card>
                     </Col>
-                    <Col span={12}>
-                        <h3>{selectedImage ? selectedImage.name : '图片名称'}</h3>
-                        <Divider/> {/* 这是一个简单的分割线 */}
-                        <div>
-                            <h4>阈值</h4>
-                            <DecimalStep/>
-                            <h4>原始图像大小：</h4>
-                            <h4>分块大小：</h4>
-                            <h4>步长：</h4>
-                            <h4>每个图像的分块数量：</h4>
-                        </div>
-                    </Col>
-                </Row>
-            </Modal>
-
-            <Col span={6}>
-                <Card title="调参面板" style={{height: '95vh'}}>
-                    <div className="threshold-label">阈值:
-                        <Row>
-                            <Col span={16}>
-                                <Slider
-                                    min={0}
-                                    max={1}
-                                    onChange={onChange}
-                                    value={typeof confidenceThreshold === 'number' ? confidenceThreshold : 0}
-                                    step={0.01}
-                                />
+                    <Modal
+                        open={previewVisible}
+                        title="图片预览与参数调整"
+                        width={800} // 设置一个更大的宽度以适应左右布局
+                        height={600}
+                        onCancel={handleImgCancel}
+                        footer={[
+                            <Button key="confirm" onClick={handleImgCancel}>
+                                确定
+                            </Button>,
+                        ]}
+                    >
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Image alt="example" style={{width: '100%'}} src={previewImage}/>
                             </Col>
-                            <Col span={4}>
-                                <InputNumber
-                                    min={0}
-                                    max={1}
-                                    style={{
-                                        margin: '0 16px',
-                                    }}
-                                    step={0.01}
-                                    value={confidenceThreshold}
-                                    onChange={onChange}
-                                />
+                            <Col span={12}>
+                                <h3>{selectedImage ? selectedImage.name : '图片名称'}</h3>
+                                <Divider/> {/* 这是一个简单的分割线 */}
+                                <div>
+                                    <h4>阈值</h4>
+                                    <DecimalStep/>
+                                    <h4>原始图像大小：</h4>
+                                    <h4>分块大小：</h4>
+                                    <h4>步长：</h4>
+                                    <h4>每个图像的分块数量：</h4>
+                                </div>
                             </Col>
                         </Row>
-                    </div>
-                    <Divider></Divider>
-                    <Space direction="vertical" style={{width: '100%'}}>
-                        <div className="threshold-label">预测展示：</div>
-                        <Select defaultValue={filterOption} style={{width: '100%', marginBottom: '20px'}}
-                                onChange={handleSelectChange}>
-                            <Option value="all">所有预测图象</Option>
-                            <Option value="disease">只有病害的图像</Option>
-                            <Option value="normal">只有正常的图像</Option>
-                        </Select>
+                    </Modal>
 
-                        <Space direction="vertical" style={{width: '100%',}}>
-                            <div style={{marginBottom: '10px'}} className="threshold-label">图片类型：</div>
-                            <Checkbox
-                                indeterminate={indeterminate}
-                                onChange={onCheckAllChange}
-                                checked={checkAll}
-                                className="large-font-checkbox-item"
-                            >
-                                所有类型
-                            </Checkbox>
-                        </Space>
-                    </Space>
-                    <div style={{marginBottom: '10px'}}></div>
-                    <Checkbox.Group value={checkedList} onChange={onCheckboxChange} style={{width: '100%'}}
-                                    className="large-font-checkbox">
-                        {getCheckboxOptions().map((value, index) => (
-                            <Space key={index} direction="vertical" style={{width: '100%'}}>
-                                <Checkbox value={value}>
-                                    {value}
-                                </Checkbox>
+                    <Col xs={24} sm={24} md={24} lg={6} xl={6}>
+                        <Card title="调参面板" style={{height: '90vh', position: 'relative'}}>
+                            <div className="threshold-label">阈值:
+                                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <div style={{ flex: '1 1 auto', marginRight: '4px' }}> {/* 确保这个div有足够的空间来缩放 */}
+                                        <Slider
+                                            min={0}
+                                            max={1}
+                                            onChange={onChange}
+                                            value={typeof confidenceThreshold === 'number' ? confidenceThreshold : 0}
+                                            step={0.01}
+                                        />
+                                    </div>
+                                    <div style={{ flex: '0 1 auto' }}> {/* 这个div不会成长，但是可以缩小 */}
+                                        <InputNumber
+                                            min={0}
+                                            max={1}
+                                            step={0.01}
+                                            value={confidenceThreshold}
+                                            onChange={onChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <Divider></Divider>
+                            <Space direction="vertical" style={{width: '100%'}}>
+                                <div className="threshold-label">预测展示：</div>
+                                <Select defaultValue={filterOption} style={{width: '100%', marginBottom: '20px'}}
+                                        onChange={handleSelectChange}>
+                                    <Option value="all">所有预测图象</Option>
+                                    <Option value="disease">只有病害的图像</Option>
+                                    <Option value="normal">只有正常的图像</Option>
+                                </Select>
+
+                                <Space direction="vertical" style={{width: '100%',}}>
+                                    <div style={{marginBottom: '10px'}} className="threshold-label">图片类型：</div>
+                                    <Checkbox
+                                        indeterminate={indeterminate}
+                                        onChange={onCheckAllChange}
+                                        checked={checkAll}
+                                        className="large-font-checkbox-item"
+                                    >
+                                        所有类型
+                                    </Checkbox>
+                                </Space>
                             </Space>
-                        ))}
-                    </Checkbox.Group>
-                    <div style={{position: 'absolute', bottom: '5vh', width: '100%'}}>
-                        <Space style={{width: '100%', justifyContent: 'center',}} size='large'>
-                            {/*<Button type="primary" onClick={handleExport}><VerticalAlignBottomOutlined />*/}
-                            {/*    导出结果*/}
-                            {/*</Button>*/}
-                            {/*<Button type="primary" onClick={showDrawer}>*/}
-                            {/*    <PlusOutlined />*/}
-                            {/*    对话*/}
-                            {/*</Button>*/}
-                            <Button type="primary" block onClick={showModal}><VerticalAlignBottomOutlined/>
-                                导出结果
-                            </Button>
-                        </Space>
-                        <Modal
-                            title="导出结果"
-                            open={isModalVisible}
-                            onOk={handleOk}
-                            onCancel={handleModalCancel}
-                            width={800}
-                            footer={null}
-                            style={{top: '25%'}} // 控制 Modal 在垂直方向上的位置
-                        >
-                            {/*<div style={{ height: '50vh' }}>*/}
-                            <Row>
-                                <Col span={8}>
-                                    <Menu
-                                        onClick={handleMenuClick}
-                                        style={{width: 200}}
-                                        defaultSelectedKeys={['1']}
-                                        mode="inline"
-                                        items={menuItems}
-                                    />
-                                </Col>
-                                <Col span={16} style={{height: '30vh'}}>
-                                    {renderContent()}
-                                </Col>
-                            </Row>
-                            {/*</div>*/}
-                        </Modal>
-                    </div>
-                    <Drawer
-                        title="进行对话"
-                        placement={placement}
-                        onClose={onClose}
-                        open={open}
-                        // size={'large'}
-                        width={'50%'}
-                    >
-                        {/*根据isSending来判断是否加载spin*/}
-                        {chatStore.isSending && (
-                            <div className="spin">
-                                <Spin/>
-                            </div>
-                        )}
-                        <div className="chat-container">
-                            {/* 聊天历史 */}
-                            <div className="chat-history">
-                                {chatStore.messages
-                                    .filter(message => message.role !== 'analysis') // 过滤掉 role 为 'analysis' 的消息
-                                    .map((message, index) => (
-                                        <div
-                                            key={index}
-                                            className={`chat-message ${message.role === 'user' ? 'user-message' : 'gpt-message'}`}
-                                        >
-                                            {message.role === 'user' && (
-                                                <div className="message-avatar">
-                                                    {/* 用户头像 */}
-                                                    <Avatar src={userStore.userInfo.avatar}/>
-                                                </div>
-                                            )}
-                                            <div className="message-content">
-                                                {message.content}
-                                            </div>
-                                            {message.role === 'gpt' && (
-                                                <div className="message-avatar">
-                                                    {/* GPT头像 */}
-                                                    <Avatar src={logoMini} size={48}/> {/* GPT 头像的 URL */}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                            </div>
+                            <div style={{marginBottom: '10px'}}></div>
+                            <Checkbox.Group value={checkedList} onChange={onCheckboxChange} style={{width: '100%'}}
+                                            className="large-font-checkbox">
+                                {getCheckboxOptions().map((value, index) => (
+                                    <Space key={index} direction="vertical" style={{width: '100%'}}>
+                                        <Checkbox value={value}>
+                                            {value}
+                                        </Checkbox>
+                                    </Space>
+                                ))}
+                            </Checkbox.Group>
 
-                            {/* 输入区 */}
-                            <div className="message-input">
-                                <Input.TextArea
-                                    rows={1}
-                                    placeholder="输入你的问题"
-                                    value={userInput}
-                                    onChange={handleInputChange}
-                                    onKeyDown={handleKeyPress}
-                                />
-                                <Button
-                                    type="primary"
-                                    onClick={handleSendClick}
-                                    disabled={chatStore.isSending}
-                                >
-                                    <FontAwesomeIcon icon={faPaperPlane} style={{marginRight: '5px'}}/>
-                                    发送
-                                </Button>
-                            </div>
-                        </div>
-                    </Drawer>
-                    <Drawer
-                        title="报告详情"
-                        placement="right"
-                        onClose={closeReportDrawer}
-                        open={isReportDrawerVisible}
-                        width={'50%'}
-                    >
-                        <Descriptions bordered column={3}>
-                            {imgStore.reportData.map((item, index) => {
-                                if (item.upload_time) {
-                                    // 对于包含多个小字段的项，分组以适应三列布局
-                                    return (
-                                        <React.Fragment key={index}>
-                                            <Descriptions.Item label="上传者">{item.uploader}</Descriptions.Item>
-                                            <Descriptions.Item label="上传时间">{item.upload_time}</Descriptions.Item>
-                                            <Descriptions.Item label="路名">{item.road_name}</Descriptions.Item>
-                                            <Descriptions.Item label="上传数量">{item.upload_count}</Descriptions.Item>
-                                            <Descriptions.Item label="损坏比例">{item.damage_ratio}</Descriptions.Item>
-                                            <Descriptions.Item
-                                                label="选用模型">{item.selected_model}</Descriptions.Item>
-                                            <Descriptions.Item label="所在区域" span={2}>
-                                                {`${item.province} ${item.city} ${item.district}`}
-                                            </Descriptions.Item>
-                                            <Descriptions.Item label="经纬度信息" span={1}>
-                                                {`${item.gps_longitude} ${item.gps_latitude}`}
-                                            </Descriptions.Item>
-                                        </React.Fragment>
-                                    );
-                                } else {
-                                    // 仅当item.theme出现在selectedTags中时，才渲染该项
-                                    if (selectedTags.includes(item.theme)) {
-                                        return (
-                                            <Descriptions.Item label={item.theme} key={item.theme} span={3}>
-                                                {item.answer}
-                                            </Descriptions.Item>
-                                        );
-                                    }
+                            <Drawer
+                                title="进行对话"
+                                placement={placement}
+                                onClose={onChatDrawerClose}
+                                open={openChatDrawer}
+                                width={'50%'}
+                                key={'chat'}
+                            >
+                                {/*根据isSending来判断是否加载spin*/}
+                                {chatStore.isSending && (
+                                    <div className="spin">
+                                        <Spin/>
+                                    </div>
+                                )}
+                                <div className="chat-container">
+                                    {/* 聊天历史 */}
+                                    <div className="chat-history">
+                                        {chatStore.messages
+                                            .filter(message => message.role !== 'analysis') // 过滤掉 role 为 'analysis' 的消息
+                                            .map((message, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={`chat-message ${message.role === 'user' ? 'user-message' : 'gpt-message'}`}
+                                                >
+                                                    {message.role === 'user' && (
+                                                        <div className={'message-avatar'}>
+                                                            {/* 用户头像 */}
+                                                            <Avatar size={36} src={userStore.userInfo.avatar}/>
+                                                        </div>
+                                                    )}
+                                                    <div className="message-content">
+                                                        {message.content}
+                                                    </div>
+                                                    {message.role === 'gpt' && (
+                                                        <div>
+                                                            {/* GPT头像 */}
+                                                            <Avatar src={logoMini} size={48}/> {/* GPT 头像的 URL */}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                    </div>
+
+                                    {/* 输入区 */}
+                                    <div className="message-input">
+                                        <Input.TextArea
+                                            rows={1}
+                                            placeholder="输入你的问题"
+                                            value={userInput}
+                                            onChange={handleInputChange}
+                                            onKeyDown={handleKeyPress}
+                                        />
+                                        <Button
+                                            type="primary"
+                                            onClick={handleSendClick}
+                                            disabled={chatStore.isSending}
+                                        >
+                                            <FontAwesomeIcon icon={faPaperPlane} style={{marginRight: '5px'}}/>
+                                            发送
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Drawer>
+                            <Drawer
+                                title="报告详情"
+                                placement={placement}
+                                onClose={closeReportDrawer}
+                                open={isReportDrawerVisible}
+                                width={'50%'}
+                                key={'report'}
+                            >
+                                {
+                                    imgStore.reportData.length === 0 ? (
+                                        <Empty description="暂无报告"/>
+                                    ) : (
+                                        <ProDescriptions
+                                            title={imgStore.reportData[0].theme} // 使用第一个字典的 theme 作为标题
+                                            dataSource={imgStore.reportData[0]} // 只使用第一个字典作为数据源
+                                            tooltip={`道路 ${imgStore.reportData[0].road_name} 的报告`}
+                                            column={2}
+                                            actionRef={actionRef}
+                                            // bordered
+                                            formProps={{
+
+                                            }}
+                                            editable={{
+                                                onSave: async (keypath, newInfo, oriInfo) => {
+                                                    await handleSave(keypath, newInfo, oriInfo);
+                                                }
+                                            }} // 使内容可编辑
+                                            columns={[
+                                                {
+                                                    title: '上传者',
+                                                    dataIndex: 'uploader',
+                                                    key: 'uploader',
+                                                    editable: false,
+                                                },
+                                                {
+                                                    title: '上传时间',
+                                                    dataIndex: 'upload_time',
+                                                    key: 'upload_time',
+                                                    valueType: 'dateTime',
+                                                    editable: false,
+                                                },
+                                                {
+                                                    title: '位置',
+                                                    key: 'location',
+                                                    render: (_, record) => (
+                                                        <>{record.province} {record.city} {record.district}</>
+                                                    ),
+                                                    editable: false,
+                                                },
+                                                {
+                                                    title: 'GPS坐标',
+                                                    key: 'gps',
+                                                    render: (_, record) => (
+                                                        <>{record.gps_longitude}, {record.gps_latitude}</>
+                                                    ),
+                                                    editable: false,
+                                                },
+                                                {
+                                                    title: '道路名称',
+                                                    dataIndex: 'road_name',
+                                                    key: 'road_name',
+                                                    editable: false,
+                                                },
+                                                {
+                                                    title: '上传数量',
+                                                    dataIndex: 'upload_count',
+                                                    key: 'upload_count',
+                                                    editable: false,
+                                                },
+                                                {
+                                                    title: '选择的模型',
+                                                    dataIndex: 'selected_model',
+                                                    key: 'selected_model',
+                                                    editable: false,
+                                                },
+                                                {
+                                                    title: '完好程度',
+                                                    key: 'integrity',
+                                                    render: (_, record) => (
+                                                        <Progress
+                                                            percent={100 - record.damage_ratio * 100}
+                                                            format={percent => `${percent.toFixed(2)}%`}
+                                                        />
+                                                    ),
+                                                    editable: false,
+                                                }
+                                            ]}
+                                        >
+                                            <ProDescriptions.Item label="导出报告" valueType="option">
+                                            </ProDescriptions.Item>
+                                            {
+                                                imgStore.reportData.slice(1).map((item, index) => {
+                                                    if (selectedTags.includes(item.theme)) {
+                                                        return (
+                                                            <ProDescriptions.Item
+                                                                label={item.theme}
+                                                                dataIndex={item.theme}
+                                                                key={item.theme}
+                                                                span={2}
+                                                                copyable // 使内容可复制
+                                                                valueType={'textarea'}
+                                                                className='custom-editor'
+                                                            >
+                                                                {item.answer}
+                                                            </ProDescriptions.Item>
+                                                        );
+                                                    }
+                                                })
+                                            }
+                                        </ProDescriptions>
+                                    )
                                 }
-                            })}
-                        </Descriptions>
-                    </Drawer>
-                </Card>
-            </Col>
-        </Row>
+                            </Drawer>
+                        </Card>
+                    </Col>
+                </Row>
+            </PageContainer>
+        </App>
     );
 });
 

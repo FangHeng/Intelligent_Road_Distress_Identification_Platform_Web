@@ -1,141 +1,51 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Card,
     Form,
-    Input,
-    Button,
-    Space,
-    Row,
-    Col,
-    Upload,
-    Tag,
-    Avatar,
-    Select,
-    message, Descriptions,
+    App, Menu, Layout, theme, Input, Modal
 } from 'antd';
-import {EditOutlined} from "@ant-design/icons";
 import userStore from '../../store/UserStore'
-import companyStore from "../../store/CompanyStore";
-import { observer } from 'mobx-react-lite'
+import {observer} from 'mobx-react-lite'
 import {checkComplexity} from "../../utils/utils";
 import {useNavigate} from "react-router-dom";
 import {reaction} from "mobx";
+import {PageContainer} from "@ant-design/pro-components";
+import AccountSecurity from "../../components/AccountSetting/AccountSecurity";
+import Appearance from "../../components/AccountSetting/Appearance";
+import BasicInfo from "../../components/AccountSetting/BasicInfo";
 
+const menuItems = [
+    {
+        label: '基本信息',
+        key: 'basicInfo',
+    },
+    {
+        label: '账户安全',
+        key: 'accountSecurity',
+    },
+    {
+        label: '其他设置',
+        key: 'otherSettings',
+    },
+];
 
-const {Option} = Select;
-
-const formItemLayout = {
-    labelCol: {
-        xs: {span: 24},
-        sm: {span: 2},
-    },
-    wrapperCol: {
-        xs: {span: 24},
-        sm: {span: 16},
-    },
-};
-
-const tailFormItemLayout = {
-    wrapperCol: {
-        xs: {
-            span: 24,
-            offset: 0,
-        },
-        sm: {
-            span: 16,
-            offset: 8,
-        },
-    },
-};
-
-const colformItemLayout = {
-    labelCol: {
-        xs: {span: 21},
-        sm: {span: 5},
-    },
-    wrapperCol: {
-        xs: {span: 24},
-        sm: {span: 16},
-    },
-};
-
-const colTailformItemLayout = {
-    wrapperCol: {
-        xs: {
-            span: 12,
-            offset: 12,
-        },
-        sm: {
-            span: 14,
-            offset: 10,
-        },
-    },
-};
 
 const UserSetting = observer(() => {
-    const {userInfo, infoChangeHint} = userStore;
-    const {employeeNumber} = companyStore;
-
-    const navigate = useNavigate()
-
-    useEffect(() => {
-        // 添加性别映射逻辑
-        const genderMapping = {
-            'Male': '男',
-            'Female': '女',
-            'Other': '其他'
-        };
-
-        // 使用映射逻辑来更新性别字段
-        const genderValue = genderMapping[userInfo.gender] ?? '';
-
-        const personalInfofieldsValue = {
-            email: userInfo.email ?? '',
-            phone: userInfo.phone_number ?? '',
-            nickname: userInfo.username ?? '',
-            gender: genderValue, // 使用映射后的性别值
-        };
-
-        // 过滤掉值为 null 或空字符串的字段
-        const filteredPersonalInfofieldsValue = Object.fromEntries(
-            Object.entries(personalInfofieldsValue).filter(([_, value]) => value != null && value !== '')
-        );
-
-        formPersonalInfo.setFieldsValue(filteredPersonalInfofieldsValue);
-    }, [userInfo]);
-
-    const [formPersonalInfo] = Form.useForm();
     const [formPasswordSet] = Form.useForm();
 
-    const companyItems = [
-        {
-            key: '1',
-            label: '公司名称',
-            children: `${userInfo.company_name}`,
-        },
-        {
-            key: '2',
-            label: '工号位数',
-            children: `${employeeNumber}`,
-        },
-    ];
-
-    const onInfoFinish = async (values) => {
-        console.log('Received values of form: ', values);
-
-        // 调用 updateUserInfo 来更新用户信息
-        await userStore.updateUserInfo(values);
-
-    };
+    const navigate = useNavigate();
+    const {message} = App.useApp();
 
     const onPasswordFormFinish = async (values) => {
-        const { oldPassword, newPassword } = values;
+        const {oldPassword, newPassword} = values;
         const result = await userStore.changePassword(oldPassword, newPassword);
 
         if (result.success) {
             // 显示成功消息
             message.success(result.message);
-            await userStore.logout()
+            // 停留几秒，并跳转到登录页面
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await userStore.logout();
             navigate('/');
         } else {
             // 显示错误消息
@@ -143,262 +53,179 @@ const UserSetting = observer(() => {
         }
     };
 
-    const prefixSelector = (
-        <Form.Item name="prefix" noStyle>
-            <Select
-                style={{
-                    width: 70,
-                }}
-            >
-                <Option value="86">+86</Option>
-                <Option value="87">+87</Option>
-            </Select>
-        </Form.Item>
-    );
-
-    const handleFileChange = (info) => {
-        if (info.file.status !== 'uploading') {
-            console.log(info.file, info.fileList);
-        }
-        if (info.file.status === 'done') {
-            console.log(`${info.file.name} file uploaded successfully`);
-        } else if (info.file.status === 'error') {
-            console.log(`${info.file.name} file upload failed.`);
-        }
-    };
-
-    const uploadButton = (
-        <div>
-            <Avatar size={128} src={userInfo.avatar}/>
-            <div style={{position: 'absolute', right: 0, top: 0}}>
-                <Upload
-                    accept="image/*"
-                    showUploadList={false}
-                    beforeUpload={(file) => {
-                        userStore.changeAvatar(file);
-                        return false;
-                    }}
-                    onChange={handleFileChange}
-                >
-                    <Button shape="circle" icon={<EditOutlined/>}/>
-                </Upload>
-            </div>
-        </div>
-    );
 
     useEffect(() => {
-        const dispose = reaction(
-            () => infoChangeHint,
+        reaction(
+            () => userStore.infoChangeHint,
             (infoChangeHint) => {
-                console.log('Reaction triggered:', infoChangeHint);
                 if (infoChangeHint.status === 'success') {
+                    console.log(111111)
+                    // 显示成功消息
                     message.success(infoChangeHint.message);
                 } else if (infoChangeHint.status === 'error') {
+                    // 显示错误消息
                     message.error(infoChangeHint.message);
                 } else {
+                    // 显示警告消息
                     message.warning(infoChangeHint.message);
                 }
             }
         );
-
-        return () => dispose(); // 在组件卸载时清理
     }, []);
 
+    const [currentTab, setCurrentTab] = useState('basicInfo');
+
+    const [currentRecord, setCurrentRecord] = useState(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const handleEdit = (record) => {
+        if (record.id === '1') {
+            // 如果是密码修改，显示模态框
+            setCurrentRecord(record);
+            setIsModalVisible(true);
+        } else {
+            // 如果是其他设置项，根据项的 id 切换到对应的菜单界面
+            // const keyMap = {
+            //
+            //     // 这里可以扩展更多的映射
+            // };
+            // const key = keyMap[record.id];
+            setCurrentTab('basicInfo');
+        }
+    };
+
+    const renderContent = () => {
+        switch (currentTab) {
+            case 'basicInfo':
+                return (
+                    <BasicInfo />
+                );
+            case 'accountSecurity':
+                return (
+                    <AccountSecurity onEdit={handleEdit}/>
+                );
+            case 'otherSettings':
+                return (
+                    <Appearance />
+                );
+            default:
+                return null;
+        }
+    };
+    const {Sider, Content} = Layout;
+
+    const {
+        token: {colorBgContainer},
+    } = theme.useToken();
+
     return (
-        <Space
-            direction="vertical"
-            size="middle"
-            style={{
-                display: 'flex',
-                justifyContent: 'center', // 使内容居中
-            }}
-        >
-            <Card title="用户信息设置">
-                <Row gutter={24}>
-                    <Col span={7}>
-                        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center',}}>
-                            <Col span={8} style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                {uploadButton}
-                                <h5>{userInfo.username}</h5>
-                                <h5>{userInfo.employee_number}</h5>
-                                <Tag key={userInfo.user_level}  bordered={false} color="blue">{userInfo.user_level}</Tag>
-                            </Col>
-                        </div>
-                    </Col>
-
-                    <Col span={16}>
-                        <Form
-                            {...formItemLayout}
-                            form={formPersonalInfo}
-                            name="userSetting"
-                            onFinish={onInfoFinish}
-                            initialValues={{
-                                prefix: '86',
-                            }}
-                            scrollToFirstError
+        <App>
+            <PageContainer
+                header={{
+                    title: '账户设置',
+                }}
+                content='管理您的个人信息以及系统设置。'
+            >
+                <Card>
+                    <Layout>
+                        <Sider width={200} theme={'light'}>
+                            <Menu
+                                mode="inline"
+                                selectedKeys={[currentTab]}
+                                onClick={({key}) => setCurrentTab(key)}
+                                theme="light"
+                                items={menuItems}
+                            >
+                            </Menu>
+                        </Sider>
+                        <Layout>
+                            <Content style={{padding: '0 24px', minHeight: 280, background: colorBgContainer}}>
+                                {renderContent()}
+                            </Content>
+                        </Layout>
+                    </Layout>
+                </Card>
+                <Modal
+                    title="编辑设置"
+                    open={isModalVisible}
+                    onOk={() => {
+                        // 表单提交
+                        formPasswordSet
+                            .validateFields()
+                            .then((values) => {
+                                formPasswordSet.resetFields();
+                                // handleSave(values);
+                                onPasswordFormFinish(values);
+                            })
+                            .catch((info) => {
+                                console.log('Validate Failed:', info);
+                            });
+                    }}
+                    onCancel={() => setIsModalVisible(false)}
+                >
+                    <Form
+                        form={formPasswordSet}
+                        name="passwordSetting"
+                        scrollToFirstError
+                        layout={'vertical'}
+                    >
+                        <Form.Item name="oldPassword" label="旧密码" rules={[
+                            {
+                                required: true,
+                                message: '请输入您的密码！',
+                            },
+                        ]}
                         >
-                            <Form.Item name="email" label="邮箱" rules={[
-                                {
-                                    type: 'email',
-                                    message: '输入的电子邮件无效！',
+                            <Input.Password/>
+                        </Form.Item>
+                        <Form.Item name="newPassword" label="新密码" rules={[
+                            {
+                                required: true,
+                                message: '请输入您的新密码！',
+                            },
+                            ({getFieldValue}) => ({
+                                validator(_, value) {
+                                    if (!value || !checkComplexity(value)) {
+                                        return Promise.reject(new Error('密码过于简单，请包含大写字母、数字和特殊字符'));
+                                    }
+                                    if (value === getFieldValue('oldPassword')) {
+                                        return Promise.reject(new Error('新密码不能与旧密码相同'));
+                                    }
+                                    return Promise.resolve();
                                 },
+                            }),
+                        ]}
+                                   hasFeedback>
+                            <Input.Password/>
+                        </Form.Item>
+
+
+                        <Form.Item
+                            name="confirmPassword"
+                            label="确认新密码"
+                            dependencies={['newPassword']}
+                            hasFeedback
+                            rules={[
                                 {
                                     required: true,
-                                    message: '请输入您的电子邮件！',
-                                },
-                            ]}>
-                                <Input/>
-                            </Form.Item>
-
-
-                            <Form.Item
-                                name="phone"
-                                label="电话号码"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '请输入您的电话号码！',
-                                    },
-                                ]}
-                            >
-                                <Input
-                                    addonBefore={prefixSelector}
-                                    style={{
-                                        width: '100%',
-                                    }}
-                                />
-                            </Form.Item>
-
-
-                            <Form.Item
-                                name="nickname"
-                                label="昵称"
-                                tooltip="你希望别人怎么称呼你？"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '请输入您的昵称！',
-                                        whitespace: true,
-                                    },
-                                ]}
-                            >
-                                <Input/>
-                            </Form.Item>
-
-
-                            <Form.Item
-                                name="gender"
-                                label="性别"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '请选择性别！',
-                                    },
-                                ]}
-                            >
-                                <Select placeholder="请选择性别">
-                                    <Option value="Male">男</Option>
-                                    <Option value="Female">女</Option>
-                                    <Option value="Other">其他</Option>
-                                </Select>
-                            </Form.Item>
-
-                            <Form.Item {...tailFormItemLayout}>
-                                <Button type="primary" htmlType="submit" >
-                                    确认
-                                </Button>
-                            </Form.Item>
-                        </Form>
-                    </Col>
-                </Row>
-            </Card>
-            <Row gutter={16}>
-                <Col span={12}>
-                    <Card title='你的公司' style={{height:'40vh'}}>
-                        <Descriptions layout="vertical" bordered items={companyItems} />
-                    </Card>
-                </Col>
-                <Col span={12}>
-                    <Card title="修改密码" style={{height:'40vh'}}>
-                        <Form
-                            {...colformItemLayout}
-                            form={formPasswordSet}
-                            name="passwordSetting"
-                            onFinish={onPasswordFormFinish}
-                            initialValues={{
-                                prefix: '86',
-                            }}
-                            scrollToFirstError
-                        >
-                            <Form.Item name="oldPassword" label="旧密码" rules={[
-                                {
-                                    required: true,
-                                    message: '请输入您的密码！',
-                                },
-                            ]}
-                                   >
-                                <Input.Password/>
-                            </Form.Item>
-                            <Form.Item name="newPassword" label="新密码" rules={[
-                                {
-                                    required: true,
-                                    message: '请输入您的新密码！',
+                                    message: '请确认您的密码!',
                                 },
                                 ({getFieldValue}) => ({
                                     validator(_, value) {
-                                        if (!value || !checkComplexity(value)) {
-                                            return Promise.reject(new Error('密码过于简单，请包含大写字母、数字和特殊字符'));
+                                        if (!value || getFieldValue('newPassword') === value) {
+                                            return Promise.resolve();
                                         }
-                                        if (value === getFieldValue('oldPassword')) {
-                                            return Promise.reject(new Error('新密码不能与旧密码相同'));
-                                        }
-                                        return Promise.resolve();
+                                        return Promise.reject(new Error('您输入的新密码不匹配！'));
                                     },
                                 }),
                             ]}
-                                       hasFeedback>
-                                <Input.Password/>
-                            </Form.Item>
-
-
-                            <Form.Item
-                                name="confirmPassword"
-                                label="确认新密码"
-                                dependencies={['newPassword']}
-                                hasFeedback
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '请确认您的密码!',
-                                    },
-                                    ({getFieldValue}) => ({
-                                        validator(_, value) {
-                                            if (!value || getFieldValue('newPassword') === value) {
-                                                return Promise.resolve();
-                                            }
-                                            return Promise.reject(new Error('您输入的新密码不匹配！'));
-                                        },
-                                    }),
-                                ]}
-                            >
-                                <Input.Password/>
-                            </Form.Item>
-                            <Form.Item {...colTailformItemLayout}>
-                                <Button type="primary" htmlType="submit">
-                                    确认
-                                </Button>
-                            </Form.Item>
-                        </Form>
-                    </Card>
-                </Col>
-
-            </Row>
-        </Space>
+                        >
+                            <Input.Password/>
+                        </Form.Item>
+                    </Form>
+                </Modal>
+            </PageContainer>
+        </App>
     );
 })
 

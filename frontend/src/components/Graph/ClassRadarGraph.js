@@ -4,6 +4,7 @@ import {Radar} from "@ant-design/plots";
 import {observer} from "mobx-react-lite";
 import React from "react";
 import {classification_mapping} from "../../utils/utils";
+import {themeStore} from "../../store/ThemeStore";
 
 const processData = (data) => {
     const counts = {};
@@ -64,6 +65,7 @@ const ClassRadarGraph = observer(() => {
         style: {
             lineWidth: 2,
         },
+        theme: themeStore.theme === 'dark' ? 'dark' : 'light',
     };
     return (
         <Card title="道路分类数量" style={{ width: '100%' }}>

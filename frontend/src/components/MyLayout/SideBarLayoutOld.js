@@ -1,8 +1,8 @@
 import {Button, Layout, Menu, theme, message, Divider, Tooltip, Avatar, Typography, FloatButton} from 'antd'
 import { useState, useEffect } from 'react'
 import {useNavigate} from 'react-router-dom'
-import logo from '../../assets/img/logo.png'
-import logo_mini from '../../assets/img/logo-mini.png'
+import logo from '../../assets/img/logo/logo.png'
+import logo_mini from '../../assets/img/logo/logo-mini.png'
 import { Outlet } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHouse, faArrowRightFromBracket, faGears, faCircleInfo, faChartColumn, faCube } from '@fortawesome/free-solid-svg-icons';
@@ -18,27 +18,42 @@ import roadStore from "../../store/RoadStore";
 const { Text } = Typography
 const { Sider, Content, Footer } = Layout
 
-const SideBarLayout = observer(() => {
+const SideBarLayoutOld = observer(() => {
     const [collapsed, setCollapsed] = useState(false)
     const navigate = useNavigate()
     const {
         token: { colorBgContainer },
     } = theme.useToken()
 
+    // useEffect(() => {
+    //     userStore.fetchUserInfo(
+    //         () => {
+    //             if (userStore.getInfoHint.status === 'error') {
+    //                 message.error(userStore.getInfoHint.message)
+    //             }
+    //         }
+    //     );
+    //     companyStore.fetchEmployeeNumber();
+    //     const {loginHint} = userStore
+    //     if (loginHint.status === 'success'){
+    //         message.success('登陆成功！')
+    //     }
+    // }, [])
+
     useEffect(() => {
-        userStore.fetchUserInfo(
-            () => {
-                if (userStore.getInfoHint.status === 'error') {
-                    message.error(userStore.getInfoHint.message)
-                }
+        const fetchInfo = async () => {
+            await userStore.fetchUserInfo();
+
+            if (userStore.getInfoHint.status === 'error') {
+                message.error(userStore.getInfoHint.message);
             }
-        );
-        companyStore.fetchEmployeeNumber();
-        const {loginHint} = userStore
-        if (loginHint.status === 'success'){
-            message.success('登陆成功！')
-        }
-    }, [])
+        };
+
+        fetchInfo().catch(error => {
+            console.error("Failed to fetch user info:", error);
+        });
+    }, []);
+
 
     useEffect(() => {
         // 当主页加载完成，停止进度条
@@ -259,4 +274,4 @@ const SideBarLayout = observer(() => {
     )
 })
 
-export default SideBarLayout
+export default SideBarLayoutOld

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Anchor, Card } from 'antd';
+import {PageContainer} from "@ant-design/pro-components";
 
 const About = () => {
     const anchorItems = [
@@ -8,7 +9,8 @@ const About = () => {
     ];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'start', padding: '20px' }}>
+        <PageContainer>
+            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'start', padding: '20px' }}>
             <div style={{ flex: 4 }}>
                 <Card id="members" title="成员信息" style={{ marginBottom: 20 }}>
                     成员信息
@@ -22,7 +24,8 @@ const About = () => {
             <div style={{ marginLeft: '20px' }}>
                 <Anchor affix={true} offsetTop={80} items={anchorItems} replace/>
             </div>
-        </div>
+            </div>
+        </PageContainer>
     );
 };
 

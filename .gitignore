@@ -25,6 +25,7 @@ yarn-error.log*
 
 frontend/.idea/
 backend/.idea/
+homepage/.idea/
 
 backend/IRDIP/__pycache__/
 

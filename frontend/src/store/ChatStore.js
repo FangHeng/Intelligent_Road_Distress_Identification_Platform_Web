@@ -1,4 +1,4 @@
-import {makeAutoObservable, toJS} from "mobx";
+import {action, makeAutoObservable, observable, toJS} from "mobx";
 import axios from "axios";
 
 
@@ -9,7 +9,14 @@ class ChatStore {
     isSending = false;
 
     constructor() {
-        makeAutoObservable(this);
+        makeAutoObservable(this, {
+            messages: observable,
+            isSending: observable,
+            addMessage: action,
+            sendMessage: action,
+            setIsSending: action,
+            updateAnalysisResult: action,
+        });
     }
 
     addMessage(role, content) {
@@ -38,7 +45,7 @@ class ChatStore {
     updateAnalysisResult(newAnalysisResult) {
         this.analysisResult = newAnalysisResult;
         const formattedMessage = this.formatMessages(newAnalysisResult);
-        const analysisIntro = "这是一条或几条道路的一个分析结果，每条是该道路的病害分类结果的占比，我的问题将会围绕这些问你相关问题：";
+        const analysisIntro = "在本次对话中你的角色是gpt，这是一条或几条道路的一个分析检测结果，每条是该道路本次检测后的病害分类结果的占比，请你参考这次的检测结果（即作为道路的最新监测情况），我的问题将会围绕这次检测结果（即该道路的情况）问你相关道路情况和维修问题：";
         const fullAnalysisMessage = `${analysisIntro}\n${formattedMessage}`;
         // 判断messages中是否已经有了分析结果，如果有了，就替换成新的分析结果
         const analysisMessageIndex = this.messages.findIndex(msg => msg.role === 'analysis');
@@ -96,11 +103,10 @@ function chatWithGPT(userMessage) {
         url: 'https://oneapi.xty.app/v1/chat/completions',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer sk-GkthFvMA4DRMaInHE1B7F0E775A0406fBf8a31E44aF9D267`,
+            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY }`,
         },
         data: data
     };
-    // console.log(process.env.OPENAI_API_KEY)
 
     return axios.request(config)
         .then((response) => response.data)

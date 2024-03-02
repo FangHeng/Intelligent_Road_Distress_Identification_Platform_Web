@@ -1,6 +1,7 @@
-import {HistoryOutlined, RightOutlined} from '@ant-design/icons';
+// HomeRoadCard.js
+import {HistoryOutlined, RightOutlined, ToTopOutlined} from '@ant-design/icons';
 import React, {useEffect, useState} from 'react';
-import {Button, Card, Collapse, Space, Spin, Tag, theme} from 'antd';
+import {Button, Card, Collapse, Empty, Progress, Space, Tag, theme} from 'antd';
 import {observer} from "mobx-react-lite";
 import historyStore from "../../store/HistoryStore";
 import {formatDateTime} from "../../utils/utils";
@@ -20,8 +21,12 @@ const HomeRoadCard = observer(() => {
     };
 
 
-    const handleClick = () => {
+    const handleMoreClick = () => {
         navigate('/pages/detect/Detect')
+    }
+
+    const handleUploadClick = () => {
+        navigate('/pages/detect/UploadPhoto')
     }
 
     useEffect(() => {
@@ -42,23 +47,31 @@ const HomeRoadCard = observer(() => {
     const getItems = (panelStyle) => {
         return sortedRecords.map(record => ({
             key: record.upload_id,
-            label: <Space><div>{record.upload_name}</div> <Tag color="geekblue">{record.road__road_name}</Tag></Space>,
+            label: (
+                <Space>
+                    <div>{record.upload_name}</div>
+                    <Tag color="geekblue">{record.road__road_name}</Tag>
+                </Space>
+            ),
             children: (
                 <div>
                     <p>上传者: {record.uploader__user__username}</p>
                     <p>上传时间: {formatDateTime(record.upload_time)}</p>
-                    {/*<p>道路ID: {record.road__road_id}</p>*/}
                     <p>上传数量: {record.upload_count}</p>
                     <p>使用的模型：{record.selected_model}</p>
-                    <p>完好度: {Math.round(record.integrity)+'%'}</p>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ whiteSpace: 'nowrap' }}>完好度: </span>
+                        <Progress percent={Math.round(parseFloat(record.integrity))} style={{ marginLeft: 8 }} />
+                    </div>
                 </div>
             ),
             style: panelStyle,
         }));
     };
 
+
     return (
-        <Card title='最近上传' className='secondRowCard' style={{ overflow: 'auto' }}>
+        <Card title='最近上传' className='firstRowCard' style={{ overflow: 'auto'}}>
             {
                 defaultActiveKey !== undefined ? (
                     <>
@@ -71,12 +84,16 @@ const HomeRoadCard = observer(() => {
                             }}
                             items={getItems(panelStyle)}
                         />
-                        <Button type="link" onClick={handleClick} block><HistoryOutlined />
+                        <Button type="link" onClick={handleMoreClick} block><HistoryOutlined />
                             查看更多
                         </Button>
                     </>
                 ) : (
-                    <Spin className='spin' />
+                    <Empty>
+                        <Button type="link" onClick={handleUploadClick} block><ToTopOutlined />
+                            去上传
+                        </Button>
+                    </Empty>
                 )
             }
         </Card>

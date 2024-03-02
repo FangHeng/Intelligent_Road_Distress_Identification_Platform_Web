@@ -1,24 +1,37 @@
-import React, {useState} from 'react';
-import {Upload, Button, Input, Select, Row, Col, Card, Space, Modal, message, Spin,} from 'antd';
+// Upload.js: 上传图片的页面，包括图片上传和图片信息填写
+import React, {useEffect, useState} from 'react';
+import {Upload, Button, Input, Select, Space, Modal, Spin, App} from 'antd';
 import {PlusOutlined, VerticalAlignTopOutlined} from '@ant-design/icons';
-import { observer } from 'mobx-react-lite'
+import {observer} from 'mobx-react-lite'
 import imageStore from '../../../store/ImgStore'
 import roadStore from '../../../store/RoadStore'
 import '../css/ImageList.css'
-import {getBase64} from "../../../utils/utils";
+// import {getBase64} from "../../../utils/utils";
 import {useNavigate} from "react-router-dom";
+import {ProCard} from "@ant-design/pro-components";
+import RcResizeObserver from 'rc-resize-observer';
+
+const getBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+};
 
 
 const ImageUpload = observer(() => {
     const [fileList, setFileList] = useState([]);
-    const [imageInfo, setImageInfo] = useState({ title: '', road: '' });
+    const [imageInfo, setImageInfo] = useState({title: '', road: ''});
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
 
     const navigate = useNavigate();
+    const {message} = App.useApp();
 
-    const handleFileChange = ({ fileList }) => setFileList(fileList);
+    const handleFileChange = ({fileList}) => setFileList(fileList);
 
     const handleCancel = () => setPreviewOpen(false);
     const handlePreview = async (file) => {
@@ -29,6 +42,31 @@ const ImageUpload = observer(() => {
         setPreviewOpen(true);
         setPreviewTitle(file.name || file.url.substring(file.url.lastIndexOf('/') + 1));
     };
+    // const handlePreview = async (file) => {
+    //     if (!file.url && !file.preview) {
+    //         // 创建一个Blob URL
+    //         file.preview = URL.createObjectURL(file.originFileObj);
+    //     }
+    //     setPreviewImage(file.url || file.preview);
+    //     setPreviewOpen(true);
+    //     setPreviewTitle(file.name || file.url.substring(file.url.lastIndexOf('/') + 1));
+    // };
+    //
+    // // 在组件卸载时释放Blob URL
+    // useEffect(() => {
+    //     // 组件卸载时的清理函数
+    //     return () => {
+    //         // 如果有预览图，释放Blob URL
+    //         if (fileList && fileList.length > 0) {
+    //             fileList.forEach(file => {
+    //                 if (file.preview) {
+    //                     URL.revokeObjectURL(file.preview);
+    //                 }
+    //             });
+    //         }
+    //     };
+    // }, [fileList]); // 依赖项是fileList，确保每次fileList变化时都能正确清理
+
 
     const handleUpload = async () => {
         // 检查是否所有字段都已填写
@@ -45,6 +83,7 @@ const ImageUpload = observer(() => {
         await imageStore.uploadImages(fileList, imageInfo);
 
         // 显示提示信息
+
         if (imageStore.uploadHint.status === 'success') {
             message.success(imageStore.uploadHint.message);
             navigate('/pages/visualize/ImgVisualize');
@@ -55,73 +94,90 @@ const ImageUpload = observer(() => {
 
     const uploadButton = (
         <div>
-            <PlusOutlined />
-            <div style={{ marginTop: 8 }}>上传</div>
+            <PlusOutlined/>
+            <div style={{marginTop: 8}}>上传</div>
         </div>
     );
 
-    return (
-        <Row gutter={24}>
-            <Col span={18}>
-                <Card style={{ height: '90vh', overflow: 'auto', position:'relative' }}>
-                    {imageStore.uploadHint.isProcessing ? <div className="spin"><Spin tip="处理中..."><div className='content'></div></Spin> </div>: null}
-                    <Upload
-                        className="custom-upload"
-                        listType="picture-card"
-                        onChange={handleFileChange}
-                        beforeUpload={() => false} // 阻止自动上传
-                        fileList={fileList}
-                        onPreview={handlePreview}
-                        multiple={true}
-                    >
-                        {fileList.length >= 64 ? null : uploadButton}
-                    </Upload>
-                    <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
-                        <img
-                            alt="选择的图片"
-                            style={{
-                                width: '100%',
-                            }}
-                            src={previewImage}
-                        />
-                    </Modal>
-                </Card>
-            </Col>
-            <Col span={6}>
-                <Card title="图片信息填写" style={{ height: '90vh', overflow:'auto'}}>
-                    <Space direction="vertical" style={{ width: '100%' }} size="large">
-                        <Input
-                            placeholder="输入图片名称"
-                            onChange={(e) => setImageInfo({ ...imageInfo, title: e.target.value })}
-                        />
-                        <Select
-                            placeholder="选择道路"
-                            style={{ width: '100%' }}
-                            onChange={(value) => setImageInfo({ ...imageInfo, road: value })}
-                        >
-                            {roadStore.roadData.map((road) => (
-                                <Select.Option key={road.road_id} value={road.road_id}>
-                                    {road.road_name}
-                                </Select.Option>
-                            ))}
-                        </Select>
+    const [responsive, setResponsive] = useState(false);
 
-                        <Button type="primary"
-                            style={{
-                                width: '85%',
-                                position: 'absolute',
-                                bottom: '5vh',
-                                left: '25px',
-                            }}
-                            onClick={handleUpload}
-                            loading={imageStore.uploadHint.isProcessing}
-                    >
-                        <VerticalAlignTopOutlined />上传
-                    </Button>
-                    </Space>
-                </Card>
-            </Col>
-        </Row>
+    return (
+        <App>
+        <RcResizeObserver
+            key="resize-observer"
+            onResize={(offset) => {
+                setResponsive(offset.width < 596);
+            }}
+        >
+            <ProCard
+                split={responsive ? 'horizontal' : 'vertical'}
+                bordered
+                headerBordered
+            >
+                <ProCard colSpan="75%">
+                    <div style={{height: '70vh', overflow: 'auto'}}>
+                        {imageStore.uploadHint.isProcessing ? <div className="spin"><Spin tip="处理中...">
+                            <div className='content'></div>
+                        </Spin></div> : null}
+                        <Upload
+                            className="custom-upload"
+                            listType="picture-card"
+                            onChange={handleFileChange}
+                            beforeUpload={() => false} // 阻止自动上传
+                            fileList={fileList}
+                            onPreview={handlePreview}
+                            multiple={true}
+                        >
+                            {fileList.length >= 64 ? null : uploadButton}
+                        </Upload>
+                        <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
+                            <img
+                                alt="选择的图片"
+                                style={{
+                                    width: '100%',
+                                }}
+                                src={previewImage}
+                            />
+                        </Modal>
+                    </div>
+                </ProCard>
+                <ProCard title="图片信息填写">
+                    <div style={{height: '70vh'}}>
+                        <Space direction="vertical" style={{width: '100%'}} size="large">
+                            <Input
+                                placeholder="输入本次上传记录名"
+                                onChange={(e) => setImageInfo({...imageInfo, title: e.target.value})}
+                            />
+                            <Select
+                                placeholder="选择道路"
+                                style={{width: '100%'}}
+                                onChange={(value) => setImageInfo({...imageInfo, road: value})}
+                            >
+                                {roadStore.roadData.map((road) => (
+                                    <Select.Option key={road.road_id} value={road.road_id}>
+                                        {road.road_name}
+                                    </Select.Option>
+                                ))}
+                            </Select>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent:'center'}}>
+                            <Button type="primary"
+                                    style={{
+                                        width: '85%',
+                                        position: 'absolute',
+                                        bottom: '5vh',
+                                    }}
+                                    onClick={handleUpload}
+                                    loading={imageStore.uploadHint.isProcessing}
+                            >
+                                <VerticalAlignTopOutlined/>上传
+                            </Button>
+                            </div>
+                        </Space>
+                    </div>
+                </ProCard>
+            </ProCard>
+        </RcResizeObserver>
+        </App>
     );
 });
 

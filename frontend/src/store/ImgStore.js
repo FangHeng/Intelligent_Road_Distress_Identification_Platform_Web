@@ -1,13 +1,12 @@
-import { makeAutoObservable } from 'mobx';
+import {action, makeAutoObservable, observable} from 'mobx';
 import axiosInstance from "../utils/AxiosInstance";
-import {processStackedData} from "../components/Graph/ClassStackedBarChart";
-import { message } from 'antd';
 import chatStore from "./ChatStore";
+import {classification_mapping} from "../utils/utils";
 
 class ImageStore {
     images = [];
     uploadHint = {
-        status: '',  // 'success', 'error', or ''
+        status: '',
         message: '',
         isProcessing: false,
     };
@@ -15,16 +14,68 @@ class ImageStore {
     selectedUploadId = [];
     resultData = [];
     isLastUploadIdFetched = false;
+    reportIds = [];
     reportData = [];
     analysisResult = [];
 
     constructor() {
-        makeAutoObservable(this);
+        makeAutoObservable(this, {
+            images: observable,
+            uploadHint: observable,
+            lastUploadId: observable,
+            selectedUploadId: observable,
+            resultData: observable,
+            isLastUploadIdFetched: observable,
+            reportIds: observable,
+            reportData: observable,
+            analysisResult: observable,
+            addImage: action,
+            setResultData: action,
+            setReportIds: action,
+            setReportData: action,
+            setAnalysisResult: action,
+            setUploadHint: action,
+            setSelectedUploadId: action,
+            uploadImages: action,
+            setLastUploadId: action,
+            resetIsLastUploadIdFetched: action,
+            fetchLastUploadId: action,
+            fetchResultData: action,
+        });
     }
 
     addImage(imageData) {
         this.images.push(imageData);
     }
+
+    setResultData(results) {
+        this.resultData = results;
+    }
+
+    setReportIds(ids) {
+        this.reportIds = ids;
+    }
+
+    setReportData(data) {
+        this.reportData = data;
+    }
+
+    setAnalysisResult(data) {
+        this.analysisResult = data;
+    }
+
+    setUploadHint(uploadHint) {
+        this.uploadHint = {
+            ...this.uploadHint,
+            ...uploadHint,
+        };
+    }
+
+    setSelectedUploadId(ids) {
+        this.selectedUploadId = [];
+        this.selectedUploadId = ids;
+    }
+
 
     async uploadImages(fileList, imageInfo) {
         const formData = new FormData();
@@ -49,21 +100,32 @@ class ImageStore {
         }
 
         try {
-            this.uploadHint.isProcessing = true;
+            this.setUploadHint({
+                status: 'processing',
+                message: '正在处理图片，请稍后...',
+                isProcessing: true,
+            })
             const response = await axiosInstance.post('/irdip/upload/', formData);
             const responseData = response.data;
 
-            this.uploadHint.status = 'success';
-            this.uploadHint.message = '处理成功！';
-            this.uploadHint.isProcessing = false;
-            this.selectedUploadId = [];
+            this.setUploadHint({
+                status: 'success',
+                message: '处理成功！',
+                isProcessing: false,
+            })
+            this.setSelectedUploadId([]);
             return responseData;
         } catch (error) {
-            this.uploadHint.status = 'error';
-            this.uploadHint.message = '图片处理失败！';
+            this.setUploadHint({
+                status: 'error',
+                message: '处理失败，请稍后再试！',
+                isProcessing: false,
+            })
             console.error('Error during image upload:', error);
         } finally {
-            this.uploadHint.isProcessing = false;
+            this.setUploadHint({
+                isProcessing: false,
+            })
         }
     }
 
@@ -89,23 +151,10 @@ class ImageStore {
             })
             .catch(error => {
                 console.error('Error fetching data: ', error);
-                throw error; // 抛出错误，以便在调用链上捕获
+                throw error; // 抛出错误
             });
     }
 
-    // fetchResultData(ids) {
-    //     const params = new URLSearchParams();
-    //     ids.forEach(id => params.append('upload_id', id));
-    //
-    //     axiosInstance.get('/irdip/get_result', { params })
-    //         .then(response => {
-    //             console.log(response.data);
-    //             this.resultData = response.data;
-    //         })
-    //         .catch(error => {
-    //             console.error('Error fetching upload data: ', error);
-    //         });
-    // }
     fetchResultData(ids) {
         const params = new URLSearchParams();
         ids.forEach(id => params.append('upload_id', id));
@@ -114,26 +163,55 @@ class ImageStore {
         return axiosInstance.get('/irdip/get_result/', { params })
             .then(response => {
                 console.log(response.data);
-                this.resultData = response.data;
-                this.analysisResult = processStackedData(this.resultData);
+                this.setResultData(response.data);
+                this.setAnalysisResult(calculatePercentage(this.resultData));
                 // 确保 ChatStore 使用最新的 analysisResult
                 chatStore.updateAnalysisResult(this.analysisResult);
             })
             .catch(error => {
                 console.error('Error fetching upload data: ', error);
-                message.error('获取数据失败!');
                 // 可以选择在这里处理错误，或者把它抛出让调用者处理
                 // throw error;
             });
     }
 
-    setReportData(data) {
-        this.reportData = data;
-    }
-
 
 
 }
+
+
+const calculatePercentage = (data) => {
+    const percentage = [];
+
+    // 对每个 upload 计算分类的占比
+    Object.entries(data).forEach(([uploadId, entry]) => {
+        const { road_name, upload_name, files } = entry;
+        const typeName = `${road_name}-${upload_name}`;
+        const totalCount = files.length;
+        const counts = {};
+
+        // 初始化分类计数
+        Object.keys(classification_mapping).forEach(classification => {
+            counts[classification] = 0;
+        });
+
+        // 计算每个分类的数量
+        files.forEach(file => {
+            counts[file.classification_result]++;
+        });
+
+        // 转换为占比并添加描述性名称
+        Object.entries(counts).forEach(([classification, count]) => {
+            percentage.push({
+                typeName, // 使用描述性名称
+                classification: classification_mapping[classification], // 使用分类的描述
+                percentage: count / totalCount
+            });
+        });
+    });
+
+    return percentage;
+};
 
 
 const imageStore = new ImageStore();

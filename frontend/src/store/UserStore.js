@@ -1,4 +1,4 @@
-import {makeAutoObservable} from 'mobx';
+import {makeAutoObservable, observable, action} from 'mobx';
 import MaleAvatar from '../assets/img/Male.png'
 import FemaleAvatar from '../assets/img/Female.png'
 import axiosInstance from "../utils/AxiosInstance";
@@ -19,14 +19,36 @@ class UserStore {
     };
     isLoggedIn = false;
     isLoading = false;
-    loginHint = {message:'', status:'error'};
+    loginHint = {message:'', status:null};
     infoChangeHint = { status: null, message: '' };
-    getInfoHint = {message:'', status:'error'};
-    subordinatesInfo = {};
-    errorsubordinatesInfo = false;
+    getInfoHint = {message:'', status:null};
+    subordinatesInfo = [];
 
     constructor() {
-        makeAutoObservable(this);
+        makeAutoObservable(this, {
+            userInfo: observable,
+            isLoggedIn: observable,
+            isLoading: observable,
+            loginHint: observable,
+            infoChangeHint: observable,
+            getInfoHint: observable,
+            subordinatesInfo: observable,
+            setUserInfo: action,
+            setIsLoggedIn: action,
+            setIsLoading: action,
+            setSubordinatesInfo: action,
+            setInfoChangeHint: action,
+            login: action,
+            logout: action,
+            fetchUserInfo: action,
+            updateUserInfo: action,
+            setPreferredModel: action,
+            changePassword: action,
+            changeAvatar: action,
+            fetchSubordinatesInfo: action,
+            sendPreferredModel: action,
+            deleteSubordinate: action,
+        });
     }
 
     setUserInfo(userData) {
@@ -37,41 +59,55 @@ class UserStore {
         console.log(this.userInfo)
     }
 
+    setIsLoggedIn(isLoggedIn) {
+        this.isLoggedIn = isLoggedIn;
+    }
+
+    setIsLoading(isLoading) {
+        this.isLoading = isLoading;
+    }
+
+    setSubordinatesInfo(subordinatesInfo) {
+        this.subordinatesInfo = subordinatesInfo;
+    }
+
+    setInfoChangeHint(infoChangeHint) {
+        this.infoChangeHint = infoChangeHint;
+    }
 
     async login(companyID, jobNumber, password) {
         try {
-            this.isLoading = true;
-            this.loginError = '';
+            // 设置isLoading为true，表示正在登录
+            this.setIsLoading(true);
 
             // 使用FormData来发送数据
             const formData = new FormData();
             formData.append('company_id', companyID);
             formData.append('employee_number', jobNumber);
             formData.append('password', password);
-
-            const response = await axiosInstance({
+            await axiosInstance({
                 url: '/irdip/login/',
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                 },
-                withCredentials: true, // 相当于 fetch 中的 credentials: 'include'
+                withCredentials: true,
                 data: formData,
             });
-
-            // 直接处理响应数据
-            const data = response.data;
-            this.isLoggedIn = true;
-            this.loginHint.message = '登陆成功！';
-            this.loginHint.status = 'success';
+            this.loginHint = {
+                status: true,
+                message: '登录成功！',
+            }
+            this.setIsLoggedIn(true);
             localStorage.setItem('isLoggedIn', 'true');
         } catch (error) {
-            this.isLoggedIn = false;
-            this.loginHint.message = '工号或密码错误！';
-            this.loginHint.status = 'error';
-            console.error('There has been a problem with your axios operation:', error);
+            this.setIsLoggedIn(false);
+            this.loginHint = {
+                status: false,
+                message: '登录失败，请检查账号密码！',
+            }
         } finally {
-            this.isLoading = false;
+            this.setIsLoading(false);
         }
     }
 
@@ -94,7 +130,7 @@ class UserStore {
     }
 
 
-    async fetchUserInfo(callback) {
+    async fetchUserInfo() {
         const userData = await fetchUserFromDatabase();
         if (userData) {
             // 如果 userData 中的 avatar 为空，则根据性别设置默认头像
@@ -105,12 +141,10 @@ class UserStore {
                 userData.avatar = `data:image/jpeg;base64,${userData.avatar}`;
             }
 
-
             this.setUserInfo({ ...this.userInfo, ...userData });
         } else {
             this.getInfoHint.status = 'error'
             this.getInfoHint.message = '获取用户信息失败！'
-            callback();
         }
     }
 
@@ -133,32 +167,38 @@ class UserStore {
             // 根据响应更新 userStore 中的 infoChangeHint
             if (response.status === 200) {
                 // 成功更新用户信息
-                this.infoChangeHint = {
-                    message: response.data.message,
+                this.setInfoChangeHint({
+                    message: '用户信息更新成功！',
                     status: 'success'
-                };
-                this.fetchUserInfo();
+                })
+                await this.fetchUserInfo();
             }else{
-                this.infoChangeHint = {
-                    message: response.data.message,
+                this.setInfoChangeHint({
+                    message: '用户信息更新失败！',
                     status: 'error'
-                };
+                })
             }
             return response.data;
         } catch (error) {
             // 错误处理
             console.error('Updating user info failed:', error);
-            this.infoChangeHint = {
-                message: error.response?.data?.error || '更新用户信息时出现错误',
-                status: 'error'
-            };
+            if (error.response.status === 502) {
+                this.setInfoChangeHint({
+                    message: error.response?.data?.error || '并未作出修改！',
+                    status: 'warning'
+                })
+            } else {
+                this.setInfoChangeHint({
+                    message: error.response?.data?.error || '更新用户信息时出现错误！',
+                    status: 'error'
+                })
+            }
             return null;
         }
     }
 
     setPreferredModel(model) {
         this.userInfo.selected_model = model;
-        console.log(this.userInfo.selected_model)
     }
 
     async changePassword(oldPassword, newPassword) {
@@ -177,8 +217,16 @@ class UserStore {
                 return { success: false, message: '密码修改失败！'};
             }
         } catch (error) {
-            // 网络或其他错误
-            return { success: false, message: '网络错误或服务器错误' };
+            switch (error.response.status) {
+                case 400: {
+                    // 旧密码错误
+                    return { success: false, message: '旧密码错误！' };
+                }
+                default: {
+                    // 网络或其他错误
+                    return { success: false, message: '网络错误或服务器错误' };
+                }
+            }
         }
     }
 
@@ -197,22 +245,19 @@ class UserStore {
 
             // 根据响应内容更新状态
             if (response.status === 200) {
-                this.fetchUserInfo();
-                this.infoChangeHint = {
+                await this.fetchUserInfo();
+
+                this.setInfoChangeHint({
                     message: '头像上传成功！',
                     status: 'success'
-                };
-            } else {
-                this.infoChangeHint = {
-                    message: response.data.error || '上传失败',
-                    status: 'error'
-                };
+                });
             }
         } catch (error) {
-            this.infoChangeHint = {
-                message: '服务器出了问题，请稍后再试！',
+            this.setInfoChangeHint({
+                message: '头像上传失败，请稍后再试！',
                 status: 'error'
-            };
+            });
+            console.error('Error during avatar upload:', error);
         }
     }
 
@@ -222,19 +267,15 @@ class UserStore {
             try {
                 const response = await axiosInstance.get('/irdip/get_subordinates_info/');
                 if (response.status === 200) {
-                    this.errorsubordinatesInfo = false;
-                    this.subordinatesInfo = response.data;
-                } else {
-                    this.errorsubordinatesInfo = true;
-                    console.error('Error during fetch: ', response);
+                    this.setSubordinatesInfo(response.data);
+                    return { success: true };
                 }
             } catch (error) {
-                this.errorsubordinatesInfo = true;
                 console.error('Error during fetch: ', error);
+                return { success: false, message: '获取下属信息失败！' };
             }
         } else {
-            this.errorsubordinatesInfo = true;
-            console.log('Unauthorized to access subordinates information');
+            return { success: false, message: '您没有权限获取下属信息！' };
         }
     }
 
@@ -253,7 +294,7 @@ class UserStore {
     };
 
     deleteSubordinate(userId) {
-        return axiosInstance.delete(`/irdip/delete_subordinate/${userId}`)
+        return axiosInstance.delete(`/irdip/delete_subordinate/${userId}/`)
             .then(response => {
                 if (response.data.status === 'success') {
                     // 返回成功的消息
@@ -265,7 +306,7 @@ class UserStore {
             })
             .catch(error => {
                 // 返回错误的消息
-                return { success: false, message: error.response?.data?.message || '删除用户失败' };
+                return { success: false, message: error.response?.data?.message || '删除用户失败！' };
             });
     }
 

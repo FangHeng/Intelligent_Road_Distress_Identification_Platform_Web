@@ -1,41 +1,17 @@
-import React, {useState} from 'react';
+// SubordinateUserRegistration.js: 下属用户注册
+import React from 'react';
 import { Link } from 'react-router-dom';
-import {Button, Result, Space, Card, Tooltip, Segmented} from 'antd';
+import {Button, Result, Space, Card, } from 'antd';
 import UserTable from "../../components/Table/UserTable";
 import {RegisterSingleUser} from "../../components/Forms/registerSingleUser";
 import {RegisterMultipleUser} from "../../components/Forms/registerMultipleUser";
 import {UserAddOutlined, UsergroupAddOutlined} from "@ant-design/icons";
 import userStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
+import {PageContainer} from "@ant-design/pro-components";
 
 const SubordinateUserRegistration = observer(() => {
     const {user_level} = userStore.userInfo;
-    const [viewMode, setViewMode] = useState('single');
-
-    const handleSegmentChange = (value) => {
-        setViewMode(value === 'Single' ? 'single' : 'multiple');
-    };
-
-    const cardTitle = (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>注册下属用户</span>
-                <Tooltip title="单个或批量注册">
-                    <Segmented
-                        options={[
-                            {
-                                value: 'Single',
-                                icon: <UserAddOutlined />,
-                            },
-                            {
-                                value: 'Multiple',
-                                icon: <UsergroupAddOutlined />,
-                            },
-                        ]}
-                        onChange={handleSegmentChange}
-                    />
-                </Tooltip>
-            </div>
-    );
 
     let content;
     switch (user_level) {
@@ -47,10 +23,7 @@ const SubordinateUserRegistration = observer(() => {
                         width: '100%',
                     }}
                 >
-                    <Card title={cardTitle} style={{ height: '40vh', overflow: 'True' }} >
-                        {viewMode === 'single' ? <RegisterSingleUser /> : <RegisterMultipleUser />}
-                    </Card>
-                    <Card title='下属用户列表' style={{ height: '55vh' }}>
+                    <Card >
                         <UserTable />
                     </Card>
                 </Space>
@@ -64,10 +37,7 @@ const SubordinateUserRegistration = observer(() => {
                         width: '100%',
                     }}
                 >
-                    <Card title={cardTitle} style={{ height: '40vh', overflow: 'True' }} >
-                        {viewMode === 'single' ? <RegisterSingleUser /> : <RegisterMultipleUser />}
-                    </Card>
-                    <Card title='下属用户列表' style={{ height: '55vh' }}>
+                    <Card >
                         <UserTable />
                     </Card>
                 </Space>
@@ -90,7 +60,23 @@ const SubordinateUserRegistration = observer(() => {
             );
     }
 
-    return <>{content}</>;
+    return <PageContainer
+        title='注册下属用户'
+        tabList={[
+            {
+                tab: '单个注册',
+                key: 'Single',
+                icon: <UserAddOutlined />,
+                children: <RegisterSingleUser />,
+            },
+            {
+                tab: '批量注册',
+                key: 'multiple',
+                icon: <UsergroupAddOutlined />,
+                children: <RegisterMultipleUser />,
+            },
+        ]}
+    >{content}</PageContainer>;
 });
 
 export default SubordinateUserRegistration;

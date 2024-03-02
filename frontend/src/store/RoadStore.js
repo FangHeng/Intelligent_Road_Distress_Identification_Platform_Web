@@ -1,8 +1,6 @@
-import { makeAutoObservable } from "mobx";
+import {action, makeAutoObservable, observable} from "mobx";
 import userStore from "./UserStore";
-import {getCookie} from "../utils/utils";
-
-const csrfToken = getCookie('csrftoken'); // 从cookie中获取CSRF token
+import axiosInstance from "../utils/AxiosInstance";
 
 class RoadStore {
     selectedItem = null;
@@ -15,7 +13,18 @@ class RoadStore {
     }
 
     constructor(userStore) {
-        makeAutoObservable(this);
+        makeAutoObservable(this, {
+            selectedItem: observable,
+            selectedRegion: observable,
+            roadData: observable,
+            isLoading: observable,
+            hint: observable,
+            setSelectedItem: action,
+            setSelectedRegion: action,
+            setIsLoading: action,
+            saveData: action,
+            fetchRoadData: action,
+        });
         this.userStore = userStore;
     }
 
@@ -27,36 +36,24 @@ class RoadStore {
         this.selectedRegion = { province, city, district };
     }
 
+    setIsLoading(value) {
+        this.isLoading = value;
+    }
+
     saveData(callback) {
-        this.isLoading = true;
+        this.setIsLoading(true);
         if (this.selectedItem !== null && this.selectedRegion !== null) {
             const url = '/irdip/road_registration/';
             const dataToSave = {
                 region: this.selectedRegion,
                 roadDetails: this.selectedItem
             };
-            console.log(csrfToken)
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
-                },
-                body: JSON.stringify(dataToSave),
-            })
+            console.log(dataToSave)
+
+            axiosInstance.post(url, dataToSave)
                 .then(response => {
-                    // 检查响应的状态码
-                    if (!response.ok) {
-                        // 如果响应状态不是OK，则解析错误消息
-                        return response.json().then(errData => {
-                            throw new Error(errData.message || '发生未知错误');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    this.isLoading = false;
+                    this.setIsLoading(false);
+                    const data = response.data;
                     if (data.status === 'success') {
                         this.hint.status = 'success';
                         this.hint.message = "保存成功！";
@@ -69,13 +66,13 @@ class RoadStore {
                 })
                 .catch((error) => {
                     console.error('Error:', error);
-                    this.isLoading = false;
+                    this.setIsLoading(false);
                     this.hint.status = 'error';
-                    this.hint.message = error.message || '保存失败，请稍后再试！';
+                    this.hint.message = error.response?.data?.message || '保存失败，请稍后再试！';
                     callback(); // 调用回调
                 });
         } else {
-            this.isLoading = false;
+            this.setIsLoading(false);
             this.hint.status = 'warning';
             this.hint.message = '请输入完整信息！';
             callback(); // 调用回调
