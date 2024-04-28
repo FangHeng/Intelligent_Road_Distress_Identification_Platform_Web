@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-me3ws7_mb3*&3s64ep742bq*^_289w^_xvv5r9zb==+mri_p)v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.234.114.2']
+ALLOWED_HOSTS = ['10.234.114.13']
 
 
 # Application definition
@@ -74,7 +74,7 @@ CORS_ALLOW_HEADERS = [
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-	"http://10.234.114.2:3000",
+	"http://10.230.60.174:3000",
 ]
 
 CORS_ALLOW_METHODS = [
@@ -94,10 +94,19 @@ CORS_ALLOW_METHODS = [
 # ]
 
 CACHES = {
+    # 'default': {
+    #     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    #     'LOCATION': 'unique-snowflake',
+    # }
+
+    # redis
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-    }
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f"redis://:{os.getenv('REDIS_PASSWORD')}@{os.getenv('REDIS_HOST')}:{os.getenv('REDIS_PORT')}/1",
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+    },
 }
 
 
@@ -162,7 +171,6 @@ AUTH_PASSWORD_VALIDATORS = [
 APPEND_SLASH = False
 
 LANGUAGE_CODE = "zh-Hans"
-
 TIME_ZONE = "Asia/Shanghai"
 
 USE_I18N = True

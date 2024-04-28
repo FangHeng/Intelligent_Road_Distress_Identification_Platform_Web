@@ -27,6 +27,9 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from PDC_predict.predict import predict
 from IRDIP.LLM import format_report
 
+from django.shortcuts import render
+from django.core.cache import cache
+
 # 定义映射字典
 classification_mapping = {
     "cementation_fissures": 0,
@@ -207,6 +210,10 @@ def get_company_info(request):
     companies = Company.objects.all()
 
     company_list = {str(company.company_id): company.company_name for company in companies}
+
+    cache.set("RoadInfo", json.dumps(company_list),120)
+    print("尝试获取RoadInfo在redis内存中：",cache.get("RoadInfo"))
+
 
     return JsonResponse(company_list)
 
