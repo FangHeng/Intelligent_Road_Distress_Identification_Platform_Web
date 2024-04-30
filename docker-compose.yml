@@ -68,12 +68,31 @@ services:
     networks:
       - my_network
 
+  minio:
+    image: minio/minio
+    volumes:
+      - /home/data:/data
+      - /home/config:/root/.minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"  # Console 端口
+    environment:
+      MINIO_ROOT_USER: "MINIOROOT"
+      MINIO_ROOT_PASSWORD: "root1234@"
+    privileged: true
+
+    command: server --console-address ":9001" /data
+    networks:
+      - my_network
+
+
 
 volumes:
   redis-data: # 定义持久化卷
     driver: local  # 使用本地卷
   mysql_data:
   uploads:
+  minio_data:
 
 networks:
   my_network:

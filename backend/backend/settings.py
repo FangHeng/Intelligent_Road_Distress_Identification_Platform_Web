@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-me3ws7_mb3*&3s64ep742bq*^_289w^_xvv5r9zb==+mri_p)v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.234.114.13']
+ALLOWED_HOSTS = ['10.234.114.29']
 
 
 # Application definition
@@ -197,3 +197,13 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = f'智能路面病害分析平台 <{EMAIL_HOST_USER}>'
+
+# minIO设置
+MINIO_STORAGE_ENDPOINT = 'minio:9000'
+MINIO_STORAGE_ACCESS_KEY = 'kzwQJKCOUYCsy2Jehmr0'
+MINIO_STORAGE_SECRET_KEY = '2w8WEIjRDDJbihjxBdUvMbvdnhCpwkjKLL14YTEG'
+MINIO_STORAGE_ROOT_USER = 'MINIOROOT'
+MINIO_STORAGE_ROOT_PASSWORD = 'root1234@'
+MINIO_STORAGE_USE_HTTPS = False
+MINIO_STORAGE_BUCKET_NAME = 'image'
+

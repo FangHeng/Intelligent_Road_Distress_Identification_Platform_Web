@@ -1,6 +1,9 @@
+import io
 import os
 import json
 import uuid
+from datetime import timedelta
+
 import pytz
 import base64
 import shutil
@@ -29,6 +32,8 @@ from IRDIP.LLM import format_report
 
 from django.shortcuts import render
 from django.core.cache import cache
+from minio import Minio
+from minio.error import S3Error
 
 # 定义映射字典
 classification_mapping = {
@@ -41,6 +46,14 @@ classification_mapping = {
     "normal": 6,
     "transverse_crack": 7
 }
+
+# 初始化MinIO客户端 EXIPIRE - 2024.05.30
+minio_client = Minio(
+    'localhost:9000',
+    access_key='kzwQJKCOUYCsy2Jehmr0',
+    secret_key='2w8WEIjRDDJbihjxBdUvMbvdnhCpwkjKLL14YTEG',
+    secure=False
+)
 
 
 def index(request):
@@ -98,7 +111,8 @@ def register_subordinate(request):
 
         # 检查工号是否在同一公司内已被使用
         if UserRole.objects.filter(company=current_user_role.company, employee_number=employee_number).exists():
-            return JsonResponse({'status': 'error', 'message': 'Employee number already exists in the company'}, status=400)
+            return JsonResponse({'status': 'error', 'message': 'Employee number already exists in the company'},
+                                status=400)
 
         # 创建新用户
         new_user = User.objects.create_user(username=username)
@@ -122,6 +136,7 @@ def register_subordinate(request):
         return JsonResponse({'status': 'success', 'message': 'User registered successfully'})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
 
 @require_http_methods(["DELETE"])
 def delete_subordinate(request, user_id):
@@ -211,9 +226,8 @@ def get_company_info(request):
 
     company_list = {str(company.company_id): company.company_name for company in companies}
 
-    cache.set("RoadInfo", json.dumps(company_list),120)
-    print("尝试获取RoadInfo在redis内存中：",cache.get("RoadInfo"))
-
+    cache.set("RoadInfo", json.dumps(company_list), 120)
+    print("尝试获取RoadInfo在redis内存中：", cache.get("RoadInfo"))
 
     return JsonResponse(company_list)
 
@@ -314,7 +328,11 @@ def upload(request):
                 file_path = os.path.join(folder_name, file_name + extension)  # 使用上传的文件的原始文件名
 
                 handle_uploaded_file(file, file_path)
-
+                # 上传到本地服务器
+                # 获取文件 URL，保存到数据库
+                file_url = handle_uploaded_images(file, file_path, settings.MINIO_STORAGE_BUCKET_NAME)
+                print(file_url)
+        # TODO:并发处理/并行
         # predictions = {}
         predictions = predict(user=user_id, time=upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
         for file_name, result in predictions.items():
@@ -322,6 +340,7 @@ def upload(request):
             FileUpload.objects.create(
                 upload=upload_record,
                 file_url=os.path.join(folder_name, file_name),
+                # file_url=file_url,
                 classification_result=classification_int,
                 confidence=result['probability']
             )
@@ -335,6 +354,79 @@ def handle_uploaded_file(f, file_name):
             destination.write(chunk)
 
 
+# def handle_file(file, file_name):
+#     # 创建MinIO客户端
+#     minio_client = Minio(
+#         settings.MINIO_STORAGE_ENDPOINT,
+#         access_key=settings.MINIO_STORAGE_ACCESS_KEY,
+#         secret_key=settings.MINIO_STORAGE_SECRET_KEY,
+#         secure=settings.MINIO_STORAGE_USE_HTTPS
+#     )
+#
+#     # 确保bucket存在
+#     if not minio_client.bucket_exists(settings.MINIO_STORAGE_BUCKET_NAME):
+#         minio_client.make_bucket(settings.MINIO_STORAGE_BUCKET_NAME)
+#
+#     # 上传文件到MinIO
+#     try:
+#         minio_client.put_object(
+#             settings.MINIO_STORAGE_BUCKET_NAME,
+#             file_name,
+#             file,
+#             length=-1,  # 对于流数据，长度设为-1
+#             part_size=10 * 1024 * 1024  # 分片大小设置为10MB
+#         )
+#     except Exception as e:
+#         print("Failed to upload file:", e)
+#         return None
+#
+#     # 生成可访问的URL
+#     return minio_client.presigned_get_object(settings.MINIO_STORAGE_BUCKET_NAME, file_name)
+
+
+def handle_uploaded_images(f, file_name, bucket_name):
+    # 初始化 MinIO 客户端
+    minio_client = Minio(
+        settings.MINIO_STORAGE_ENDPOINT,
+        access_key=settings.MINIO_STORAGE_ROOT_USER,
+        secret_key=settings.MINIO_STORAGE_ROOT_PASSWORD,
+        secure=settings.MINIO_STORAGE_USE_HTTPS
+    )
+
+    # 打印文件类型
+
+    # 将文件上传到 MinIO
+    try:
+        # minio_client.fput_object(bucket_name, file_name, f.temporary_file_path())
+        if hasattr(f, 'temporary_file_path'):
+            # 使用文件路径
+            file_path = f.temporary_file_path()
+            minio_client.fput_object(bucket_name, file_name, file_path)
+        else:
+            # 从内存中读取数据并创建一个 BytesIO 对象
+            f.seek(0)
+            data = f.read()
+            data_stream = io.BytesIO(data)  # 创建一个支持 'read' 方法的流对象
+            print("封装字节流数据：")
+            minio_client.put_object(bucket_name, file_name, data_stream, length=len(data))
+
+
+    except S3Error as exc:
+        print(f"Error occurred: {exc}")
+
+    # 获取文件的 URL
+    file_url = minio_client.presigned_get_object(bucket_name, file_name)
+    return file_url
+
+
+# # 自定义签名文件url
+# def get_signed_url(bucket_name, object_name):
+#     # 生成一个有效期为24小时的签名URL
+#     return minio_client.presigned_get_object(bucket_name, object_name, expires=timedelta(days=1))
+
+
+# TODO:提取数据存储到minIO buckets中,
+# 当前代码仍需考虑数据一致性
 @require_http_methods(["GET"])
 def get_result(request):
     upload_ids = request.GET.getlist('upload_id')
@@ -603,9 +695,9 @@ def change_user_info(request):
 
     # 检查UserRole信息是否有变化
     user_role_changes = (
-        new_email != user_role.email or
-        new_phone_number != user_role.phone_number or
-        new_gender != user_role.gender
+            new_email != user_role.email or
+            new_phone_number != user_role.phone_number or
+            new_gender != user_role.gender
     )
 
     # 检查User信息是否有变化
@@ -781,7 +873,8 @@ def get_upload_records(request):
     for record in records_list:
         upload_record_instance = UploadRecord.objects.get(upload_id=record['upload_id'])
         record['selected_model'] = upload_record_instance.get_selected_model_display()
-        record['integrity'] = (record['intact_count'] / record['upload_count'] * 100) if record['upload_count'] > 0 else 0
+        record['integrity'] = (record['intact_count'] / record['upload_count'] * 100) if record[
+                                                                                             'upload_count'] > 0 else 0
 
     return JsonResponse(records_list, safe=False)
 
