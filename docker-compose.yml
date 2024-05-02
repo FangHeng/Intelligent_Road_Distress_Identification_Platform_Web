@@ -24,6 +24,11 @@ services:
       - DB_HOST=db
       - EMAIL_HOST_USER=${EMAIL_HOST_USER}
       - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    networks:
+      - my_network
 
   frontend:
     build: ./frontend
@@ -31,6 +36,19 @@ services:
       - "3000:80"
     environment:
       - Map_Key=${Map_Key}
+
+  redis:
+    build:
+      context: ./redis  # 指定Dockerfile的位置
+    command: redis-server --requirepass "${REDIS_PASSWORD}"
+    ports:
+      - "6379:6379"  # 映射Redis的默认端口 <主机端口>：<容器端口>
+    volumes:
+      - redis-data:/var/lib/redis-server/  # 将持久化卷映射到工作目录
+    networks:
+      - my_network
+
+
 
   db:
     image: mysql:8.0
@@ -47,8 +65,35 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
+    networks:
+      - my_network
+
+  minio:
+    image: minio/minio
+    volumes:
+      - /home/data:/data
+      - /home/config:/root/.minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"  # Console 端口
+    environment:
+      MINIO_ROOT_USER: "MINIOROOT"
+      MINIO_ROOT_PASSWORD: "root1234@"
+    privileged: true
+
+    command: server --console-address ":9001" /data
+    networks:
+      - my_network
+
 
 
 volumes:
+  redis-data: # 定义持久化卷
+    driver: local  # 使用本地卷
   mysql_data:
   uploads:
+  minio_data:
+
+networks:
+  my_network:
+    driver: bridge
