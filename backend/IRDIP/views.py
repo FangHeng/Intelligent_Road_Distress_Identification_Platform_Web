@@ -361,7 +361,7 @@ def handle_uploaded_file(f, file_name):
 def handle_uploaded_images(f, file_name, bucket_name):
     # 初始化 MinIO 客户端
     minio_client = Minio(
-        os.getenv('MINIO_PUBLIC_URL', 'localhost:9000'),
+        os.getenv('MINIO_ENDPOINT', 'localhost:9000'),
         access_key=settings.MINIO_STORAGE_ROOT_USER,
         secret_key=settings.MINIO_STORAGE_ROOT_PASSWORD,
         secure=settings.MINIO_STORAGE_USE_HTTPS
@@ -381,7 +381,6 @@ def handle_uploaded_images(f, file_name, bucket_name):
             f.seek(0)
             data = f.read()
             data_stream = io.BytesIO(data)  # 创建一个支持 'read' 方法的流对象
-            print("封装字节流数据：")
             minio_client.put_object(bucket_name, file_name, data_stream, length=len(data))
 
 
@@ -398,8 +397,6 @@ def handle_uploaded_images(f, file_name, bucket_name):
 #     # 生成一个有效期为24小时的签名URL
 #     return minio_client.presigned_get_object(bucket_name, object_name, expires=timedelta(days=1))
 
-
-# TODO:提取数据存储到minIO buckets中,
 # 当前代码仍需考虑数据一致性
 @require_http_methods(["GET"])
 def get_result(request):
