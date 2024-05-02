@@ -15,5 +15,4 @@ COPY . .
 
 # 检查数据库连接
 # 运行Django项目
-CMD python wait_for_db.py && python wait_for_redis.py && python manage.py  runserver 0.0.0.0:8000
-
+CMD python wait_for_db.py && python wait_for_redis.py && python wait_for_minio.py && python manage.py  runserver 0.0.0.0:8000

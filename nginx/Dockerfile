@@ -1,14 +1,13 @@
-## 使用官方 MinIO 镜像作为基础镜像
-#FROM minio/minio
-#
-## （可选）安装你需要的额外工具
-## RUN apt-get update && apt-get install -y curl vim
-#
-## （可选）复制一些配置文件或脚本到容器中
-## COPY ./my-custom-config /etc/minio/config
-#
-## （可选）设置工作目录
-## WORKDIR /data
-#
-## 启动命令仍然是启动 MinIO 服务
-#CMD ["server", "/data"]
+# 使用 MinIO 官方镜像作为基础
+FROM minio/minio
+
+# 安装 Python 和 MinIO Python 客户端
+USER root
+#RUN apt-get update && apt-get install -y python3 python3-pip
+#RUN pip3 install minio
+
+# 添加脚本到容器
+#ADD test_minio_state.py /test_minio_state.py
+
+# 设置启动命令，先启动 MinIO，然后运行 Python 脚本
+CMD ["sh", "-c", "minio server /data --console-address ':9001' & sleep 10"]
