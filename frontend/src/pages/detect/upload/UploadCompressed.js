@@ -1,18 +1,18 @@
 // UploadFolder.js: 上传文件夹组件，用于上传文件夹中的图片
 import React, { useState } from 'react';
-import {InboxOutlined, VerticalAlignTopOutlined} from '@ant-design/icons';
-import {message, Upload, Spin, Space, Input, Select, Button, Descriptions} from 'antd';
+import { VerticalAlignTopOutlined} from '@ant-design/icons';
+import {message, Upload, Spin, Space, Input, Select, Button} from 'antd';
 import {ProCard} from "@ant-design/pro-components";
 import imageStore from "../../../store/ImgStore";
 import roadStore from "../../../store/RoadStore";
 import RcResizeObserver from "rc-resize-observer";
 import {useNavigate} from "react-router-dom";
 import {observer} from "mobx-react-lite";
-import { ReactComponent as Folder } from '../../../assets/icons/folder.svg';
+import { ReactComponent as CompressedPackage } from '../../../assets/icons/compressedPackage.svg';
 
 const { Dragger } = Upload;
 
-const UploadFolder = observer(() => {
+const UploadCompressed = observer(() => {
     const [fileList, setFileList] = useState([]);
     const [responsive, setResponsive] = useState(false);
     const [imageInfo, setImageInfo] = useState({title: '', road: ''});
@@ -22,36 +22,40 @@ const UploadFolder = observer(() => {
     const props = {
         name: 'file',
         multiple: true,
-        directory: true,
+        // directory: true,
+        accept: '.zip, .rar, .7z',
+        showFileList: true,
         onChange(info) {
             setFileList(info.fileList);
         },
         onDrop(e) {
             console.log('Dropped files', e.dataTransfer.files);
         },
-        showUploadList: false, // 禁用默认的上传列表显示
+        beforeUpload: (file) => {
+            return false;
+        }
     };
 
-    // 自定义文件列表显示
-    const renderFileList = () => {
-        return (
-            <div style={{ marginTop: '1vh' }}>
-                <Descriptions title="已选择文件" column={1} size="small">
-                    <Descriptions.Item label="文件数量">{fileList.length}</Descriptions.Item>
-                    <Descriptions.Item label="文件">
-                        <div style={{ maxHeight: '20vh', overflow: 'auto' }}>
-                            {fileList.map((file) => (
-                                <Space>
-                                    <span key={file.uid} style={{ marginRight: '2px' }}>{file.name}</span>
-                                </Space>
-
-                            ))}
-                        </div>
-                    </Descriptions.Item>
-                </Descriptions>
-            </div>
-        );
-    };
+    // // 自定义文件列表显示
+    // const renderFileList = () => {
+    //     return (
+    //         <div style={{ marginTop: '1vh' }}>
+    //             <Descriptions title="已选择文件" column={1} size="small">
+    //                 <Descriptions.Item label="文件数量">{fileList.length}</Descriptions.Item>
+    //                 <Descriptions.Item label="文件">
+    //                     <div style={{ maxHeight: '20vh', overflow: 'auto' }}>
+    //                         {fileList.map((file) => (
+    //                             <Space>
+    //                                 <span key={file.uid} style={{ marginRight: '2px' }}>{file.name}</span>
+    //                             </Space>
+    //
+    //                         ))}
+    //                     </div>
+    //                 </Descriptions.Item>
+    //             </Descriptions>
+    //         </div>
+    //     );
+    // };
 
 
     const handleUpload = async () => {
@@ -96,14 +100,15 @@ const UploadFolder = observer(() => {
                             <div className='content'></div>
                         </Spin></div> : null}
                         <div style={{ height: '40vh' }}>
-                        <Dragger {...props} >
-                            <p className="ant-upload-drag-icon">
-                                <Folder />
-                            </p>
-                            <p className="ant-upload-text">点击或者将文件夹拖拽到此处上传</p>
-                        </Dragger>
+                            <Dragger {...props}>
+                                <p className="ant-upload-drag-icon">
+                                    <CompressedPackage />
+                                </p>
+                                <p className="ant-upload-text">点击或者将图片压缩包拖拽到此处上传</p>
+                                <p className="ant-upload-text">我们目前支持的压缩包格式有：.zip, .rar, .7z</p>
+                            </Dragger>
                         </div>
-                        {renderFileList()}
+                        {/*{renderFileList()}*/}
                     </div>
                 </ProCard>
                 <ProCard title="图片信息填写">
@@ -144,4 +149,4 @@ const UploadFolder = observer(() => {
     );
 });
 
-export default UploadFolder;
+export default UploadCompressed;

@@ -14,7 +14,6 @@ const processData = (data) => {
         const { road_name, upload_name } = entry;
         const typeName = `${road_name}-${upload_name}`;
         Object.keys(classification_mapping).forEach(classification => {
-            // 使用 classification 的文本描述作为 item
             const itemLabel = classification_mapping[classification];
             const countKey = `${typeName}-${itemLabel}`;
             counts[countKey] = { item: itemLabel, type: typeName, score: 0 };

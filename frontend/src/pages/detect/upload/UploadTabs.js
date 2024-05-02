@@ -7,6 +7,7 @@ import {PageContainer} from "@ant-design/pro-components";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faRoad} from "@fortawesome/free-solid-svg-icons";
 import {useNavigate} from "react-router-dom";
+import UploadCompressed from "./UploadCompressed";
 const items = [
     {
         key: '1',
@@ -17,6 +18,11 @@ const items = [
         key: '2',
         label: `上传文件夹`,
         children: <UploadFolder/>,
+    },
+    {
+        key: '3',
+        label: `上传图片压缩包`,
+        children: <UploadCompressed/>,
     },
 ]
 

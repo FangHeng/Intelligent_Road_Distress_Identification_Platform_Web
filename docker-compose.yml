@@ -32,6 +32,9 @@ services:
 
   frontend:
     build: ./frontend
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./frontend/build:/usr/share/nginx/html
     ports:
       - "3000:80"
     environment:

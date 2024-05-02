@@ -7,6 +7,9 @@ import imgStore from "../../store/ImgStore";
 import {themeStore} from "../../store/ThemeStore";
 
 export const processStackedData = (data) => {
+    if (!data) {
+        return [];
+    }
     const stackedData = [];
 
     // 对每个 upload 计算分类的占比

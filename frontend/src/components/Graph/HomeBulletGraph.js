@@ -7,7 +7,6 @@ import {themeStore} from "../../store/ThemeStore";
 
 const HomeBulletGraph = observer(() => {
     const { uploadRecords } = historyStore;
-    console.log('uploadRecords:', uploadRecords);
 
     // 步骤1: 获取每条道路的最新记录
     const roadMap = new Map();

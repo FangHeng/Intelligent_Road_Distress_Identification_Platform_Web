@@ -15,6 +15,7 @@ RUN npm install
 
 # 复制项目文件并构建应用
 COPY . .
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # 使用nginx来提供React构建产物

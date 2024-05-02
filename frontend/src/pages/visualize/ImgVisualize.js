@@ -127,7 +127,8 @@ const ImgVisualize = observer(() => {
                             imageName: file.file_name,
                             classificationResult: file.classification_result,
                             confidence: file.confidence,
-                            imgUrl: `data:image/jpeg;base64,${file.img}`
+                            // imgUrl: `data:image/jpeg;base64,${file.img}`
+                            imgUrl: file.img_url
                         });
                     });
                 }
@@ -392,33 +393,33 @@ const ImgVisualize = observer(() => {
             });
     };
 
-    // 聊天
-    const [userInput, setUserInput] = useState('');
+    // // 聊天
+    // const [userInput, setUserInput] = useState('');
 
-    const handleInputChange = (event) => {
-        setUserInput(event.target.value);
-    };
-
-    const handleSendClick = () => {
-        if (userInput.trim()) {
-            // 添加用户消息到本地存储
-            chatStore.addMessage('user', userInput);
-
-            // 发送消息（包括整个历史）给 GPT
-            chatStore.sendMessage(chatStore.messages);
-
-            // 清空输入框
-            setUserInput('');
-        }
-    };
+    // const handleInputChange = (event) => {
+    //     setUserInput(event.target.value);
+    // };
+    //
+    // const handleSendClick = () => {
+    //     if (userInput.trim()) {
+    //         // 添加用户消息到本地存储
+    //         chatStore.addMessage('user', userInput);
+    //
+    //         // 发送消息（包括整个历史）给 GPT
+    //         chatStore.sendMessage(chatStore.messages);
+    //
+    //         // 清空输入框
+    //         setUserInput('');
+    //     }
+    // };
     
     // 处理回车键
-    const handleKeyPress = (event) => {
-        if (event.key === 'Enter' && event.shiftKey === false) {
-            event.preventDefault(); // 阻止默认的换行行为
-            handleSendClick(); // 调用发送消息的函数
-        }
-    };
+    // const handleKeyPress = (event) => {
+    //     if (event.key === 'Enter' && event.shiftKey === false) {
+    //         event.preventDefault(); // 阻止默认的换行行为
+    //         handleSendClick(); // 调用发送消息的函数
+    //     }
+    // };
 
     // 打开模态框
     const [isModalVisible, setIsModalVisible] = useState(false);

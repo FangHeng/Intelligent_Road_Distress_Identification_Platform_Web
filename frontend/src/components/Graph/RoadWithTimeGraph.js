@@ -8,6 +8,9 @@ import {formatDateTime} from "../../utils/utils";
 import {themeStore} from "../../store/ThemeStore";
 
 export function getProcessedData(resultData, uploadRecords) {
+    if (!resultData || !uploadRecords) {
+        return [];
+    }
     let processedData = [];
 
     for (let uploadId in resultData) {

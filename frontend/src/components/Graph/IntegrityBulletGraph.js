@@ -20,6 +20,10 @@ const IntegrityBulletGraph = observer(() => {
     const {uploadRecords} = historyStore;
     const dataForGraph = getProcessedData(resultData, uploadRecords);
 
+    if (!dataForGraph) {
+        return null;
+    }
+
     // 使用Map来聚合每条道路的完好度测量值
     const roadMap = new Map();
     dataForGraph.forEach(record => {

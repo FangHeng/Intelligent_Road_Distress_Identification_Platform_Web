@@ -39,8 +39,10 @@
     "react-bmapgl": "^0.2.26",
     "react-dom": "^18.2.0",
     "react-highlight-words": "^0.20.0",
+    "react-lazy-load": "^4.0.1",
     "react-router-dom": "^6.20.0",
     "react-scripts": "5.0.1",
+    "react-window": "^1.8.10",
     "stream": "^0.0.2",
     "web-vitals": "^2.1.4",
     "yarn": "^1.22.21"

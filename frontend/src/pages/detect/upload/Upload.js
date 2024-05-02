@@ -103,80 +103,80 @@ const ImageUpload = observer(() => {
 
     return (
         <App>
-        <RcResizeObserver
-            key="resize-observer"
-            onResize={(offset) => {
-                setResponsive(offset.width < 596);
-            }}
-        >
-            <ProCard
-                split={responsive ? 'horizontal' : 'vertical'}
-                bordered
-                headerBordered
+            <RcResizeObserver
+                key="resize-observer"
+                onResize={(offset) => {
+                    setResponsive(offset.width < 596);
+                }}
             >
-                <ProCard colSpan="75%">
-                    <div style={{height: '80vh', overflow: 'auto', minHeight: '700px'}}>
-                        {imageStore.uploadHint.isProcessing ? <div className='result-wait-spin'><Spin tip="处理中...">
-                            <div className='tip-content'></div>
-                        </Spin></div> : null}
-                        <Upload
-                            className="custom-upload"
-                            listType="picture-card"
-                            onChange={handleFileChange}
-                            beforeUpload={() => false} // 阻止自动上传
-                            fileList={fileList}
-                            onPreview={handlePreview}
-                            multiple={true}
-                        >
-                            {fileList.length >= 64 ? null : uploadButton}
-                        </Upload>
-                        <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
-                            <img
-                                alt="选择的图片"
-                                style={{
-                                    width: '100%',
-                                }}
-                                src={previewImage}
-                            />
-                        </Modal>
-                    </div>
-                </ProCard>
-                <ProCard title="图片信息填写">
-                    <div style={{height: '80vh', minHeight: '700px'}}>
-                        <Space direction="vertical" style={{width: '100%'}} size="large">
-                            <Input
-                                placeholder="输入本次上传记录名"
-                                onChange={(e) => setImageInfo({...imageInfo, title: e.target.value})}
-                            />
-                            <Select
-                                placeholder="选择道路"
-                                style={{width: '100%'}}
-                                onChange={(value) => setImageInfo({...imageInfo, road: value})}
+                <ProCard
+                    split={responsive ? 'horizontal' : 'vertical'}
+                    bordered
+                    headerBordered
+                >
+                    <ProCard colSpan="75%">
+                        <div style={{height: '80vh', overflow: 'auto', minHeight: '700px'}}>
+                            {imageStore.uploadHint.isProcessing ? <div className='result-wait-spin'><Spin tip="处理中...">
+                                <div className='tip-content'></div>
+                            </Spin></div> : null}
+                            <Upload
+                                className="custom-upload"
+                                listType="picture-card"
+                                onChange={handleFileChange}
+                                beforeUpload={() => false} // 阻止自动上传
+                                fileList={fileList}
+                                onPreview={handlePreview}
+                                multiple={true}
                             >
-                                {roadStore.roadData.map((road) => (
-                                    <Select.Option key={road.road_id} value={road.road_id}>
-                                        {road.road_name}
-                                    </Select.Option>
-                                ))}
-                            </Select>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent:'center'}}>
-                            <Button type="primary"
+                                {fileList.length >= 64 ? null : uploadButton}
+                            </Upload>
+                            <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
+                                <img
+                                    alt="选择的图片"
                                     style={{
-                                        width: '85%',
-                                        position: 'absolute',
-                                        bottom: '5vh',
+                                        width: '100%',
                                     }}
-                                    onClick={handleUpload}
-                                    loading={imageStore.uploadHint.isProcessing}
-                            >
-                                <VerticalAlignTopOutlined/>上传
-                            </Button>
-                            </div>
-                        </Space>
-                    </div>
+                                    src={previewImage}
+                                />
+                            </Modal>
+                        </div>
+                    </ProCard>
+                    <ProCard title="图片信息填写">
+                        <div style={{height: '80vh', minHeight: '700px'}}>
+                            <Space direction="vertical" style={{width: '100%'}} size="large">
+                                <Input
+                                    placeholder="输入本次上传记录名"
+                                    onChange={(e) => setImageInfo({...imageInfo, title: e.target.value})}
+                                />
+                                <Select
+                                    placeholder="选择道路"
+                                    style={{width: '100%'}}
+                                    onChange={(value) => setImageInfo({...imageInfo, road: value})}
+                                >
+                                    {roadStore.roadData.map((road) => (
+                                        <Select.Option key={road.road_id} value={road.road_id}>
+                                            {road.road_name}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent:'center'}}>
+                                    <Button type="primary"
+                                            style={{
+                                                width: '85%',
+                                                position: 'absolute',
+                                                bottom: '5vh',
+                                            }}
+                                            onClick={handleUpload}
+                                            loading={imageStore.uploadHint.isProcessing}
+                                    >
+                                        <VerticalAlignTopOutlined/>上传
+                                    </Button>
+                                </div>
+                            </Space>
+                        </div>
+                    </ProCard>
                 </ProCard>
-            </ProCard>
-        </RcResizeObserver>
+            </RcResizeObserver>
         </App>
     );
 });
