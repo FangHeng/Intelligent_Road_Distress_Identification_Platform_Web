@@ -142,6 +142,7 @@ class UserStore {
             }
 
             this.setUserInfo({ ...this.userInfo, ...userData });
+            this.getInfoHint.status = 'success'
         } else {
             this.getInfoHint.status = 'error'
             this.getInfoHint.message = '获取用户信息失败！'

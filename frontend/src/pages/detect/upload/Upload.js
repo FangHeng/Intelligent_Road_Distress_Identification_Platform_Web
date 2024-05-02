@@ -115,9 +115,9 @@ const ImageUpload = observer(() => {
                 headerBordered
             >
                 <ProCard colSpan="75%">
-                    <div style={{height: '70vh', overflow: 'auto'}}>
-                        {imageStore.uploadHint.isProcessing ? <div className="spin"><Spin tip="处理中...">
-                            <div className='content'></div>
+                    <div style={{height: '80vh', overflow: 'auto', minHeight: '700px'}}>
+                        {imageStore.uploadHint.isProcessing ? <div className='result-wait-spin'><Spin tip="处理中...">
+                            <div className='tip-content'></div>
                         </Spin></div> : null}
                         <Upload
                             className="custom-upload"
@@ -142,7 +142,7 @@ const ImageUpload = observer(() => {
                     </div>
                 </ProCard>
                 <ProCard title="图片信息填写">
-                    <div style={{height: '70vh'}}>
+                    <div style={{height: '80vh', minHeight: '700px'}}>
                         <Space direction="vertical" style={{width: '100%'}} size="large">
                             <Input
                                 placeholder="输入本次上传记录名"

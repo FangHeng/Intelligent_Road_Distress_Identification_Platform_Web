@@ -29,13 +29,14 @@ class HistoryStore {
         this.dataLoaded = value;
     }
 
-    fetchUploadRecords() {
+    async fetchUploadRecords() {
         this.setIsLoading(true);
         // 返回一个 Promise 对象
         return axiosInstance.get('/irdip/get_upload_records/')
             .then(response => {
                 console.log('获取历史数据成功:', response.data);
                 this.uploadRecords = response.data;
+                console.log('修改dataLoaded为true')
                 this.setIsLoading(false);
                 this.setDataLoaded(true);
 

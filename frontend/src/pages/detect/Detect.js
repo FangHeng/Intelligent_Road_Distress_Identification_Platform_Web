@@ -100,13 +100,17 @@ const Detect = observer(() => {
             setInitialData(data);
             setDataSource(data);
             setTotalRecords(data.length);
-            setMyRecords(data.filter(item => item.uploader === userInfo.username).length);
             const roads = new Set(data.map(item => item.road));
             setRoadOptions(['全部', ...roads]);
         }).catch(error => {
             message.error('获取历史数据失败!');
         });
     };
+
+    // 刷新时导致用户信息加载没有完成，导致userInfo为空，重新计算myRecords
+    useEffect(() => {
+        setMyRecords(dataSource.filter(item => item.uploader === userInfo.username).length);
+    }, [userInfo, dataSource]);
 
 
     useEffect(() => {
@@ -155,8 +159,21 @@ const Detect = observer(() => {
     };
 
 
-    const renderBadge = (count, active) => {
-        return active ? <Badge count={count} style={{marginLeft: 8}}/> : null;
+    // const renderBadge = (count, active) => {
+    //     return active ? <Badge count={count} style={{marginLeft: 8}}/> : null;
+    // };
+    const renderBadge = (count, active = false) => {
+        return (
+            <Badge
+                count={count}
+                style={{
+                    marginBlockStart: -2,
+                    marginInlineStart: 4,
+                    color: active ? '#ffffff' : '#999',
+                    backgroundColor: active ? 'red' : '#eee',
+                }}
+            />
+        );
     };
 
     const rowSelection = {
@@ -182,84 +199,102 @@ const Detect = observer(() => {
                 }}
             >
                 <Card style={{minHeight: '90vh'}}>
-                {
-                    isLoading ? <Skeleton active/> :
-                        <ProList
-                            metas={{
-                                title: {},
-                                subTitle: {},
-                                type: {},
-                                description: {},
-                                avatar: {},
-                                content: {},
-                                actions: {},
-                            }}
-                            toolbar={{
-                                menu: {
-                                    activeKey,
-                                    items: [
-                                        {
-                                            key: 'tab1',
-                                            label: (
-                                                <span>全部上传记录{renderBadge(totalRecords, activeKey === 'tab1')}</span>
-                                            ),
-                                        },
-                                        {
-                                            key: 'tab2',
-                                            label: (
-                                                <span>
+                    {
+                        isLoading ? <Skeleton active/> :
+                            <ProList
+                                metas={{
+                                    title: {},
+                                    subTitle: {},
+                                    type: {},
+                                    description: {},
+                                    avatar: {},
+                                    content: {},
+                                    actions: {},
+                                }}
+                                tableAlertRender={({selectedRowKeys, selectedRows}) => {
+                                    return (
+                                        <Space size={16}>
+                                            <span>已选择 <a style={{fontWeight: 600}}>{selectedRowKeys.length}</a> 项</span>
+                                            <span>总共 <a style={{fontWeight: 600}}>{dataSource.length}</a> 项</span>
+                                        </Space>
+                                    );
+                                }}
+                                tableAlertOptionRender={() => {
+                                    return (
+                                        <Space size={16}>
+                                            {/*取消选择*/}
+                                            <Button type='link' onClick={() => setSelectedRowKeys([])}>取消选择</Button>
+                                            <Button key="customAction" onClick={handleClick} type='link'>
+                                                查看所选记录
+                                            </Button>
+                                        </Space>
+                                    );
+                                }}
+                                toolbar={{
+                                    menu: {
+                                        activeKey,
+                                        items: [
+                                            {
+                                                key: 'tab1',
+                                                label: (
+                                                    <span>全部上传记录{renderBadge(totalRecords, activeKey === 'tab1')}</span>
+                                                ),
+                                            },
+                                            {
+                                                key: 'tab2',
+                                                label: (
+                                                    <span>
                                     我上传的记录{renderBadge(myRecords, activeKey === 'tab2')}
                                     </span>
-                                            ),
-                                        },
-                                    ],
-                                    onChange: (key) => setActiveKey(key),
-                                },
-                                actions: [
-                                    <Select
-                                        key="roadSelect"
-                                        showSearch
-                                        style={{width: 200, marginLeft: 8}}
-                                        placeholder="选择道路"
-                                        optionFilterProp="children"
-                                        onChange={handleRoadChange}
-                                        filterOption={(input, option) =>
-                                            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                                        }
-                                    >
-                                        {roadOptions.map(road => (
-                                            <Select.Option key={road} value={road}>{road}</Select.Option>
-                                        ))}
-                                    </Select>,
-                                    <Button key="selectAll" onClick={handleSelectAll} type='link'>
-                                        全选
-                                    </Button>,
-                                    selectedRowKeys.length ? (
-                                        <Button key="customAction" onClick={handleClick} type='link'>
-                                            查看所选记录
-                                        </Button>
-                                    ) : null,
-                                ],
-                                search: {
-                                    onSearch: (value) => {
-                                        setSearchValue(value);
+                                                ),
+                                            },
+                                        ],
+                                        onChange: (key) => setActiveKey(key),
                                     },
-                                },
-                            }}
-                            rowKey="id"
-                            // headerTitle="预设的列状态"
-                            rowSelection={rowSelection}
-                            dataSource={dataSource}
-                            expandable={{
-                                expandedRowKeys,
-                                onExpandedRowsChange: setExpandedRowKeys,
-                            }}
-                            size={'large'}
-                            pagination={{
-                                pageSize: 20,
-                            }}
-                        />
-                }
+                                    actions: [
+                                        <Select
+                                            key="roadSelect"
+                                            showSearch
+                                            style={{width: 200, marginLeft: 8}}
+                                            placeholder="选择道路"
+                                            optionFilterProp="children"
+                                            onChange={handleRoadChange}
+                                            filterOption={(input, option) =>
+                                                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                            }
+                                        >
+                                            {roadOptions.map(road => (
+                                                <Select.Option key={road} value={road}>{road}</Select.Option>
+                                            ))}
+                                        </Select>,
+                                        <Button key="selectAll" onClick={handleSelectAll} type='primary'>
+                                            全选
+                                        </Button>,
+                                    ],
+                                    search: {
+                                        filterType: 'light',
+                                        onSearch: (value) => {
+                                            setSearchValue(value);
+                                        },
+                                    },
+                                }}
+                                rowKey="id"
+                                // headerTitle="预设的列状态"
+                                rowSelection={rowSelection}
+                                dataSource={dataSource}
+                                expandable={{
+                                    expandedRowKeys,
+                                    onExpandedRowsChange: setExpandedRowKeys,
+                                }}
+                                size={'large'}
+                                pagination={{
+                                    defaultPageSize: 10,
+                                    showQuickJumper: true,
+                                    showSizeChanger: true,
+                                }}
+
+                            />
+                    }
                 </Card>
             </PageContainer>
         </App>

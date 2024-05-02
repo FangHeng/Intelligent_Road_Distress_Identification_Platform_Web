@@ -1,5 +1,5 @@
 
-import {action, makeAutoObservable, observable, runInAction} from 'mobx';
+import {action, computed, makeAutoObservable, observable, runInAction} from 'mobx';
 
 class TaskStore {
      tasks = [
@@ -14,7 +14,7 @@ class TaskStore {
             roadId: "RD123456",
             roadName: "大学城东路",
             analysisReport: "报告链接",
-            progress: 75,
+            progress: 100,
             status: "processing",
             createdAt: "2024-02-10",
             estimatedEndDate: "2024-03-10",
@@ -22,7 +22,7 @@ class TaskStore {
         },
          {
              taskId: 2,
-             taskName: "路面检测任务",
+             taskName: "111",
              uploadId: "UPL123456",
              creatorId: "CRE123456",
              creatorName: "王小二",
@@ -38,10 +38,16 @@ class TaskStore {
              remarks: "这是一个关于路面检测的任务",
          },
     ];
+     // filteredTasks = [];
+     currentTask = null;
+     taskData = {};   // 单个任务的数据
+
 
     constructor() {
         makeAutoObservable(this, {
             tasks: observable,
+            currentTask: observable,
+            taskData: observable,
             setTasks: action,
             updateTask: action,
             updateTaskProgress: action,
@@ -52,25 +58,42 @@ class TaskStore {
         this.tasks = newTasks;
     }
 
-    updateTask(taskId, newTask) {
-        const index = this.tasks.findIndex((task) => task.taskId === taskId);
-        this.tasks[index] = newTask;
+    setCurrentTask(taskId) {
+        this.currentTask = this.getTaskById(taskId);
     }
 
-    updateTaskProgress(taskId, updatedProgress) {
-        const index = this.tasks.findIndex((task) => task.taskId === taskId);
-        if (index !== -1) {
-            // 使用runInAction来确保操作是作为一个事务执行的
-            runInAction(() => {
-                // 为了确保响应性，可以使用splice代替直接赋值
-                const updatedTask = {
-                    ...this.tasks[index],
-                    progress: updatedProgress,
-                };
-                this.tasks.splice(index, 1, updatedTask);
-            });
+    setTaskData(taskId) {
+        this.taskData = this.getTaskById(taskId);
+    }
+
+
+    getTaskById(taskId) {
+        return this.tasks.find((task) => task.taskId === taskId);
+    }
+
+    // update taskData
+    updateTask(taskId, newInfo) {
+        console.log(newInfo)
+        const taskIndex = this.tasks.findIndex(task => task.taskId === taskId);
+        if (taskIndex !== -1) {
+            // 更新tasks中对应的任务
+            this.tasks[taskIndex] = { ...this.tasks[taskIndex], ...newInfo };
+            console.log(JSON.parse(JSON.stringify(this.tasks)))
+            this.setTaskData(taskId);
+        } else {
+            console.error("Task not found:", taskId);
         }
     }
+
+    resetTask() {
+        this.taskData = {};
+        this.currentTask = null;
+    }
+
+    addTask(newTask) {
+        this.tasks.push(newTask);
+    }
+
 }
 
 const taskStore = new TaskStore();

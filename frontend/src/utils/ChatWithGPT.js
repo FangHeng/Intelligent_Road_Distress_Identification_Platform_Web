@@ -1,27 +1,28 @@
-require('dotenv').config();
-const OpenAI = require('openai').default;
-console.log(process.env.OPENAI_API_KEY)
-
-const openai = new OpenAI({
-    apiKey: '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', // This is the default and can be omitted
-});
-
-async function chatWithGPT() {
-    try {
-        const stream = await openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
-            messages: [{ role: 'user', content: 'Say this is a test' }],
-            stream: true,
-        });
-        for await (const chunk of stream) {
-            console.log(chunk.choices[0]?.delta?.content || '');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-
-chatWithGPT();
+// require('dotenv').config();
+// const OpenAI = require('openai').default;
+// console.log(process.env.OPENAI_API_KEY)
+//
+// const openai = new OpenAI({
+//     apiKey: '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', // This is the default and can be omitted
+//     base: 'https://api.openai.com/v1',
+// });
+//
+// async function chatWithGPT() {
+//     try {
+//         const stream = await openai.chat.completions.create({
+//             model: 'gpt-3.5-turbo',
+//             messages: [{ role: 'user', content: 'Say this is a test' }],
+//             stream: true,
+//         });
+//         for await (const chunk of stream) {
+//             console.log(chunk.choices[0]?.delta?.content || '');
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+// }
+//
+// chatWithGPT();
 
 // const axios = require('axios');
 // let data = JSON.stringify({
@@ -95,3 +96,22 @@ chatWithGPT();
 // chatWithGPT("Say this is a test!")
 //     .then(response => console.log(JSON.stringify(response)))
 //     .catch(error => console.error('Error:', error));
+const OpenAI = require("openai");
+
+const openai = new OpenAI({
+    apiKey: 'sk-GkthFvMA4DRMaInHE1B7F0E775A0406fBf8a31E44aF9D267',
+    baseURL: "https://oneapi.xty.app/v1",
+});
+
+async function main() {
+    const stream = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: "How to learn Python?" }],
+        stream: true,
+    });
+    for await (const chunk of stream) {
+        process.stdout.write(chunk.choices[0]?.delta?.content || "");
+    }
+}
+
+main();

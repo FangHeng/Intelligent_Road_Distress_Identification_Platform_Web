@@ -59,9 +59,7 @@ const SideBarLayout = observer(() => {
         const fetchInfo = async () => {
             await userStore.fetchUserInfo();
             if (userStore.getInfoHint.status === 'success') {
-                if (!userInfo.email || !userInfo.phone_number) {
-                    console.log(!userInfo.email || !userInfo.phone_number)
-                    console.log(userInfo.email, userInfo.phone_number)
+                if(userInfo.email === null || userInfo.phone_number === null){
                     notification.warning({
                         message: '请完善您的信息！',
                         description: '您的电子邮件和电话号码是必填项。',
@@ -76,7 +74,14 @@ const SideBarLayout = observer(() => {
         };
 
         fetchInfo();
-    }, [message]);
+
+        return () => {
+            userStore.getInfoHint = {
+                status: 'initial',
+            }
+        }
+
+    }, []);
 
     useEffect(() => {
         // 当主页加载完成，停止进度条
@@ -136,7 +141,6 @@ const SideBarLayout = observer(() => {
                             />
                         </div>
                     </Divider>
-
                     <Menu
                         // theme="white"
                         mode="inline"

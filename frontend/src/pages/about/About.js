@@ -10,6 +10,7 @@ const About = () => {
 
     return (
         <PageContainer>
+
             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'start', padding: '20px' }}>
             <div style={{ flex: 4 }}>
                 <Card id="members" title="成员信息" style={{ marginBottom: 20 }}>
