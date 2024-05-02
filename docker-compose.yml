@@ -27,6 +27,10 @@ services:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     networks:
       - my_network
 
@@ -69,21 +73,22 @@ services:
       - my_network
 
   minio:
-    image: minio/minio
+    build:
+      context: ./nginx  # Dockerfile 所在的目录
     volumes:
-      - /home/data:/data
-      - /home/config:/root/.minio
+      - minio_data:/data  # 映射命名卷到 MinIO 的数据目录
+#      - minio_config:/root/.minio  # 映射命名卷到 MinIO 的配置目录
     ports:
       - "9000:9000"
       - "9001:9001"  # Console 端口
     environment:
       MINIO_ROOT_USER: "MINIOROOT"
       MINIO_ROOT_PASSWORD: "root1234@"
+#      MINIO_ACCESS_KEY 控制权限是用这个
     privileged: true
-
     command: server --console-address ":9001" /data
-    networks:
-      - my_network
+#    networks:
+#      - my_network
 
 
 

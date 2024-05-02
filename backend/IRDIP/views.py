@@ -49,7 +49,7 @@ classification_mapping = {
 
 # 初始化MinIO客户端 EXIPIRE - 2024.05.30
 minio_client = Minio(
-    'localhost:9000',
+    os.getenv('MINIO_ENDPOINT', 'localhost:9000'),
     access_key='kzwQJKCOUYCsy2Jehmr0',
     secret_key='2w8WEIjRDDJbihjxBdUvMbvdnhCpwkjKLL14YTEG',
     secure=False
@@ -331,7 +331,9 @@ def upload(request):
                 # 上传到本地服务器
                 # 获取文件 URL，保存到数据库
                 file_url = handle_uploaded_images(file, file_path, settings.MINIO_STORAGE_BUCKET_NAME)
-                print(file_url)
+                # print("dev: 检查上传文件：",file_url)
+
+
         # TODO:并发处理/并行
         # predictions = {}
         predictions = predict(user=user_id, time=upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
@@ -354,40 +356,12 @@ def handle_uploaded_file(f, file_name):
             destination.write(chunk)
 
 
-# def handle_file(file, file_name):
-#     # 创建MinIO客户端
-#     minio_client = Minio(
-#         settings.MINIO_STORAGE_ENDPOINT,
-#         access_key=settings.MINIO_STORAGE_ACCESS_KEY,
-#         secret_key=settings.MINIO_STORAGE_SECRET_KEY,
-#         secure=settings.MINIO_STORAGE_USE_HTTPS
-#     )
-#
-#     # 确保bucket存在
-#     if not minio_client.bucket_exists(settings.MINIO_STORAGE_BUCKET_NAME):
-#         minio_client.make_bucket(settings.MINIO_STORAGE_BUCKET_NAME)
-#
-#     # 上传文件到MinIO
-#     try:
-#         minio_client.put_object(
-#             settings.MINIO_STORAGE_BUCKET_NAME,
-#             file_name,
-#             file,
-#             length=-1,  # 对于流数据，长度设为-1
-#             part_size=10 * 1024 * 1024  # 分片大小设置为10MB
-#         )
-#     except Exception as e:
-#         print("Failed to upload file:", e)
-#         return None
-#
-#     # 生成可访问的URL
-#     return minio_client.presigned_get_object(settings.MINIO_STORAGE_BUCKET_NAME, file_name)
 
 
 def handle_uploaded_images(f, file_name, bucket_name):
     # 初始化 MinIO 客户端
     minio_client = Minio(
-        settings.MINIO_STORAGE_ENDPOINT,
+        os.getenv('MINIO_PUBLIC_URL', 'localhost:9000'),
         access_key=settings.MINIO_STORAGE_ROOT_USER,
         secret_key=settings.MINIO_STORAGE_ROOT_PASSWORD,
         secure=settings.MINIO_STORAGE_USE_HTTPS
@@ -433,9 +407,17 @@ def get_result(request):
     # print(upload_ids)
     response_data = {}
     request_user = request.user
+    # TODO: 类供
+    minio_client = Minio(
+        os.getenv('MINIO_ENDPOINT', 'localhost:9000'),
+        access_key=settings.MINIO_STORAGE_ROOT_USER,
+        secret_key=settings.MINIO_STORAGE_ROOT_PASSWORD,
+        secure=settings.MINIO_STORAGE_USE_HTTPS
+    )
+
+    public_url_base = os.getenv('MINIO_PUBLIC_URL', 'http://localhost:9000')
 
     upload_records = UploadRecord.objects.filter(upload_id__in=upload_ids).select_related('uploader', 'road')
-
     for upload_record in upload_records:
         uploader = upload_record.uploader.user
 
@@ -445,6 +427,24 @@ def get_result(request):
             continue
 
         files = FileUpload.objects.filter(upload=upload_record).select_related('upload')
+        files_data = []
+        for file in files:
+            object_name = file.file_url  # 确保 file_url 存储对象的路径
+            try:
+                # 生成minio预签名 URL,加密包含了endpoint，不可以使用bridge桥接网络。
+                presigned_url = minio_client.presigned_get_object(settings.MINIO_STORAGE_BUCKET_NAME, object_name,
+                                                                  expires=timedelta(days=7))
+
+                # print("dev: presigned_url:", presigned_url)
+                files_data.append({
+                    "file_id": file.file_id,
+                    "file_name": os.path.basename(file.file_url),
+                    "classification_result": file.classification_result,
+                    "confidence": float(file.confidence),
+                    "img_url": presigned_url
+                })
+            except S3Error as e:
+                print(f"Error generating URL for {file.file_url}: {e}")
 
         # 构建响应数据
         upload_data = {
@@ -454,16 +454,7 @@ def get_result(request):
             "upload_name": upload_record.upload_name,
             "upload_count": upload_record.upload_count,
             "selected_model": upload_record.get_selected_model_display(),
-            "files": [
-                {
-                    "file_id": file.file_id,
-                    "file_name": os.path.basename(file.file_url),
-                    "classification_result": file.classification_result,
-                    "confidence": float(file.confidence),
-                    "img": get_base64_encoded_image(file.file_url)
-                }
-                for file in files
-            ]
+            "files": files_data
         }
 
         response_data[str(upload_record.upload_id)] = upload_data
