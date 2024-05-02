@@ -17,6 +17,7 @@ class ImageStore {
     reportIds = [];
     reportData = [];
     analysisResult = [];
+    cameFromReport = false;
 
     constructor() {
         makeAutoObservable(this, {
@@ -74,6 +75,10 @@ class ImageStore {
     setSelectedUploadId(ids) {
         this.selectedUploadId = [];
         this.selectedUploadId = ids;
+    }
+
+    setCameFromReport(value) {
+        this.cameFromReport = value;
     }
 
 
@@ -166,6 +171,7 @@ class ImageStore {
                 this.setResultData(response.data);
                 this.setAnalysisResult(calculatePercentage(this.resultData));
                 // 确保 ChatStore 使用最新的 analysisResult
+                chatStore.setMessages([]);
                 chatStore.updateAnalysisResult(this.analysisResult);
             })
             .catch(error => {

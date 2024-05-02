@@ -1,6 +1,6 @@
 // TaskStepForm.js: 任务步骤表单，包括创建任务，更新进度，完成任务等步骤。
 import React, {useEffect, useState} from 'react';
-import {Button, Result, Space, Steps, Typography, App} from 'antd';
+import {Button, Result, Space, Steps, Typography, App, Divider, Alert} from 'antd';
 import {
     ProCard, ProDescriptions,
     ProForm,
@@ -12,22 +12,29 @@ import {
 import roadStore from "../../store/RoadStore";
 import {observer} from "mobx-react-lite";
 import {ArrowLeftOutlined, ArrowRightOutlined} from "@ant-design/icons";
+import imgStore from "../../store/ImgStore";
+import userStore from "../../store/UserStore";
+import ReportDescriptions from "../Descriptions/ReportDescriptions";
 import taskStore from "../../store/TaskStore";
 
-const {Title} = Typography;
+const {Title, Text} = Typography;
 
-const TaskStepForm = observer(({task}) => {
+const TaskStepForm = observer(() => {
     const roadData = roadStore.roadData;
     const {message} = App.useApp();
     const [current, setCurrent] = useState(0);
+    const [loading, setLoading] = useState(false);
     const roadOptions = roadData.map(road => ({
         label: road.road_name, // 显示给用户的名称
         value: road.road_id, // 实际的道路ID
     }));
 
-    const [taskData, setTaskData] = useState(task);
+    const taskData = taskStore.taskData;
+
+    // const [taskData, setTaskData] = useState(task);
 
     useEffect(() => {
+        // console.log('Task data:', taskStore.currentTask);
         switch (taskData.status) {
             case 'closed':
                 setCurrent(2);
@@ -41,30 +48,62 @@ const TaskStepForm = observer(({task}) => {
     }, [taskData.status]); // 当taskData.status变化时更新步骤
 
     const onCreateTaskFinish = async (values) => {
+        setLoading(true);
         console.log(values);
         //等待2秒模拟后端响应
         await new Promise((resolve) => {
             setTimeout(resolve, 2000);
         });
-        setTaskData({...taskData, ...values, status: 'processing'}); // 更新任务状态
+        setLoading(false);
+
+        // 从values中提取数据
+        const { taskName, roadId, responsibleName, duration, remarks } = values;
+        const [createdAt, estimatedEndDate] = duration;
+        // 合并数据
+        const newTaskData = {
+            taskName,
+            roadId,
+            responsibleName,
+            estimatedEndDate,
+            remarks,
+            roadName: roadOptions.find((road) => road.value === roadId)?.label,
+            // 其他固定数据
+            taskId: 3,
+            uploadId: "UPL123456",
+            creatorId: "CRE123456",
+            creatorName: userStore.userInfo.username,
+            responsibleId: "RES123456",
+            analysisReport: "报告链接",
+            progress: 0,
+            status: "processing",
+            createdAt
+        };
+
+        taskStore.addTask(newTaskData);
+
+        taskStore.resetTask();
+        // taskStore.setCurrentTask(newTaskData);
+        taskStore.setTaskData(newTaskData.taskId);
+        console.log('Task data:', taskStore.taskData);
         message.success('创建任务成功！');
         setCurrent(current + 1);
     };
 
-    const updateTaskProgress = (newProgress) => {
-        setTaskData((currentTasks) => {
-            return {
-                ...currentTasks,
-                progress: newProgress,
-            };
-        });
-    };
+    // const updateTaskProgress = (newProgress) => {
+    //     setTaskData((currentTasks) => {
+    //         return {
+    //             ...currentTasks,
+    //             progress: newProgress,
+    //         };
+    //     });
+    // };
 
     const steps = [
         {
             title: '创建任务',
             description: '这里填写任务的基本信息',
             content:
+
                 <ProCard
                     style={{
                         display: 'flex',
@@ -76,7 +115,7 @@ const TaskStepForm = observer(({task}) => {
                 >
                     <ProForm
                         style={{
-                            maxWidth: '60vw', // 限制表单的最大宽度
+                            maxWidth: '900px', // 限制表单的最大宽度
                             width: '100%', // 确保在限制范围内表单宽度是100%
                         }}
                         onFinish={onCreateTaskFinish}
@@ -98,9 +137,8 @@ const TaskStepForm = observer(({task}) => {
                                         key="submit"
                                         onClick={() => {
                                             props.form?.submit?.()
-
-                                        }
-                                        }
+                                        }}
+                                        loading={loading}
                                     >
                                         提交
                                     </Button>,
@@ -145,6 +183,9 @@ const TaskStepForm = observer(({task}) => {
                                 WangXiaoEr: '王小二',
                                 LiSi: '李四',
                                 ZhangSan: '张三',
+                                WangWu: '王五',
+                                liuLiu: '刘六',
+                                huangQi: '黄七',
                             }}
                             fieldProps={{
                                 mode: 'multiple',
@@ -160,7 +201,7 @@ const TaskStepForm = observer(({task}) => {
                         />
 
                         <ProFormDateRangePicker
-                            name="estimatedEndDate"
+                            name="duration"
                             label="项目持续时间"
                             colProps={{md: 16, xl: 12}}
                             rules={[{required: true, message: '请选择项目持续时间！'}]}
@@ -177,14 +218,19 @@ const TaskStepForm = observer(({task}) => {
             title: '更新进度',
             description: '这里更新任务的进度和预计完成日期',
             content:
-
                 <ProCard
                     bordered
                 >
                     <ProForm
                         onFinish={async (values) => {
                             console.log(values);
-                            // Proceed to next step or save data
+                            setLoading(true);
+                            // 发送给后端，模拟两秒
+                            await new Promise((resolve) => {
+                                setTimeout(resolve, 2000);
+                            });
+                            setLoading(false);
+                            taskStore.updateTask(taskData.taskId, values);
                         }}
                         layout="vertical" // 使用水平布局
                         grid={true} // 启用栅格布局
@@ -203,9 +249,9 @@ const TaskStepForm = observer(({task}) => {
                                         type="primary"
                                         key="update"
                                         onClick={() => {
-                                            console.log(taskData);
-                                        }
-                                        }
+                                            props.form?.submit?.();
+                                        }}
+                                        loading={loading}
                                     >
                                         更新进度
                                     </Button>,
@@ -213,8 +259,13 @@ const TaskStepForm = observer(({task}) => {
                                         type="primary"
                                         key="complete"
                                         disabled={taskData.progress !== 100}
-                                        onClick={() => {
+                                        onClick={async () => {
                                             if (taskData.progress === 100) {
+                                                // 更新该任务的status为closed
+                                                await new Promise((resolve) => {
+                                                    setTimeout(resolve, 2000);
+                                                });
+                                                taskStore.updateTask(taskData.taskId, {status: 'closed'});
                                                 setCurrent(current + 1);
                                             } else {
                                                 message.error('任务的进度还不是100%，不能确认！');
@@ -253,17 +304,23 @@ const TaskStepForm = observer(({task}) => {
                             }}
                             fieldProps={{
                                 onChange: (value) => {
-                                    updateTaskProgress(value);
-                                    taskStore.updateTaskProgress(taskData.taskId, value);
+                                    // updateTaskProgress(value);
+                                    // taskStore.updateTaskProgress(taskData.taskId, value);
                                 },
                             }}
                             initialValue={taskData.progress}
                         />
                         <ProDescriptions
                             column={2} // 设置列数
-                            title={task.taskName} // 可以设置ProDescriptions的标题为任务名称
-                            dataSource={task} // 传入数据源
-                            editable
+                            title={taskData.taskName} // 可以设置ProDescriptions的标题为任务名称
+                            dataSource={taskData} // 传入数据源
+                            editable={{
+                                onSave: async (keypath, newInfo, oriInfo) => {
+                                    // console.log(keypath, newInfo, oriInfo);
+                                    // 更新数据
+                                    taskStore.updateTask(taskData.taskId, newInfo);
+                                },
+                            }}
                         >
                             <ProDescriptions.Item label="任务ID" dataIndex="taskId" editable={false}/>
                             <ProDescriptions.Item label="创建者" dataIndex="creatorName" editable={false}/>
@@ -281,7 +338,7 @@ const TaskStepForm = observer(({task}) => {
                             />
                             <ProDescriptions.Item label="道路" dataIndex="roadName" editable={false}/>
                             <ProDescriptions.Item label="分析报告" dataIndex="analysisReport" editable={false}>
-                                <a href={task.analysisReport} target="_blank" rel="noopener noreferrer">查看报告</a>
+                                <a href={taskData.analysisReport} target="_blank" rel="noopener noreferrer">查看报告</a>
                             </ProDescriptions.Item>
                             {/*<ProDescriptions.Item label="任务进度" dataIndex="progress" editable={false}/>*/}
                             <ProDescriptions.Item label="创建日期" dataIndex="createdAt" editable={false}
@@ -317,8 +374,8 @@ const TaskStepForm = observer(({task}) => {
                 >
                     <ProDescriptions
                         column={2} // 设置列数
-                        title={task.taskName} // 可以设置ProDescriptions的标题为任务名称
-                        dataSource={task} // 传入数据源
+                        title={taskData.taskName} // 可以设置ProDescriptions的标题为任务名称
+                        dataSource={taskData} // 传入数据源
                     >
                         <ProDescriptions.Item label="任务ID" dataIndex="taskId"/>
                         <ProDescriptions.Item label="创建者" dataIndex="creatorName"/>
@@ -335,7 +392,7 @@ const TaskStepForm = observer(({task}) => {
                         />
                         <ProDescriptions.Item label="道路" dataIndex="roadName"/>
                         <ProDescriptions.Item label="分析报告" dataIndex="analysisReport">
-                            <a href={task.analysisReport} target="_blank" rel="noopener noreferrer">查看报告</a>
+                            <a href={taskData.analysisReport} target="_blank" rel="noopener noreferrer">查看报告</a>
                         </ProDescriptions.Item>
                         {/*<ProDescriptions.Item label="任务进度" dataIndex="progress" editable={false}/>*/}
                         <ProDescriptions.Item label="创建日期" dataIndex="createdAt"
@@ -368,11 +425,32 @@ const TaskStepForm = observer(({task}) => {
 
     return (
         <ProCard style={{paddingLeft: '5vw', paddingRight: '5vw'}}>
-            <Space direction="vertical" style={{width: '100%'}}>
+            <Space direction="vertical" style={{width: '100%'}} size={'large'}>
+                {
+                    imgStore.cameFromReport &&
+                    <>
+                    <ProCard
+                        bordered
+                        size="default"
+                        title={imgStore.reportData[0].road_name + '分析报告'}
+                        headerBordered
+                        collapsible
+                        defaultCollapsed
+                        onCollapse={(collapse) => console.log(collapse)}
+                    >
+                        <ReportDescriptions report={imgStore.reportData} tags={['总体评价']}/>
+                    </ProCard>
+                        <Divider orientation="left"><Title level={5}>创建维修对应的维修任务</Title></Divider>
+                    </>
+                }
+                {/*根据imgStore.cameFromReport判断渲染Alert组件*/}
+
                 <Steps current={current} items={items}/>
                 <div>
                     {steps[current].content}
                 </div>
+
+
                 {/*<div*/}
                 {/*    style={{*/}
                 {/*        marginTop: 24,*/}
@@ -403,4 +481,26 @@ const TaskStepForm = observer(({task}) => {
         </ProCard>
     );
 });
+
+const TaskAlert = () => {
+    return (
+        <Alert
+            message="请先完成检测报告"
+            description="我们建议您先完成检测报告，再创建维修任务，以便更好地了解道路的情况，否则报告内容可能会丢失。"
+            type="info"
+            showIcon
+            action={
+                <Space direction="vertical">
+                    <Button size="small" type="link">
+                        去上传图片检测
+                    </Button>
+                    <Button size="small" type="link">
+                        去历史记录选择
+                    </Button>
+                </Space>
+            }
+        />
+    );
+}
+
 export default TaskStepForm;

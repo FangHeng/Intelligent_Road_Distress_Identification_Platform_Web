@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {
     Card,
     Form,
-    App, Menu, Layout, theme, Input, Modal
+    App, Menu, Layout, theme, Input, Modal, Breadcrumb
 } from 'antd';
 import userStore from '../../store/UserStore'
 import {observer} from 'mobx-react-lite'
@@ -120,12 +120,16 @@ const UserSetting = observer(() => {
 
     return (
         <App>
+
             <PageContainer
+
                 header={{
                     title: '账户设置',
                 }}
                 content='管理您的个人信息以及系统设置。'
+
             >
+
                 <Card>
                     <Layout>
                         <Sider width={200} theme={'light'}>

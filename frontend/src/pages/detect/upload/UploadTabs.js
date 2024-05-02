@@ -31,7 +31,7 @@ const UploadTabs =()=>{
                 navigate('/pages/settings/AddRoad');
             }}
         >
-            <FontAwesomeIcon icon={faRoad} style={{ marginRight: '5px', color: '#faad14' }}/>
+            <FontAwesomeIcon icon={faRoad} style={{ marginRight: '5px'}}/>
             添加新路段
         </Button>
 

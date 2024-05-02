@@ -18,13 +18,15 @@ import {observer} from "mobx-react-lite";
 import historyStore from "../../store/HistoryStore";
 import axiosInstance from "../../utils/AxiosInstance";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import { faPaperPlane} from "@fortawesome/free-solid-svg-icons";
+import {faPaperPlane, faTasks} from "@fortawesome/free-solid-svg-icons";
 import chatStore from "../../store/ChatStore";
 import userStore from "../../store/UserStore";
 import logoMini from "../../assets/img/logo/logo-mini.png";
 import {PageContainer, ProDescriptions} from "@ant-design/pro-components";
 import {useNavigate} from "react-router-dom";
 import {classification_mapping} from "../../utils/utils";
+import Chat from "../../components/Chat/Chat";
+import ReportDescriptions from "../../components/Descriptions/ReportDescriptions";
 
 const {Option} = Select;
 const {CheckableTag} = Tag;
@@ -809,61 +811,73 @@ const ImgVisualize = observer(() => {
                                 open={openChatDrawer}
                                 width={'50%'}
                                 key={'chat'}
-                            >
-                                {/*根据isSending来判断是否加载spin*/}
-                                {chatStore.isSending && (
-                                    <div className="spin">
-                                        <Spin/>
-                                    </div>
-                                )}
-                                <div className="chat-container">
-                                    {/* 聊天历史 */}
-                                    <div className="chat-history">
-                                        {chatStore.messages
-                                            .filter(message => message.role !== 'analysis') // 过滤掉 role 为 'analysis' 的消息
-                                            .map((message, index) => (
-                                                <div
-                                                    key={index}
-                                                    className={`chat-message ${message.role === 'user' ? 'user-message' : 'gpt-message'}`}
-                                                >
-                                                    {message.role === 'user' && (
-                                                        <div className={'message-avatar'}>
-                                                            {/* 用户头像 */}
-                                                            <Avatar size={36} src={userStore.userInfo.avatar}/>
-                                                        </div>
-                                                    )}
-                                                    <div className="message-content">
-                                                        {message.content}
-                                                    </div>
-                                                    {message.role === 'gpt' && (
-                                                        <div>
-                                                            {/* GPT头像 */}
-                                                            <Avatar src={logoMini} size={48}/> {/* GPT 头像的 URL */}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                    </div>
+                                style = {{ overflow: 'auto',}}
+                                extra={
+                                    <Space>
+                                        <Button type={'link'} size={'small'} onClick={() => navigate('/pages/MaintenanceTasks/AssignmentsCreate')}>
+                                            <FontAwesomeIcon icon={faTasks} style={{marginRight: '5px'}}/>
+                                            创建任务
 
-                                    {/* 输入区 */}
-                                    <div className="message-input">
-                                        <Input.TextArea
-                                            rows={1}
-                                            placeholder="输入你的问题"
-                                            value={userInput}
-                                            onChange={handleInputChange}
-                                            onKeyDown={handleKeyPress}
-                                        />
-                                        <Button
-                                            type="primary"
-                                            onClick={handleSendClick}
-                                            disabled={chatStore.isSending}
-                                        >
-                                            <FontAwesomeIcon icon={faPaperPlane} style={{marginRight: '5px'}}/>
-                                            发送
                                         </Button>
-                                    </div>
-                                </div>
+                                    </Space>
+                                }
+                            >
+                                {/*/!*根据isSending来判断是否加载spin*!/*/}
+                                {/*{chatStore.isSending && (*/}
+                                {/*    <div className="spin">*/}
+                                {/*        <Spin/>*/}
+                                {/*    </div>*/}
+                                {/*)}*/}
+                                {/*<div className="chat-container">*/}
+                                {/*    /!* 聊天历史 *!/*/}
+                                {/*    <div className="chat-history">*/}
+
+                                {/*        {chatStore.messages*/}
+                                {/*            .filter(message => message.role !== 'system') // 过滤掉 role 为 'system' 的消息*/}
+                                {/*            .map((message, index) => (*/}
+                                {/*                <div*/}
+                                {/*                    key={index}*/}
+                                {/*                    className={`chat-message ${message.role === 'user' ? 'user-message' : 'gpt-message'}`}*/}
+                                {/*                >*/}
+                                {/*                    {message.role === 'user' && (*/}
+                                {/*                        <div className={'message-avatar'}>*/}
+                                {/*                            /!* 用户头像 *!/*/}
+                                {/*                            <Avatar size={36} src={userStore.userInfo.avatar}/>*/}
+                                {/*                        </div>*/}
+                                {/*                    )}*/}
+                                {/*                    <div className="message-content">*/}
+                                {/*                        {message.content}*/}
+                                {/*                    </div>*/}
+                                {/*                    {message.role === 'assistant' && (*/}
+                                {/*                        <div>*/}
+                                {/*                            /!* GPT头像 *!/*/}
+                                {/*                            <Avatar src={logoMini} size={48}/> /!* GPT 头像的 URL *!/*/}
+                                {/*                        </div>*/}
+                                {/*                    )}*/}
+                                {/*                </div>*/}
+                                {/*            ))}*/}
+                                {/*    </div>*/}
+
+                                {/*    /!* 输入区 *!/*/}
+                                {/*    <div className="message-input">*/}
+                                {/*        <Input.TextArea*/}
+                                {/*            rows={1}*/}
+                                {/*            placeholder="输入你的问题"*/}
+                                {/*            value={userInput}*/}
+                                {/*            onChange={handleInputChange}*/}
+                                {/*            onKeyDown={handleKeyPress}*/}
+                                {/*        />*/}
+                                {/*        <Button*/}
+                                {/*            type="primary"*/}
+                                {/*            onClick={handleSendClick}*/}
+                                {/*            disabled={chatStore.isSending}*/}
+                                {/*        >*/}
+                                {/*            <FontAwesomeIcon icon={faPaperPlane} style={{marginRight: '5px'}}/>*/}
+                                {/*            发送*/}
+                                {/*        </Button>*/}
+                                {/*    </div>*/}
+                                {/*</div>*/}
+                                <Chat />
                             </Drawer>
                             <Drawer
                                 title="报告详情"
@@ -872,109 +886,122 @@ const ImgVisualize = observer(() => {
                                 open={isReportDrawerVisible}
                                 width={'50%'}
                                 key={'report'}
+                                extra={
+                                    <Space>
+                                        <Button type={'link'} size={'small'} onClick={() => {
+                                            imgStore.setCameFromReport(true);
+                                            navigate('/pages/MaintenanceTasks/AssignmentsCreate')
+                                            }}>
+                                            <FontAwesomeIcon icon={faTasks} style={{marginRight: '5px'}}/>
+                                            创建任务
+                                        </Button>
+                                    </Space>
+                                }
                             >
                                 {
                                     imgStore.reportData.length === 0 ? (
                                         <Empty description="暂无报告"/>
                                     ) : (
-                                        <ProDescriptions
-                                            title={imgStore.reportData[0].theme} // 使用第一个字典的 theme 作为标题
-                                            dataSource={imgStore.reportData[0]} // 只使用第一个字典作为数据源
-                                            tooltip={`道路 ${imgStore.reportData[0].road_name} 的报告`}
-                                            column={2}
-                                            actionRef={actionRef}
-                                            // bordered
-                                            formProps={{
-
-                                            }}
-                                            editable={{
-                                                onSave: async (keypath, newInfo, oriInfo) => {
-                                                    await handleSave(keypath, newInfo, oriInfo);
-                                                }
-                                            }} // 使内容可编辑
-                                            columns={[
-                                                {
-                                                    title: '上传者',
-                                                    dataIndex: 'uploader',
-                                                    key: 'uploader',
-                                                    editable: false,
-                                                },
-                                                {
-                                                    title: '上传时间',
-                                                    dataIndex: 'upload_time',
-                                                    key: 'upload_time',
-                                                    valueType: 'dateTime',
-                                                    editable: false,
-                                                },
-                                                {
-                                                    title: '位置',
-                                                    key: 'location',
-                                                    render: (_, record) => (
-                                                        <>{record.province} {record.city} {record.district}</>
-                                                    ),
-                                                    editable: false,
-                                                },
-                                                {
-                                                    title: 'GPS坐标',
-                                                    key: 'gps',
-                                                    render: (_, record) => (
-                                                        <>{record.gps_longitude}, {record.gps_latitude}</>
-                                                    ),
-                                                    editable: false,
-                                                },
-                                                {
-                                                    title: '道路名称',
-                                                    dataIndex: 'road_name',
-                                                    key: 'road_name',
-                                                    editable: false,
-                                                },
-                                                {
-                                                    title: '上传数量',
-                                                    dataIndex: 'upload_count',
-                                                    key: 'upload_count',
-                                                    editable: false,
-                                                },
-                                                {
-                                                    title: '选择的模型',
-                                                    dataIndex: 'selected_model',
-                                                    key: 'selected_model',
-                                                    editable: false,
-                                                },
-                                                {
-                                                    title: '完好程度',
-                                                    key: 'integrity',
-                                                    render: (_, record) => (
-                                                        <Progress
-                                                            percent={100 - record.damage_ratio * 100}
-                                                            format={percent => `${percent.toFixed(2)}%`}
-                                                        />
-                                                    ),
-                                                    editable: false,
-                                                }
-                                            ]}
-                                        >
-                                            <ProDescriptions.Item label="导出报告" valueType="option">
-                                            </ProDescriptions.Item>
-                                            {
-                                                imgStore.reportData.slice(1).map((item, index) => {
-                                                    if (selectedTags.includes(item.theme)) {
-                                                        return (
-                                                            <ProDescriptions.Item
-                                                                label={item.theme}
-                                                                dataIndex={item.theme}
-                                                                key={item.theme}
-                                                                span={2}
-                                                                copyable // 使内容可复制
-                                                                valueType={'textarea'}
-                                                                className='custom-editor'
-                                                            >
-                                                                {item.answer}
-                                                            </ProDescriptions.Item>
-                                                        );
-                                                    }
-                                                })
-                                            }
-                                        </ProDescriptions>
+                                        // <ProDescriptions
+                                        //     title={imgStore.reportData[0].theme} // 使用第一个字典的 theme 作为标题
+                                        //     dataSource={imgStore.reportData[0]} // 只使用第一个字典作为数据源
+                                        //     tooltip={`道路 ${imgStore.reportData[0].road_name} 的报告`}
+                                        //     column={2}
+                                        //     actionRef={actionRef}
+                                        //     // bordered
+                                        //     formProps={{
+                                        //
+                                        //     }}
+                                        //     editable={{
+                                        //         onSave: async (keypath, newInfo, oriInfo) => {
+                                        //             await handleSave(keypath, newInfo, oriInfo);
+                                        //         }
+                                        //     }} // 使内容可编辑
+                                        //     columns={[
+                                        //         {
+                                        //             title: '上传者',
+                                        //             dataIndex: 'uploader',
+                                        //             key: 'uploader',
+                                        //             editable: false,
+                                        //         },
+                                        //         {
+                                        //             title: '上传时间',
+                                        //             dataIndex: 'upload_time',
+                                        //             key: 'upload_time',
+                                        //             valueType: 'dateTime',
+                                        //             editable: false,
+                                        //         },
+                                        //         {
+                                        //             title: '位置',
+                                        //             key: 'location',
+                                        //             render: (_, record) => (
+                                        //                 <>{record.province} {record.city} {record.district}</>
+                                        //             ),
+                                        //             editable: false,
+                                        //         },
+                                        //         {
+                                        //             title: 'GPS坐标',
+                                        //             key: 'gps',
+                                        //             render: (_, record) => (
+                                        //                 <>{record.gps_longitude}, {record.gps_latitude}</>
+                                        //             ),
+                                        //             editable: false,
+                                        //         },
+                                        //         {
+                                        //             title: '道路名称',
+                                        //             dataIndex: 'road_name',
+                                        //             key: 'road_name',
+                                        //             editable: false,
+                                        //         },
+                                        //         {
+                                        //             title: '上传数量',
+                                        //             dataIndex: 'upload_count',
+                                        //             key: 'upload_count',
+                                        //             editable: false,
+                                        //         },
+                                        //         {
+                                        //             title: '选择的模型',
+                                        //             dataIndex: 'selected_model',
+                                        //             key: 'selected_model',
+                                        //             editable: false,
+                                        //         },
+                                        //         {
+                                        //             title: '完好程度',
+                                        //             key: 'integrity',
+                                        //             render: (_, record) => (
+                                        //                 <Progress
+                                        //                     percent={100 - record.damage_ratio * 100}
+                                        //                     format={percent => `${percent.toFixed(2)}%`}
+                                        //                 />
+                                        //             ),
+                                        //             editable: false,
+                                        //         }
+                                        //     ]}
+                                        // >
+                                        //     {/*<ProDescriptions.Item label="导出报告" valueType="option">*/}
+                                        //     {/*</ProDescriptions.Item>*/}
+                                        //     {
+                                        //         imgStore.reportData.slice(1).map((item, index) => {
+                                        //             if (selectedTags.includes(item.theme)) {
+                                        //                 return (
+                                        //                     <ProDescriptions.Item
+                                        //                         label={item.theme}
+                                        //                         dataIndex={item.theme}
+                                        //                         key={item.theme}
+                                        //                         span={2}
+                                        //                         copyable // 使内容可复制
+                                        //                         valueType={'textarea'}
+                                        //                         className='custom-editor'
+                                        //                     >
+                                        //                         {item.answer}
+                                        //                     </ProDescriptions.Item>
+                                        //                 );
+                                        //             }
+                                        //         })
+                                        //     }
+                                        // </ProDescriptions>
+                                    //     将reportData和selectedTags传递给ReportDescription组件
+                                        <ReportDescriptions report={imgStore.reportData} tags={selectedTags}/>
                                     )
                                 }
                             </Drawer>

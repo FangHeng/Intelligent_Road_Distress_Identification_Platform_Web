@@ -30,25 +30,34 @@ import {faMoon, faSun} from "@fortawesome/free-solid-svg-icons";
 
 
 const Home = observer(() => {
-  const {isLoading, dataLoaded} = historyStore;
+  const [dataLoaded, setDataLoaded] = React.useState(false);
+  const {isLoading} = historyStore;
   const {message} = App.useApp();
   const userInfo = userStore.userInfo;
 
+
   useEffect(() => {
-    console.log(isLoading, dataLoaded)
     const loadData = async () => {
       await historyStore.fetchUploadRecords();
     };
 
-    if (!dataLoaded) {
-      loadData().then(() => {
-        console.log(isLoading, dataLoaded)
-      }).catch((error) => {
-        console.error('Fetching upload records failed:', error);
-        message.error('加载历史记录失败！');
-      });
-    }
-  }, [dataLoaded]);
+    loadData().then(() => {
+        setDataLoaded(true);
+    }).catch((error) => {
+      setDataLoaded(true);
+      console.error('Fetching upload records failed:', error);
+      message.error('加载历史记录失败！');
+    });
+
+    // if (!dataLoaded) {
+    //   loadData().then(() => {
+    //     console.log(isLoading, dataLoaded)
+    //   }).catch((error) => {
+    //     console.error('Fetching upload records failed:', error);
+    //     message.error('加载历史记录失败！');
+    //   });
+    // }
+  }, []);
 
   useEffect(() => {
     if (dataLoaded) {
@@ -87,6 +96,7 @@ const Home = observer(() => {
   }
 
   return (
+
       <PageContainer
           header={{
             title: '首页'

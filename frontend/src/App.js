@@ -31,6 +31,7 @@ import Assignments from "./pages/MaintenanceTasks/Assignments";
 import AssignmentCreate from "./pages/MaintenanceTasks/AssignmentCreate";
 const { darkAlgorithm } = theme;
 
+
 const App = observer(() => {
   useEffect(() => {
     // 当组件挂载时，尝试从localStorage中读取主题
@@ -54,8 +55,8 @@ const App = observer(() => {
               theme={themeStore.theme === 'dark' ? { algorithm: darkAlgorithm } : {}}
           >
             <Routes>
-              <Route path="*" element={<NotFound/>}/>
               <Route path="/" element={<Navigate replace to="/login" />} />
+              <Route path="*" element={<NotFound/>}/>
               <Route path='/login' element={<Login/>}/>
               {/* 使用 MoreLayout 的路由 */}
               <Route path="/more" element={<MoreLayout />}>

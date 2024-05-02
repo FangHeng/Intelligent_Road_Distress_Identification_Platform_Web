@@ -1,12 +1,12 @@
 import {action, makeAutoObservable, observable, toJS} from "mobx";
-import axios from "axios";
-
 
 class ChatStore {
     messages = [
-        { role: 'gpt', content: '你好，我是纹影探路，你的智能道路分析帮手。' },
+        {
+            role: 'system',
+            content: '你是纹影探路，一个路面病害分析的专家。'
+        }
     ];
-    isSending = false;
 
     constructor() {
         makeAutoObservable(this, {
@@ -27,6 +27,10 @@ class ChatStore {
         return this.messages;
     }
 
+    setMessages(messages) {
+        this.messages = messages;
+    }
+
     formatMessages(analysisResult) {
         // 使用 toJS 将其转换为普通的 JavaScript 数组
         const analysisMessageContent = toJS(analysisResult);
@@ -41,78 +45,100 @@ class ChatStore {
         }).join('\n')
     }
 
-    // ChatStore 中
     updateAnalysisResult(newAnalysisResult) {
-        this.analysisResult = newAnalysisResult;
         const formattedMessage = this.formatMessages(newAnalysisResult);
-        const analysisIntro = "在本次对话中你的角色是gpt，这是一条或几条道路的一个分析检测结果，每条是该道路本次检测后的病害分类结果的占比，请你参考这次的检测结果（即作为道路的最新监测情况），我的问题将会围绕这次检测结果（即该道路的情况）问你相关道路情况和维修问题：";
+        const analysisIntro = "你是纹影探路，一个路面病害分析的专家。这是本次对话的一个先验知识，是一条或几条道路的一个分析检测结果，每条是该道路本次检测后的病害分类结果的占比，请你参考这次的检测结果（即作为道路的最新监测情况），用户的问题将会围绕这次检测结果（即该道路的情况）问你相关道路情况和维修问题：";
         const fullAnalysisMessage = `${analysisIntro}\n${formattedMessage}`;
         // 判断messages中是否已经有了分析结果，如果有了，就替换成新的分析结果
-        const analysisMessageIndex = this.messages.findIndex(msg => msg.role === 'analysis');
+        const analysisMessageIndex = this.messages.findIndex(msg => msg.role === 'system');
         if (analysisMessageIndex !== -1) {
             this.messages[analysisMessageIndex].content = fullAnalysisMessage;
         } else {
-            this.addMessage('analysis', fullAnalysisMessage);
+            this.addMessage('system', fullAnalysisMessage);
         }
     }
 
-    setIsSending(isSending) {
-        this.isSending = isSending;
-    }
-
     sendMessage(messages) {
-        this.setIsSending(true);
+        return new Promise((resolve, reject) => {
+            const formattedMessages = messages.map(msg => ({
+                role: msg.role,
+                content: msg.content
+            }));
 
-        const formattedMessages = messages.map(msg => ({
-            role: msg.role,
-            content: msg.content
-        }));
+            console.log('formattedMessages:', formattedMessages)
 
-        const jsonMessages = JSON.stringify(formattedMessages);
-        console.log('jsonMessages', jsonMessages)
-        chatWithGPT(jsonMessages)
-            .then(responseData => {
-                const completion = responseData.choices[0].message.content;
-                this.addMessage('gpt', completion); // 使用正确提取的内容
-                console.log('completion', responseData)
-                this.setIsSending(false);
-            })
-            .catch(error => {
-                console.error('Error in sendMessage:', error);
-                this.setIsSending(false);
-            });
+            chatWithGPT(formattedMessages) // 确保这个函数返回一个Promise且处理的是对象而不是字符串，如果需要的话
+                .then(responseData => {
+                    const completion = responseData.choices[0].message.content;
+                    this.addMessage('assistant', completion);
+                    resolve(completion); // 解析Promise，返回完成文本
+                })
+                .catch(error => {
+                    console.error('Error in sendMessage:', error);
+                    reject('Sorry, something went wrong.'); // 拒绝Promise，返回错误信息
+                });
+        });
     }
 
 }
 
-function chatWithGPT(userMessage) {
+// function chatWithGPT(userMessage) {
+//     let data = JSON.stringify({
+//         "model": "gpt-3.5-turbo",
+//         "messages": [
+//             {
+//                 "role": "user",
+//                 "content": userMessage
+//             }
+//         ],
+//         "temperature": 0.7
+//     });
+//     console.log(userMessage, data)
+//     let config = {
+//         method: 'post',
+//         maxBodyLength: Infinity,
+//         url: 'https://oneapi.xty.app/v1/chat/completions',
+//         headers: {
+//             'Content-Type': 'application/json',
+//             'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY }`,
+//         },
+//         data: data
+//     };
+//
+//     return axios.request(config)
+//         .then((response) => response.data)
+//         .catch((error) => {
+//             console.error(error);
+//             throw error; // 可以根据需要决定是否要抛出错误
+//         });
+// }
+function chatWithGPT(message) {
+    // 设置一个随机的temperature值【0。8，1.0】
+    let temperature = Math.random() * 0.2 + 0.8;
+
     let data = JSON.stringify({
         "model": "gpt-3.5-turbo",
-        "messages": [
-            {
-                "role": "user",
-                "content": userMessage
-            }
-        ],
-        "temperature": 0.7
+        "messages": message,
+        "temperature": temperature,
     });
-    console.log(userMessage, data)
-    let config = {
-        method: 'post',
-        maxBodyLength: Infinity,
-        url: 'https://oneapi.xty.app/v1/chat/completions',
+
+    return fetch('https://oneapi.xty.app/v1/chat/completions', {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY }`,
+            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY }`
         },
-        data: data
-    };
-
-    return axios.request(config)
-        .then((response) => response.data)
+        body: data
+    })
+        .then((response) => {
+            if (!response.ok) { // 检查响应状态
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // 解析JSON数据
+        })
         .catch((error) => {
-            console.error(error);
-            throw error; // 可以根据需要决定是否要抛出错误
+            console.error('Error in chatWithGPT:', error);
+            throw error; // 根据需要决定是否要抛出错误
         });
 }
 
