@@ -1,0 +1,47 @@
+{
+  "name": "homepage",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ant-design/compatible": "^1.0.2",
+    "@ant-design/icons": "^5.2.6",
+    "@fortawesome/fontawesome-svg-core": "^6.5.1",
+    "@fortawesome/free-brands-svg-icons": "^6.5.1",
+    "@fortawesome/free-solid-svg-icons": "^6.5.1",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "antd": "^4.0.1",
+    "customize-cra-less-loader": "^2.0.0",
+    "enquire-js": "^0.2.1",
+    "rc-banner-anim": "^2.2.2",
+    "rc-queue-anim": "^1.6.12",
+    "rc-scroll-anim": "^2.5.6",
+    "rc-tween-one": "^2.3.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "react-sublime-video": "^0.2.5"
+  },
+  "scripts": {
+    "start": "set PORT=3001 && react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "babel-plugin-import": "^1.11.0",
+    "cross-env": "^7.0.3",
+    "customize-cra": "^1.0.0-alpha.0",
+    "less": "^3.9.0",
+    "less-loader": "^12.1.0",
+    "react-app-rewired": "^2.1.0"
+  }
+}
