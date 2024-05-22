@@ -4,6 +4,7 @@ import {Radar} from "@ant-design/plots";
 import {observer} from "mobx-react-lite";
 import React from "react";
 import {classification_mapping} from "../../utils/utils";
+import {themeStore} from "../../store/ThemeStore";
 
 const processData = (data) => {
     const counts = {};
@@ -13,7 +14,6 @@ const processData = (data) => {
         const { road_name, upload_name } = entry;
         const typeName = `${road_name}-${upload_name}`;
         Object.keys(classification_mapping).forEach(classification => {
-            // 使用 classification 的文本描述作为 item
             const itemLabel = classification_mapping[classification];
             const countKey = `${typeName}-${itemLabel}`;
             counts[countKey] = { item: itemLabel, type: typeName, score: 0 };
@@ -44,12 +44,12 @@ const ClassRadarGraph = observer(() => {
 
     const radarData = processData(resultData);
 
-    console.log(radarData)
+    const isAllScoresZero = radarData.every(item => item.score === 0);
 
     const maxScore = Math.max(...radarData.map(item => item.score));
 
     const config = {
-        data: radarData,
+        data: isAllScoresZero ? [] : radarData,
         xField: 'item',
         yField: 'score',
         colorField: 'type',
@@ -64,6 +64,7 @@ const ClassRadarGraph = observer(() => {
         style: {
             lineWidth: 2,
         },
+        theme: themeStore.theme === 'dark' ? 'dark' : 'light',
     };
     return (
         <Card title="道路分类数量" style={{ width: '100%' }}>

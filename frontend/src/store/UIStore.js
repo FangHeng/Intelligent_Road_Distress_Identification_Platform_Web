@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import {action, makeAutoObservable, observable} from 'mobx';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
@@ -6,7 +6,11 @@ class UIStore {
     loading = false;
 
     constructor() {
-        makeAutoObservable(this);
+        makeAutoObservable(this, {
+            loading: observable,
+            startLoading: action,
+            stopLoading: action,
+        });
     }
 
     startLoading() {

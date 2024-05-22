@@ -28,8 +28,8 @@ SECRET_KEY = "django-insecure-me3ws7_mb3*&3s64ep742bq*^_289w^_xvv5r9zb==+mri_p)v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.234.114.13']
-
+# ALLOWED_HOSTS = ['10.234.114.37','localhost']
+ALLOWED_HOSTS = ['10.236.101.25', 'irdip.com.cn', 'www.irdip.com.cn']
 
 # Application definition
 
@@ -50,7 +50,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -71,6 +71,22 @@ CORS_ALLOW_HEADERS = [
     "content-type",
 ]
 
+# CSRF_TRUSTED_ORIGINS = [
+#     "http://localhost:3000",
+#     "http://127.0.0.1:3000",
+
+# ]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+	"http://10.236.101.25:3000",
+    "https://10.236.101.25:3000",
+    "https://10.236.101.25",
+    "https://irdip.com.cn",
+    "https://www.irdip.com.cn",
+    "http://10.234.114.56:3000"
+]
+
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
@@ -88,10 +104,19 @@ CORS_ALLOW_METHODS = [
 # ]
 
 CACHES = {
+    # 'default': {
+    #     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    #     'LOCATION': 'unique-snowflake',
+    # }
+
+    # redis
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-    }
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f"redis://:{os.getenv('REDIS_PASSWORD')}@{os.getenv('REDIS_HOST')}:{os.getenv('REDIS_PORT')}/1",
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+    },
 }
 
 
@@ -156,7 +181,6 @@ AUTH_PASSWORD_VALIDATORS = [
 APPEND_SLASH = False
 
 LANGUAGE_CODE = "zh-Hans"
-
 TIME_ZONE = "Asia/Shanghai"
 
 USE_I18N = True
@@ -174,6 +198,7 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+DATA_UPLOAD_MAX_NUMBER_FILES = 10000
 
 # 邮件配置
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -183,3 +208,12 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = f'智能路面病害分析平台 <{EMAIL_HOST_USER}>'
+
+# minIO设置
+MINIO_STORAGE_ENDPOINT = os.environ.get('MINIO_ENDPOINT', 'minio:9000')
+MINIO_STORAGE_PUBLIC_URL = os.environ.get('MINIO_PUBLIC_URL', 'minio:9000')
+MINIO_STORAGE_ROOT_USER = os.environ.get('MINIO_ROOT_USER')
+MINIO_STORAGE_ROOT_PASSWORD = os.environ.get('MINIO_ROOT_PASSWORD')
+MINIO_STORAGE_USE_HTTPS = False
+MINIO_STORAGE_BUCKET_NAME = 'image'
+

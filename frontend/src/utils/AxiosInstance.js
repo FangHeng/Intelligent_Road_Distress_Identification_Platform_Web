@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 获取 CSRF token
-function getCsrfToken() {
+export function getCsrfToken() {
     return document.cookie.split('; ')
         .find(row => row.startsWith('csrftoken='))
         ?.split('=')[1];
@@ -17,6 +17,7 @@ axiosInstance.interceptors.request.use(config => {
     // 在发送请求之前添加 CSRF token
     config.headers['X-CSRFToken'] = getCsrfToken();
     config.headers['Accept'] = 'application/json';
+
     return config;
 }, error => {
     // 对请求错误做些什么

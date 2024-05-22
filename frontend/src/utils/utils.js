@@ -84,6 +84,25 @@ export const formatDateTime = (dateTimeStr) => {
     });
 }
 
+export const maskString = (str, visibleStart = 3, visibleEnd = 4) => {
+    if (str == null) { // 检查 null 或 undefined
+        return '';
+    }
+
+    // 如果字符串足够长，则遮盖中间部分
+    if (str.length > visibleStart + visibleEnd) {
+        const regex = new RegExp(`^(.{${visibleStart}})(.*)(.{${visibleEnd}})$`);
+        return str.replace(regex, (match, start, middle, end) => {
+            const maskedMiddle = '*'.repeat(middle.length);
+            return `${start}${maskedMiddle}${end}`;
+        });
+    }
+
+    // 如果字符串不够长，就返回原字符串
+    return str;
+};
+
+
 // 使用您的 API key 创建 OpenAI 实例
 // const openai = new OpenAI("sk-GkthFvMA4DRMaInHE1B7F0E775A0406fBf8a31E44aF9D267");
 //

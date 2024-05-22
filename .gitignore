@@ -34,3 +34,5 @@ backend/backend/__pycache__/
 
 
 backend/IRDIP/migrations/__pycache__/
+
+frontend/ssl/

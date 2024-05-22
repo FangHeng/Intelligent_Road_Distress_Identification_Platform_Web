@@ -11,3 +11,6 @@ numpy
 pandas
 openpyxl
 openai
+django-redis
+minio
+datetime

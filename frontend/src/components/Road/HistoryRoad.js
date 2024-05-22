@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import roadStore from "../../store/RoadStore";
 import {observer} from "mobx-react-lite";
-import {Alert, Space, Table} from "antd";
+import {Alert, Card, Space, Table} from "antd";
 
 const columns = [
     {
@@ -57,7 +57,7 @@ const HistoryRoad = (observer(() => {
 
 
     return(
-        <div style={{width:'100%'}}>
+        <Card style={{width:'100%'}}>
             <Space style={{width:'100%'}} direction="vertical" size={"large"}>
             <Alert
                 message="以下是你们公司已经记录在我们的系统中的道路信息，请不要重复注册。"
@@ -72,7 +72,7 @@ const HistoryRoad = (observer(() => {
                     pagination={{ pageSize: 10 }} // 设置每页显示10条数据
                 />
             </Space>
-        </div>
+        </Card>
     )
     }))
 

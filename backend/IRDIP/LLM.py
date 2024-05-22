@@ -18,7 +18,7 @@ from openai import OpenAI
 """
 client = OpenAI(
     base_url="https://oneapi.xty.app/v1",
-    api_key="sk-GkthFvMA4DRMaInHE1B7F0E775A0406fBf8a31E44aF9D267"
+    api_key="sk-Leghu1Par0Q2QtGkF0C6C7B4F7Dd40D2Bc5692Fd089bA4Ba"
 )
 
 # client = OpenAI(

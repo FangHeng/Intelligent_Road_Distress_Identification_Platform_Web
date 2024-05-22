@@ -1,0 +1,64 @@
+.sider-layout {
+    overflow: auto;
+    height: 100vh !important;
+    position: fixed !important;
+    left: 0;
+    top: 0
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5px;
+}
+
+.trigger {
+    z-index: 1000;
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer
+}
+
+.trigger-button {
+    color: rgba(176,172,172,0.62);
+}
+
+.user-info-container {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    align-items: center
+}
+
+.user-info-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.user-info-text {
+    margin-left: 10px;
+}
+
+.content {
+    overflow: initial !important;
+    min-height: calc(100vh - 70px) !important;
+}
+
+.float-button-container {
+    position: fixed;
+    bottom: 5px;
+    right: 5px;
+}
+
+.float-button {
+    right: 20px;
+    bottom: 10px;
+}
+
+.footer {
+    text-align: center;
+}

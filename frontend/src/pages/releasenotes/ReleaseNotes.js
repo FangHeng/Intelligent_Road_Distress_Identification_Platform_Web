@@ -1,49 +1,66 @@
-import React, {useEffect} from 'react';
-import { Layout, Input, Collapse, Breadcrumb } from 'antd';
-import {Link} from "react-router-dom";
-import uiStore from "../../store/UIStore";
-import {HomeOutlined} from "@ant-design/icons";
+// ReleaseNotes.js: 版本更新记录
+import React from 'react';
+import {Anchor, theme} from 'antd';
 
-const { Header, Content, Footer } = Layout;
-const { Search } = Input;
-const { Panel } = Collapse;
+import { Typography } from 'antd';
+import {SmileTwoTone} from "@ant-design/icons";
+const { Paragraph, Title } = Typography;
 
-const releaseNotes = [
-    // 示例发布日志数据
-    { version: "1.0.0", content: "这是版本 1.0.0 的发布说明。" },
-    { version: "1.1.0", content: "这是版本 1.1.0 的发布说明。" },
-    // 更多版本...
+const releaseNotesData = [
+    {
+        version: '1.0.0',
+        date: '2022-01-01',
+        notes: [
+            '新增了xx功能',
+            '修复了xx问题',
+            '改进了xx性能',
+            // 更多更新内容
+        ],
+    },
+    {
+        version: '1.1.0',
+        date: '2022-02-01',
+        notes: [
+            '新增了yy功能',
+            '修复了yy问题',
+            // 更多更新内容
+        ],
+    },
+    // 更多版本记录
 ];
 
+
 const ReleaseNotes = () => {
-    useEffect(() => {
-        // 当主页加载完成，停止进度条
-        uiStore.stopLoading();
-    }, []);
+    const {
+        token: { colorBgContainer, borderRadiusLG },
+    } = theme.useToken();
+    const anchorItems = releaseNotesData.map(release => ({
+        href: `#version-${release.version}`,
+        title: release.version,
+        key: release.version,
+    }));
 
     return (
-        <Layout className="layout" style={{ minHeight: '100vh' }}>
-            <Header style={{ background: '#f0f2f5', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <div style={{ color: '#000', fontSize: '20px' }}>版本发布公告</div>
-            </Header>
-            <Content style={{ padding: '0 50px' }}>
-                <Breadcrumb style={{ margin: '16px 0' }}>
-                    <Breadcrumb.Item><Link to="/pages/home"><HomeOutlined  style={{ marginRight: '4px' }}/>首页</Link></Breadcrumb.Item>
-                    <Breadcrumb.Item>版本发布公告</Breadcrumb.Item>
-                </Breadcrumb>
-                <div className="site-layout-content" style={{ background: 'white', padding: 24, minHeight: 280 }}>
-                    <Search placeholder="搜索版本" style={{ marginBottom: 16 }} />
-                    <Collapse>
-                        {releaseNotes.map((note, index) => (
-                            <Panel header={`版本 ${note.version}`} key={index}>
-                                <p>{note.content}</p>
-                            </Panel>
-                        ))}
-                    </Collapse>
-                </div>
-            </Content>
-        </Layout>
+        <div style={{ display: 'flex' }}>
+            <Anchor items={anchorItems} style={{ marginRight: '20px' }}/>
+            <div style={{ flex: 1, background: colorBgContainer, borderRadius: borderRadiusLG, padding: '20px' }}>
+                {releaseNotesData.map((release, index) => (
+                    <div key={index} id={`version-${release.version}`} style={{ marginBottom: '20px' }}>
+                        <Title
+                            level={3}
+                        >
+                            {`版本 ${release.version} - ${release.date}`}<SmileTwoTone style={{ marginLeft:'5px' }}/>
+                        </Title>
+                        <Paragraph>
+                            {release.notes}
+                        </Paragraph>
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 };
+
+
 
 export default ReleaseNotes;

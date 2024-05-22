@@ -1,22 +1,19 @@
+// login
 import React, {useEffect, useState} from 'react';
-import {Form, Input, Button, message, Modal, Select, AutoComplete, Row, Col} from 'antd';
-import { useNavigate } from 'react-router-dom';
+import {Form, Input, Button, Modal, Select, AutoComplete, Row, Col, App} from 'antd';
+import {useNavigate} from 'react-router-dom';
 import {UserOutlined, LockOutlined, MailOutlined, SafetyOutlined} from '@ant-design/icons';
-import backgroundImage from '../../assets/img/background.jpg';
 import userStore from '../../store/UserStore'
-import { observer } from 'mobx-react-lite'
+import {observer} from 'mobx-react-lite'
 import uiStore from "../../store/UIStore";
 import companyStore from "../../store/CompanyStore";
 import axiosInstance from "../../utils/AxiosInstance";
 import {checkComplexity} from "../../utils/utils";
+import {themeStore} from "../../store/ThemeStore";
+import "./login.css";
 
 const Login = observer(() => {
-    useEffect(() => {
-        companyStore.fetchCompanies(); // 获取公司列表
-    }, []);
-
     const navigate = useNavigate(); // 获取 history 对象
-
     const [jobNumber, setJobNumber] = useState('');
     const [password, setPassword] = useState('');
     const [company, setCompany] = useState('');
@@ -25,13 +22,23 @@ const Login = observer(() => {
     const [visible, setVisible] = useState(false);
     const [options, setOptions] = useState([]);
 
+    const {message} = App.useApp();
+
+    const themeClassName = themeStore.theme === 'light' ? 'light-theme' : 'dark-theme';
+
+    useEffect(() => {
+        companyStore.fetchCompanies().catch((error) => {
+            message.error('获取公司列表失败！');
+        });
+    }, [message]);
+
     const handleSearch = (value) => {
         let res = [];
         if (!value || value.indexOf('@') >= 0) {
             res = [];
         } else {
             res = ['gmail.com', '163.com', 'qq.com', 'outlook.com'].map((domain) => ({
-                value: `${value}@${domain}`, // 确保这里的 value 包含了完整的邮箱地址
+                value: `${value}@${domain}`,
             }));
         }
         setOptions(res);
@@ -41,13 +48,7 @@ const Login = observer(() => {
         setVisible(true);
     };
 
-    // const handleOk = e => {
-    //     console.log(e);
-    //     setVisible(false);
-    // };
-    //
     const handleCancel = e => {
-        console.log(e);
         setVisible(false);
     };
 
@@ -56,8 +57,7 @@ const Login = observer(() => {
         await userStore.login(company, jobNumber, password);
         if (userStore.isLoggedIn) {
             navigate('/pages/home');
-        }
-        else {
+        } else {
             uiStore.stopLoading();
             message.error(userStore.loginHint.message);
         }
@@ -75,7 +75,7 @@ const Login = observer(() => {
             // 创建 FormData 对象
             let formData = new FormData();
             // 从表单中获取电子邮件地址
-            const { email } = resetPasswordForm.getFieldsValue(['email']);
+            const {email} = resetPasswordForm.getFieldsValue(['email']);
             if (!email) {
                 message.error('请先输入电子邮件地址！');
                 return;
@@ -161,188 +161,166 @@ const Login = observer(() => {
 
 
     return (
-        <div style={styles.container}>
-            <div style={styles.loginBox}>
-                <h1 style={styles.title}>智能道路病害识别平台</h1>
+        <App>
+            <div className={themeClassName}>
+                <div className={'container'}>
+                    <div className={'login-box'}>
+                        <h1 className={'title'}>智能道路病害分析平台</h1>
 
-                <Form
-                    name="normal_login"
-                    onFinish={handleLogin}
-                >
-                    <Form.Item
-                        name="company"
-                        rules={[{ required: true, message: '请选择公司！' }]}
-                    >
-                        <Select
-                            style={{ marginTop: 30, width: '100%' }}
-                            placeholder="选择公司"
-                            onChange={(value) => setCompany(value)}
+                        <Form
+                            name="normal_login"
+                            onFinish={handleLogin}
                         >
-                            {companyStore.companyOptions.map(company => (
-                                <Select.Option key={company.id} value={company.id}>
-                                    {company.name}
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
+                            <Form.Item
+                                name="company"
+                                rules={[{required: true, message: '请选择公司！'}]}
+                            >
+                                <Select
+                                    style={{marginTop: 30, width: '100%'}}
+                                    placeholder="选择公司"
+                                    onChange={(value) => setCompany(value)}
+                                >
+                                    {companyStore.companyOptions.map(company => (
+                                        <Select.Option key={company.id} value={company.id}>
+                                            {company.name}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
 
-                    <Form.Item
-                        name="jobNumber"
-                        rules={[{required: true, message: '请输入您的工号！'}]}
-                    >
-                        <Input prefix={<UserOutlined/>} placeholder="工号" value={jobNumber} onChange={(e) => setJobNumber(e.target.value)}/>
-                    </Form.Item>
-                    <Form.Item
-                        name="password"
-                        rules={[{required: true, message: '请输入您的密码！'}]}
-                    >
-                        <Input
-                            prefix={<LockOutlined/>}
-                            type="password"
-                            placeholder="密码"
-                            value={password} onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </Form.Item>
-                    <Form.Item>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            block
-                            loading={userStore.isLoading} // 控制按钮加载状态
-                        >
-                            登录
-                        </Button>
-                    </Form.Item>
-                </Form>
-                <div style={{textAlign: 'center'}}>
+                            <Form.Item
+                                name="jobNumber"
+                                rules={[{required: true, message: '请输入您的工号！'}]}
+                            >
+                                <Input prefix={<UserOutlined/>} placeholder="工号" value={jobNumber}
+                                       onChange={(e) => setJobNumber(e.target.value)}/>
+                            </Form.Item>
+                            <Form.Item
+                                name="password"
+                                rules={[{required: true, message: '请输入您的密码！'}]}
+                            >
+                                <Input
+                                    prefix={<LockOutlined/>}
+                                    type="password"
+                                    placeholder="密码"
+                                    value={password} onChange={(e) => setPassword(e.target.value)}
+                                />
+                            </Form.Item>
+                            <Form.Item>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    block
+                                    loading={userStore.isLoading} // 控制按钮加载状态
+                                >
+                                    登录
+                                </Button>
+                            </Form.Item>
+                        </Form>
+                        <div style={{textAlign: 'center'}}>
 
-                    <Button type="link" onClick={showModal}>
-                        忘记密码？
-                    </Button>
-                </div>
-                <Modal
-                    title="重置密码"
-                    open={visible}
-                    onCancel={handleCancel}
-                    footer={null}
-                    style={{ top: '25%' }} // 控制 Modal 在垂直方向上的位置
-                >
-                    <Form
-                        name="resetPassword"
-                        initialValues={{remember: true}}
-                        form={resetPasswordForm}
-                        onFinish={handleResetPassword}
-                    >
-                        {/*对邮箱使用autocomplete*/}
-                        <Form.Item
-                            name="email"
-                            rules={[{required: true, message: '请输入您的邮箱！'}]}
+                            <Button type="link" onClick={showModal}>
+                                忘记密码？
+                            </Button>
+                        </div>
+                        <Modal
+                            title="重置密码"
+                            open={visible}
+                            onCancel={handleCancel}
+                            footer={null}
+                            style={{top: '25%'}} // 控制 Modal 在垂直方向上的位置
                         >
-                        <AutoComplete
-                            options={options}
-                            onSearch={handleSearch}
-                            onSelect={value => console.log("Selected:", value)}
-                        >
-                            <Input prefix={<MailOutlined />} placeholder="邮箱" />
-                        </AutoComplete>
-                        </Form.Item>
-                        <Form.Item
-                            name="jobNumber"
-                            rules={[{required: true, message: '请输入您的工号！'}]}
-                        >
-                            <Input prefix={<UserOutlined/>} placeholder="工号"/>
-                        </Form.Item>
-                        <Form.Item
-                            name="password"
-                            rules={[
-                                {required: true, message: '请输入您的密码！'},
-                                ({getFieldValue}) => ({
-                                    validator(_, value) {
-                                        if (!value || !checkComplexity(value)) {
-                                            return Promise.reject(new Error('密码过于简单，请包含大写字母、数字和特殊字符'));
-                                        }
-                                        return Promise.resolve();
-                                    },
-                                }),
-                            ]}
-
-                        >
-                            <Input
-                                prefix={<LockOutlined/>}
-                                type="password"
-                                placeholder="密码"
-                            />
-
-                        </Form.Item>
-                        <Row gutter={8}> {/* 添加间隔 */}
-                            {/* 验证码输入框 */}
-                            <Col span={18}> {/* 调整所占列数以调整宽度 */}
+                            <Form
+                                name="resetPassword"
+                                initialValues={{remember: true}}
+                                form={resetPasswordForm}
+                                onFinish={handleResetPassword}
+                            >
+                                {/*对邮箱使用autocomplete*/}
                                 <Form.Item
-                                    name="verificationCode"
-                                    rules={[{ required: true, message: '请输入验证码！' }]}
+                                    name="email"
+                                    rules={[{required: true, message: '请输入您的邮箱！'}]}
+                                >
+                                    <AutoComplete
+                                        options={options}
+                                        onSearch={handleSearch}
+                                        onSelect={value => console.log("Selected:", value)}
+                                    >
+                                        <Input prefix={<MailOutlined/>} placeholder="邮箱"/>
+                                    </AutoComplete>
+                                </Form.Item>
+                                <Form.Item
+                                    name="jobNumber"
+                                    rules={[{required: true, message: '请输入您的工号！'}]}
+                                >
+                                    <Input prefix={<UserOutlined/>} placeholder="工号"/>
+                                </Form.Item>
+                                <Form.Item
+                                    name="password"
+                                    rules={[
+                                        {required: true, message: '请输入您的密码！'},
+                                        ({getFieldValue}) => ({
+                                            validator(_, value) {
+                                                if (!value || !checkComplexity(value)) {
+                                                    return Promise.reject(new Error('密码过于简单，请包含大写字母、数字和特殊字符'));
+                                                }
+                                                return Promise.resolve();
+                                            },
+                                        }),
+                                    ]}
+
                                 >
                                     <Input
-                                        prefix={<SafetyOutlined />} // 添加验证码图标
-                                        placeholder="验证码"
+                                        prefix={<LockOutlined/>}
+                                        type="password"
+                                        placeholder="密码"
                                     />
+
                                 </Form.Item>
-                            </Col>
-                            {/* 发送验证码按钮 */}
-                            <Col span={6}> {/* 调整所占列数以调整宽度 */}
-                                <Form.Item>
-                                    <Button
-                                        type="primary"
-                                        block
-                                        loading={loading}
-                                        disabled={countdown > 0}
-                                        onClick={sendVerificationCode}
-                                    >
-                                        {countdown > 0 ? `${countdown}秒后重试` : '发送验证码'}
+                                <Row gutter={8}> {/* 添加间隔 */}
+                                    {/* 验证码输入框 */}
+                                    <Col span={18}> {/* 调整所占列数以调整宽度 */}
+                                        <Form.Item
+                                            name="verificationCode"
+                                            rules={[{required: true, message: '请输入验证码！'}]}
+                                        >
+                                            <Input
+                                                prefix={<SafetyOutlined/>} // 添加验证码图标
+                                                placeholder="验证码"
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                    {/* 发送验证码按钮 */}
+                                    <Col span={6}> {/* 调整所占列数以调整宽度 */}
+                                        <Form.Item>
+                                            <Button
+                                                type="primary"
+                                                block
+                                                loading={loading}
+                                                disabled={countdown > 0}
+                                                onClick={sendVerificationCode}
+                                            >
+                                                {countdown > 0 ? `${countdown}秒后重试` : '发送验证码'}
+                                            </Button>
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+                                {/* 提交按钮 */}
+                                <Form.Item style={{textAlign: 'center'}}>
+                                    <Button type="primary" htmlType="submit" style={{width: '50%', margin: '0 auto'}}>
+                                        重置密码
                                     </Button>
                                 </Form.Item>
-                            </Col>
-                        </Row>
-                        {/* 提交按钮 */}
-                        <Form.Item style={{ textAlign: 'center' }}>
-                            <Button type="primary" htmlType="submit" style={{ width: '50%', margin: '0 auto' }}>
-                                重置密码
-                            </Button>
-                        </Form.Item>
-                    </Form>
-                </Modal>
+                            </Form>
+                        </Modal>
+                    </div>
+                </div>
+                <div>
+                </div>
             </div>
-        </div>
+        </App>
     );
 })
 
-
-const styles = {
-    container: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100vw',
-        height: '100vh',
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundColor: '#f0f2f5',
-    },
-    loginBox: {
-        backgroundColor: 'rgba(255, 255, 255, 0.8)', // 设置背景色为白色，透明度为0.8
-        borderRadius: '5px',
-        padding: '20px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        width: '350px', // 设置登录框宽度为400px
-
-        maxWidth: '90%', // 确保登录框不会超过其父元素的90%
-    },
-    title: {
-        textAlign: 'center',
-        marginBottom: '20px',
-        fontWeight: 'bold',
-        fontSize: '24px',
-    },
-}
 
 export default Login;

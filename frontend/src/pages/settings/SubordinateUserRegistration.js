@@ -1,96 +1,77 @@
-import React, {useState} from 'react';
+// SubordinateUserRegistration.js: 下属用户注册
+import React from 'react';
 import { Link } from 'react-router-dom';
-import {Button, Result, Space, Card, Tooltip, Segmented} from 'antd';
+import {Button, Result, Space, Card, } from 'antd';
 import UserTable from "../../components/Table/UserTable";
 import {RegisterSingleUser} from "../../components/Forms/registerSingleUser";
 import {RegisterMultipleUser} from "../../components/Forms/registerMultipleUser";
 import {UserAddOutlined, UsergroupAddOutlined} from "@ant-design/icons";
 import userStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
+import {PageContainer} from "@ant-design/pro-components";
 
 const SubordinateUserRegistration = observer(() => {
-    const {user_level} = userStore.userInfo;
-    const [viewMode, setViewMode] = useState('single');
+    const { user_level } = userStore.userInfo;
 
-    const handleSegmentChange = (value) => {
-        setViewMode(value === 'Single' ? 'single' : 'multiple');
+    // 根据用户等级设置内容
+    const getContent = () => {
+        switch (user_level) {
+            case 'Level 0':
+            case 'Level 1':
+                return (
+                    <Space direction="vertical" style={{ width: '100%' }}>
+                        <Card>
+                            <UserTable />
+                        </Card>
+                    </Space>
+                );
+            default:
+                return (
+                    <div style={{ height: '95vh' }}>
+                        <Result
+                            status="403"
+                            title="403"
+                            subTitle="对不起，你没有权限访问这个页面。"
+                            extra={
+                                <Link to="/pages/home">
+                                    <Button type="primary">返回首页</Button>
+                                </Link>
+                            }
+                        />
+                    </div>
+                );
+        }
     };
 
-    const cardTitle = (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>注册下属用户</span>
-                <Tooltip title="单个或批量注册">
-                    <Segmented
-                        options={[
-                            {
-                                value: 'Single',
-                                icon: <UserAddOutlined />,
-                            },
-                            {
-                                value: 'Multiple',
-                                icon: <UsergroupAddOutlined />,
-                            },
-                        ]}
-                        onChange={handleSegmentChange}
-                    />
-                </Tooltip>
-            </div>
+    const content = getContent(); // 获取相应的内容
+
+    // 渲染页面或权限提示
+    return (
+        user_level === 'Level 0' || user_level === 'Level 1' ? (
+            <PageContainer
+                title='注册下属用户'
+                tabList={[
+                    {
+                        tab: '单个注册',
+                        key: 'single', // 注意保持 key 值的小写
+                        icon: <UserAddOutlined />,
+                        children: <RegisterSingleUser />,
+                    },
+                    {
+                        tab: '批量注册',
+                        key: 'multiple', // 保持一致性
+                        icon: <UsergroupAddOutlined />,
+                        children: <RegisterMultipleUser />,
+                    },
+                ]}
+            >
+                {content}
+            </PageContainer>
+        ) : (
+            content
+        )
     );
-
-    let content;
-    switch (user_level) {
-        case 'Level 0':
-            content = (
-                <Space
-                    direction="vertical"
-                    style={{
-                        width: '100%',
-                    }}
-                >
-                    <Card title={cardTitle} style={{ height: '40vh', overflow: 'True' }} >
-                        {viewMode === 'single' ? <RegisterSingleUser /> : <RegisterMultipleUser />}
-                    </Card>
-                    <Card title='下属用户列表' style={{ height: '55vh' }}>
-                        <UserTable />
-                    </Card>
-                </Space>
-            );
-            break;
-        case 'Level 1':
-            content = (
-                <Space
-                    direction="vertical"
-                    style={{
-                        width: '100%',
-                    }}
-                >
-                    <Card title={cardTitle} style={{ height: '40vh', overflow: 'True' }} >
-                        {viewMode === 'single' ? <RegisterSingleUser /> : <RegisterMultipleUser />}
-                    </Card>
-                    <Card title='下属用户列表' style={{ height: '55vh' }}>
-                        <UserTable />
-                    </Card>
-                </Space>
-            );
-            break;
-        default:
-            content = (
-                <div style={{ height: '95vh' }}>
-                    <Result
-                        status={403}
-                        title="403"
-                        subTitle="对不起，你没有权限访问这个页面。"
-                        extra={
-                            <Link to="/pages/home">
-                                <Button type="primary">返回首页</Button>
-                            </Link>
-                        }
-                    />
-                </div>
-            );
-    }
-
-    return <>{content}</>;
 });
+
 
 export default SubordinateUserRegistration;

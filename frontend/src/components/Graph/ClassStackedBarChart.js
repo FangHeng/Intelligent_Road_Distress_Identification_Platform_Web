@@ -4,15 +4,18 @@ import {Card} from "antd";
 import {classification_mapping} from "../../utils/utils";
 import {observer} from "mobx-react-lite";
 import imgStore from "../../store/ImgStore";
+import {themeStore} from "../../store/ThemeStore";
 
 export const processStackedData = (data) => {
+    if (!data) {
+        return [];
+    }
     const stackedData = [];
 
     // 对每个 upload 计算分类的占比
     Object.entries(data).forEach(([uploadId, entry]) => {
         const { road_name, upload_name, files } = entry;
         const typeName = `${road_name}-${upload_name}`;
-        const totalCount = files.length;
         const counts = {};
 
         // 初始化分类计数
@@ -30,7 +33,7 @@ export const processStackedData = (data) => {
             stackedData.push({
                 typeName, // 使用描述性名称
                 classification: classification_mapping[classification], // 使用分类的描述
-                percentage: count / totalCount
+                count: count,
             });
         });
     });
@@ -46,6 +49,8 @@ const wrapLabelAtDash = (label) => {
 const ClassStackedBarGraph = observer(() => {
     const {resultData} = imgStore;
     const stackedChartData  = processStackedData(resultData);
+    const {theme} = themeStore;
+
     useEffect(() => {
         const chart = new Chart({
             container: 'stackedDataContainer',
@@ -62,9 +67,9 @@ const ClassStackedBarGraph = observer(() => {
             .transform({type: 'sortX', by: 'y', reverse: true})
             .transform({type: 'normalizeY'})
             .encode('x', 'typeName') // 使用 typeName 作为 x 轴的编码
-            .encode('y', 'percentage') // 使用 percentage 作为 y 轴的编码
+            .encode('y', 'count') // 使用 count 作为 y 轴的编码
             .encode('color', 'classification') // 使用 classification 作为颜色的编码
-
+            .style('maxWidth', 20)
             .axis(
                 'y', {labelFormatter: '.0%'},
             ) // y 轴的标签格式化为百分比
@@ -76,6 +81,9 @@ const ClassStackedBarGraph = observer(() => {
             .animate('enter', { type: 'scaleInX' });
 
 
+        chart.theme({
+            type: theme === 'dark' ? 'classicDark' : 'light',
+        });
         chart.options({
             axis: {
                 x:{
@@ -86,15 +94,15 @@ const ClassStackedBarGraph = observer(() => {
                     title: '百分比'
                 }
 
-            }
-
+            },
         })
+
         chart.render();
     }, []);
 
     return (
         <Card title='堆叠条形图' >
-        <div id="stackedDataContainer" style={{ height:'30vh' }}></div>
+            <div id="stackedDataContainer" style={{ height:'30vh' }}></div>
         </Card>
     );
 });

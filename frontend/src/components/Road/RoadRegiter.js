@@ -1,38 +1,14 @@
-import {Alert, AutoComplete, Button, Card, Cascader, Col, Form, message, Row, Space, Spin} from "antd";
+// RoadRegister.js: 添加道路信息
+import {Alert, AutoComplete, Button, Card, Cascader, Col, Form, Row, Space, Spin, App} from "antd";
 import React, {useEffect, useState} from "react";
 import initSettingMap from "../Graph/SettingMap";
 import {Marker, Popup} from "@antv/l7";
 import roadStore from "../../store/RoadStore";
 import {observer} from "mobx-react-lite";
-const rawData = require('../../assets/json/county.json');
-
-// 创建一个映射来存储转换后的数据
-const dataMap = {};
-
-// 遍历原始数据
-rawData.forEach(item => {
-    // 检查省份是否已经在映射中
-    if (!dataMap[item.province]) {
-        dataMap[item.province] = { value: item.province_adcode, label: item.province, children: {} };
-    }
-
-    // 检查城市是否已经在省份的映射中
-    if (!dataMap[item.province].children[item.city]) {
-        dataMap[item.province].children[item.city] = { value: item.city_adcode, label: item.city, children: [] };
-    }
-
-    // 添加区信息到城市的映射中
-    dataMap[item.province].children[item.city].children.push({ value: item.county_adcode, label: item.county });
-});
-
-// 将映射转换为数组格式
-const provinceOptions = Object.values(dataMap).map(province => ({
-    ...province,
-    children: Object.values(province.children)
-}));
+import provinceOptions from "../../utils/roadData";
 
 const RoadRegister = observer(() => {
-    const [scene, setScene] = useState(null);
+    const [scene, setScene] = useState(null); // 地图实例
     const [region, setRegion] = useState('');
     const [keyword, setKeyword] = useState('');
     const [debounceTimeout, setDebounceTimeout] = useState(null);
@@ -42,45 +18,37 @@ const RoadRegister = observer(() => {
     // 加载地图
     const [loading, setLoading] = useState(true);
 
-    // useEffect(() => {
-    //     if (roadStore.hint.message) {
-    //         switch (roadStore.hint.status) {
-    //             case 'success':
-    //                 message.success(roadStore.hint.message);
-    //                 break;
-    //             case 'error':
-    //                 message.error(roadStore.hint.message);
-    //                 break;
-    //             case 'warning':
-    //                 message.warning(roadStore.hint.message);
-    //                 break;
-    //             default:
-    //                 message.info(roadStore.hint.message);
-    //         }
-    //     }
-    // }, [roadStore.hint.message]);
+    const [addRoad] = Form.useForm();
 
+    const {message} = App.useApp();
 
     useEffect(() => {
-        navigator.geolocation.getCurrentPosition(
-            position => {
-                // 成功获取位置
-                const { latitude, longitude } = position.coords;
-                const mapScene =  initSettingMap(setLoading, latitude, longitude);
-                setScene(mapScene)
-            },
-            error => {
-                // 错误处理
-                console.error("Error acquiring position: ", error);
-                const mapScene = initSettingMap(setLoading); // 使用默认位置
-                setScene(mapScene)
-            },
-            () => {
-                // 用户拒绝共享位置或获取位置失败
-                const mapScene = initSettingMap(setLoading); // 使用默认位置
-                setScene(mapScene)
+        let mapScene;
+
+        const onSuccess = position => {
+            const { latitude, longitude } = position.coords;
+            mapScene = initSettingMap(latitude, longitude);
+            setLoading(false);
+            setScene(mapScene);
+            mapScene.render();
+        };
+
+        const onError = error => {
+            console.error("Error acquiring position: ", error);
+            mapScene = initSettingMap(); // 使用默认位置
+            setLoading(false);
+            setScene(mapScene);
+            mapScene.render();
+        };
+
+        navigator.geolocation.getCurrentPosition(onSuccess, onError);
+
+        // 组件卸载时的清理函数
+        return () => {
+            if (mapScene) {
+                mapScene.destroy();
             }
-        );
+        };
     }, []);
 
     const handleCascaderChange = (value, selectedOptions) => {
@@ -107,7 +75,7 @@ const RoadRegister = observer(() => {
             method: 'GET',
             redirect: 'follow'
         };
-        var url = `/ws/place/v1/suggestion/?region=${encodeURIComponent(region)}&keyword=${encodeURIComponent(keyword)}&key=N3SBZ-L3BWL-36LPB-E7GSB-4BDAK-RFFTL`;
+        var url = `/ws/place/v1/suggestion/?region=${encodeURIComponent(region)}&keyword=${encodeURIComponent(keyword)}&key=${process.env.REACT_APP_TENCENT_MAP_KEY}`;
 
         fetch(url, requestOptions)
             .then(response => response.json())
@@ -198,6 +166,7 @@ const RoadRegister = observer(() => {
                     switch (roadStore.hint.status) {
                         case 'success':
                             message.success(roadStore.hint.message);
+                            addRoad.resetFields();
                             break;
                         case 'error':
                             message.error(roadStore.hint.message);
@@ -214,16 +183,16 @@ const RoadRegister = observer(() => {
     };
 
     return (
-        <>
-            <Space direction="vertical" style={{width: '100%'}} size="large">
-                <Alert
-                    message='请先添加你上传图片的道路，以便统计和记录。'
-                    type="info"
-                    showIcon
-                    closable
-                />
-                <Card style={{width: '100%', height: '20vh'}}>
-                    <Form layout="vertical">
+        <App>
+                <Card style={{width: '100%'}}>
+                    <Space direction="vertical" style={{width: '100%'}} size="large">
+                    <Alert
+                        message='请先添加你上传图片的道路，以便统计和记录。'
+                        type="info"
+                        showIcon
+                        closable
+                    />
+                    <Form layout="vertical" name='addRoad' form={addRoad}>
                         <Row gutter={16}>
                             <Col span={12}>
                                 <Form.Item label="请选择省市区：" required={true}>
@@ -261,15 +230,14 @@ const RoadRegister = observer(() => {
                             </Button>
                         </Form.Item>
                     </Form>
+                    <div style={{ height: "55vh", justifyContent: "center", position: "relative" }} id="settingMap">
+                        {loading && (
+                            <Spin className='spin'/>
+                        )}
+                    </div>
+                    </Space>
                 </Card>
-                <div style={{ height: "55vh", justifyContent: "center", position: "relative" }}>
-                    {loading && (
-                        <Spin className='spin'/>
-                    )}
-                    <div id="settingMap" style={{ height: "100%" }} />
-                </div>
-            </Space>
-        </>
+        </App>
     )
 })
 

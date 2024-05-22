@@ -5,8 +5,12 @@ import {observer} from "mobx-react-lite";
 import React, {useEffect} from "react";
 import {Card} from "antd";
 import {formatDateTime} from "../../utils/utils";
+import {themeStore} from "../../store/ThemeStore";
 
 export function getProcessedData(resultData, uploadRecords) {
+    if (!resultData || !uploadRecords) {
+        return [];
+    }
     let processedData = [];
 
     for (let uploadId in resultData) {
@@ -38,6 +42,8 @@ const RoadWithTimeGraph = observer(() => {
     const {uploadRecords} = historyStore;
     const dataForGraph  = getProcessedData(resultData, uploadRecords);
 
+    const {theme} = themeStore;
+
     useEffect(() => {
         const chart = new Chart({
             container: 'LineContainer',
@@ -68,12 +74,16 @@ const RoadWithTimeGraph = observer(() => {
 
         chart.point().encode('shape', 'point').tooltip(false);
 
+        chart.theme({
+            type: theme === 'dark' ? 'classicDark' : 'light',
+        });
+
         chart.render();
     }, [dataForGraph]); // 添加 dataForGraph 作为 useEffect 的依赖
 
     return (
         <Card title='道路完好度随时间变化'>
-            <div id="LineContainer" style={{ height: '40vh' }}></div>
+            <div id="LineContainer" style={{ height: '30vh' }}></div>
         </Card>
     );
 });

@@ -9,7 +9,7 @@ import openai
 import json
 
 # 设置API密钥
-openai.api_key = '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'
+openai.api_key = 'sk-Leghu1Par0Q2QtGkF0C6C7B4F7Dd40D2Bc5692Fd089bA4Ba'
 
 # 使用方法:
 # 输入：resume_text = "您从get_text函数获取的简历文本..."

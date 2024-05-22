@@ -1,4 +1,5 @@
-import {Alert, Button, Col, Form, Input, Row} from "antd";
+// RegisterMultipleUser.js: 批量注册用户
+import {Alert, Button, Card, Col, Form, Input, Row} from "antd";
 import React from "react";
 import userStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
@@ -16,9 +17,9 @@ export const RegisterMultipleUser = observer (()=> {
     const {user_level } = userStore.userInfo;
     const numberCode = companyStore.employeeNumber;
     return (
-        <>
+        <Card>
             <Alert
-                message={user_level === 'root' ? `您正在以最高权限（Level 0）身份批量注册管理员（Level 1），下属用户将可以使用您注册的账号登录系统并可以创建新的普通用户，你们公司的工号数为${numberCode}位。`
+                message={user_level === 'Level 0' ? `您正在以最高权限（Level 0）身份批量注册管理员（Level 1），下属用户将可以使用您注册的账号登录系统并可以创建新的普通用户，你们公司的工号数为${numberCode}位。`
                     : `您正在以管理员（Level）身份批量注册普通账号以使用我们的系统，你们公司的工号数为${numberCode}位。`}
                 type="info"
                 showIcon
@@ -119,6 +120,6 @@ export const RegisterMultipleUser = observer (()=> {
                     </Button>
                 </Form.Item>
             </Form>
-        </>
+        </Card>
     )
 });

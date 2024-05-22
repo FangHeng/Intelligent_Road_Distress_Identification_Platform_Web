@@ -1,16 +1,16 @@
+// ModelSelect.js: 模型选择页面，用于选择模型，包括默认模型和高级模型
 import React, {useState} from 'react';
 import {
-    Card,
-    Radio,
-    Dropdown, Space, Image
+    Card, Radio, Dropdown, Space, Image, Button
 } from 'antd';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faBolt, faWandMagicSparkles} from "@fortawesome/free-solid-svg-icons";
+import {faBolt, faFire, faWandMagicSparkles} from "@fortawesome/free-solid-svg-icons";
 import userStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
 import Swin from '../../assets/modelStructure/Swin.png';
 import WSPLIN from '../../assets/modelStructure/WSPLIN.png';
 import PicT from '../../assets/modelStructure/PicT.png';
+import {PageContainer} from "@ant-design/pro-components";
 
 
 // 用于根据selectedSubModel的值映射相应的显示标签
@@ -61,7 +61,18 @@ const ModelSelect = observer(() => {
     const selectedSubModelLabel = advancedModelLabels[selectedSubModel] || '高级模型';
 
     return (
-        <Card title="首选模型设置" style={{ width: '100%', height:'95vh' }}>
+        <PageContainer
+            title="模型选择"
+            content="我们提供了4种模型供您选择，您可以根据模型的优劣和您的需求选择不同的模型。"
+            extra={[
+                <Button type="link" onClick={() => window.location.href = 'mailto:hengfang2002@qq.com'}>
+                    <FontAwesomeIcon icon={faFire} style={{color: "rgba(201,0,0,0.62)",}} size='lg'/>
+                    &nbsp;
+                    自定义类别和数据训练模型
+                </Button>
+            ]}
+        >
+        <Card style={{ width: '100%'}}>
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <Radio.Group onChange={handleModelChange} value={preferredModel} size="large">
@@ -121,6 +132,7 @@ const ModelSelect = observer(() => {
             </div>
             </Space>
         </Card>
+        </PageContainer>
     );
 });
 

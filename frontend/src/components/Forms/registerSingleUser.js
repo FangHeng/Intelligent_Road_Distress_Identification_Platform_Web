@@ -1,5 +1,6 @@
-import {Alert, Button, Form, Input, message} from "antd";
-import React from "react";
+// RegisterSingleUser.js: 注册单个用户
+import {Alert, App, Button, Card, Form, Input} from "antd";
+import React, {useEffect} from "react";
 import userStore from "../../store/UserStore";
 import {observer} from "mobx-react-lite";
 import companyStore from "../../store/CompanyStore";
@@ -11,13 +12,24 @@ const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
 };
 
-
-
 export const RegisterSingleUser = observer(() =>{
     const {user_level} = userStore.userInfo;
     const numberCode = companyStore.employeeNumber;
-
+    const {message} = App.useApp();
     const [registerSingleUser] = Form.useForm();
+
+        useEffect(() => {
+            if (numberCode === 0) {
+                const fetchEmployeeNumber = async () => {
+                    await companyStore.fetchEmployeeNumber();
+                }
+
+                fetchEmployeeNumber().catch((error) => {
+                    message.error('获取员工工号长度失败！');
+                });
+            }
+
+        }, []);
 
     const onFinish = async (values) => {
         // 构建要发送的数据
@@ -29,21 +41,24 @@ export const RegisterSingleUser = observer(() =>{
         try {
             const response = await axiosInstance.post('/irdip/register_subordinate/', formData);
             if (response.data.status === 'success') {
-                userStore.fetchSubordinatesInfo();
-                console.log('User registered successfully');
+                await userStore.fetchSubordinatesInfo();
                 message.success('注册成功！')
-            } else if(response.data.status === 400){
-                console.log('Response: ', response.data);
-                message.error('工号已被注册！')
+                registerSingleUser.resetFields();
             }
         } catch (error) {
-            message.error('发生了一些错误，请稍后再试！')
-            console.error('Error during registration: ', error);
+            if (error.response.status === 400) {
+                console.log('Response: ', error.response.data);
+                message.error('工号已被注册！')
+            } else {
+                console.log('Response: ', error.response.data);
+                message.error('发生了一些错误，请稍后再试！')
             }
-        };
+        }
+    };
 
     return(
-        <>
+        <App>
+            <Card>
             <Alert
                 message={user_level === 'Level 0' ? `您正在以最高权限（Level 0）身份注册管理员（Level 1），下属用户将可以使用您注册的账号登录系统并可以创建新的普通用户，你们公司的工号数为${numberCode}位。`
                     : `您正在以管理员（Level 1）身份注册普通账号以使用我们的系统，你们公司的工号数为${numberCode}位。`}
@@ -77,6 +92,14 @@ export const RegisterSingleUser = observer(() =>{
                             required: true,
                             message: '请输入要注册的工号!',
                         },
+                        () => ({
+                            validator(_, value) {
+                                if (!value || value.length !== numberCode) {
+                                    return Promise.reject(new Error('工号长度不正确！'));
+                                }
+                                return Promise.resolve();
+                            },
+                        }),
                     ]}
                 >
                     <Input />
@@ -90,7 +113,7 @@ export const RegisterSingleUser = observer(() =>{
                             required: true,
                             message: '请输入密码!',
                         },
-                        ({getFieldValue}) => ({
+                        () => ({
                             validator(_, value) {
                                 if (!value || !checkComplexity(value)) {
                                     return Promise.reject(new Error('密码过于简单，请包含大写字母、数字和特殊字符'));
@@ -136,7 +159,7 @@ export const RegisterSingleUser = observer(() =>{
                     </Button>
                 </Form.Item>
             </Form>
-        </>
+            </Card>
+        </App>
     )
-}
-);
+});
