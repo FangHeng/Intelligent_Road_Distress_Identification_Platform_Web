@@ -26,7 +26,7 @@ from django.db.models import Sum, Count, Q
 from django.core.mail import EmailMessage
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-
+import threading
 from PDC_predict.predict import predict
 from IRDIP.LLM import format_report
 
@@ -47,6 +47,7 @@ classification_mapping = {
     "transverse_crack": 7
 }
 
+
 # 初始化MinIO客户端 EXIPIRE - 2024.05.30
 minio_client = Minio(
     os.getenv('MINIO_ENDPOINT', 'localhost:9000'),
@@ -55,6 +56,7 @@ minio_client = Minio(
     secure=False
 )
 
+print(minio_client)
 
 def index(request):
     return render(request)
@@ -65,6 +67,7 @@ def login(request):
         company_id = request.POST.get('company_id')
         employee_number = request.POST.get('employee_number')
         password = request.POST.get('password')
+
 
         print(company_id, employee_number, password)
 
@@ -216,98 +219,220 @@ def get_subordinates_info(request):
         })
         # print(subordinates_info)
 
+
     return JsonResponse(subordinates_info, safe=False, status=200)
 
 
 @ensure_csrf_cookie
 def get_company_info(request):
-    # 查询所有公司
-    companies = Company.objects.all()
-
-    company_list = {str(company.company_id): company.company_name for company in companies}
-
-    cache.set("RoadInfo", json.dumps(company_list), 120)
-    print("尝试获取RoadInfo在redis内存中：", cache.get("RoadInfo"))
-
+    # 尝试从缓存中获取 RoadInfo
+    cached_company_list = cache.get("RoadInfo")
+    
+    if cached_company_list:
+        # 如果缓存中有数据，直接返回缓存中的数据
+        company_list = json.loads(cached_company_list)
+    else:
+        # 查询所有公司
+        companies = Company.objects.all()
+        company_list = {str(company.company_id): company.company_name for company in companies}
+        
+        # 将数据存入缓存，缓存时间为 120 秒
+        cache.set("RoadInfo", json.dumps(company_list), 120)
+    
     return JsonResponse(company_list)
 
 
-def upload(request):
-    print(request)
-    # try:
-    #     if request.method == 'POST':
-    #         user_role = UserRole.objects.get(user=request.user)
-    #         user_id = user_role.id
-    #         # 设置北京时区并获取当前时间
-    #         tz = pytz.timezone('Asia/Shanghai')
-    #         upload_time = timezone.now().astimezone(tz)
-    #         folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
-    #         os.makedirs(folder_name, exist_ok=True)
-    #
-    #         # 从表单数据中获取 imageInfo
-    #         image_info = {
-    #             'title': request.POST.get('title', ''),
-    #             'road': request.POST.get('road', '')
-    #         }
-    #
-    #         upload_count = sum(len(request.FILES.getlist(field_name)) for field_name in request.FILES)
-    #
-    #         upload_record = UploadRecord.objects.create(
-    #             upload_time=upload_time,
-    #             folder_url=folder_name,
-    #             uploader_id=user_id,
-    #             road_id=image_info['road'],
-    #             upload_name=image_info['title'],
-    #             upload_count=upload_count,
-    #             selected_model=user_role.selected_model,
-    #         )
-    #
-    #         for field_name, files in request.FILES.lists():
-    #             for file in files:
-    #                 original_name = file.name
-    #                 file_name = uuid.uuid4().hex
-    #                 extension = os.path.splitext(original_name)[1]  # 提取文件后缀
-    #                 file_path = os.path.join(folder_name, file_name + extension)  # 使用上传的文件的原始文件名
-    #
-    #                 handle_uploaded_file(file, file_path)
-    #
-    #         # predictions = {}
-    #         predictions = predict(user=user_id, time=upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
-    #         for file_name, result in predictions.items():
-    #             classification_int = classification_mapping.get(result['class'], -1)
-    #             FileUpload.objects.create(
-    #                 upload=upload_record,
-    #                 file_url=os.path.join(folder_name, file_name),
-    #                 classification_result=classification_int,
-    #                 confidence=result['probability']
-    #             )
-    #
-    #         return JsonResponse({'message': 'Upload successful'}, status=200)
-    # except UserRole.DoesNotExist:
-    #     return JsonResponse({'error': 'User role not found'}, status=404)
-    # except OSError as e:
-    #     return JsonResponse({'error': f'File system error: {e}'}, status=500)
-    # except Exception as e:
-    #     return JsonResponse({'error': f'An unexpected error occurred: {e}'}, status=501)
-    #
-    # return JsonResponse({'error': 'Invalid request'}, status=400)
+# def upload(request):
+#     print(request)
+#     # try:
+#     #     if request.method == 'POST':
+#     #         user_role = UserRole.objects.get(user=request.user)
+#     #         user_id = user_role.id
+#     #         # 设置北京时区并获取当前时间
+#     #         tz = pytz.timezone('Asia/Shanghai')
+#     #         upload_time = timezone.now().astimezone(tz)
+#     #         folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
+#     #         os.makedirs(folder_name, exist_ok=True)
+#     #
+#     #         # 从表单数据中获取 imageInfo
+#     #         image_info = {
+#     #             'title': request.POST.get('title', ''),
+#     #             'road': request.POST.get('road', '')
+#     #         }
+#     #
+#     #         upload_count = sum(len(request.FILES.getlist(field_name)) for field_name in request.FILES)
+#     #
+#     #         upload_record = UploadRecord.objects.create(
+#     #             upload_time=upload_time,
+#     #             folder_url=folder_name,
+#     #             uploader_id=user_id,
+#     #             road_id=image_info['road'],
+#     #             upload_name=image_info['title'],
+#     #             upload_count=upload_count,
+#     #             selected_model=user_role.selected_model,
+#     #         )
+#     #
+#     #         for field_name, files in request.FILES.lists():
+#     #             for file in files:
+#     #                 original_name = file.name
+#     #                 file_name = uuid.uuid4().hex
+#     #                 extension = os.path.splitext(original_name)[1]  # 提取文件后缀
+#     #                 file_path = os.path.join(folder_name, file_name + extension)  # 使用上传的文件的原始文件名
+#     #
+#     #                 handle_uploaded_file(file, file_path)
+#     #
+#     #         # predictions = {}
+#     #         predictions = predict(user=user_id, time=upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
+#     #         for file_name, result in predictions.items():
+#     #             classification_int = classification_mapping.get(result['class'], -1)
+#     #             FileUpload.objects.create(
+#     #                 upload=upload_record,
+#     #                 file_url=os.path.join(folder_name, file_name),
+#     #                 classification_result=classification_int,
+#     #                 confidence=result['probability']
+#     #             )
+#     #
+#     #         return JsonResponse({'message': 'Upload successful'}, status=200)
+#     # except UserRole.DoesNotExist:
+#     #     return JsonResponse({'error': 'User role not found'}, status=404)
+#     # except OSError as e:
+#     #     return JsonResponse({'error': f'File system error: {e}'}, status=500)
+#     # except Exception as e:
+#     #     return JsonResponse({'error': f'An unexpected error occurred: {e}'}, status=501)
+#     #
+#     # return JsonResponse({'error': 'Invalid request'}, status=400)
+#     if request.method == 'POST':
+#         # print(request.user.id)
+#         user_role = UserRole.objects.get(user=request.user)
+#         user_id = user_role.id
+#         # 设置中国时区并获取当前时间
+#         tz = pytz.timezone('Asia/Shanghai')
+#         upload_time = timezone.now().astimezone(tz)
+#         folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
+#         os.makedirs(folder_name, exist_ok=True)
+
+#         # 从表单数据中获取 imageInfo
+#         image_info = {
+#             'title': request.POST.get('title', ''),
+#             'road': request.POST.get('road', '')
+#         }
+
+#         upload_count = sum(len(request.FILES.getlist(field_name)) for field_name in request.FILES)
+
+#         upload_record = UploadRecord.objects.create(
+#             upload_time=upload_time,
+#             folder_url=folder_name,
+#             uploader_id=user_id,
+#             road_id=image_info['road'],
+#             upload_name=image_info['title'],
+#             upload_count=upload_count,
+#             selected_model=user_role.selected_model,
+#         )
+
+#         for field_name, files in request.FILES.lists():
+#             for file in files:
+#                 original_name = file.name
+#                 # file_name = uuid.uuid4().hex                    # 使用uuid作为文件名
+#                 file_name = os.path.splitext(original_name)[0]  # 使用上传的文件的原始文件名
+#                 extension = os.path.splitext(original_name)[1]  # 提取文件后缀
+#                 file_path = os.path.join(folder_name, file_name + extension)  # 使用上传的文件的原始文件名
+
+#                 handle_uploaded_file(file, file_path)
+#                 # 上传到本地服务器
+#                 # 获取文件 URL，保存到数据库
+#                 file_url = handle_uploaded_images(file, file_path, settings.MINIO_STORAGE_BUCKET_NAME)
+#                 # print("dev: 检查上传文件：",file_url)
+
+
+#         # TODO:并发处理/并行
+#         # predictions = {}
+#         predictions = predict(user=user_id, time=upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
+#         for file_name, result in predictions.items():
+#             classification_int = classification_mapping.get(result['class'], -1)
+#             FileUpload.objects.create(
+#                 upload=upload_record,
+#                 file_url=os.path.join(folder_name, file_name),
+#                 # file_url=file_url,
+#                 classification_result=classification_int,
+#                 confidence=result['probability']
+#             )
+#         return JsonResponse({'message': 'Upload successful'}, status=200)
+
+def upload_compressed(request):
     if request.method == 'POST':
-        # print(request.user.id)
         user_role = UserRole.objects.get(user=request.user)
         user_id = user_role.id
-        # 设置中国时区并获取当前时间
         tz = pytz.timezone('Asia/Shanghai')
         upload_time = timezone.now().astimezone(tz)
         folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
         os.makedirs(folder_name, exist_ok=True)
 
-        # 从表单数据中获取 imageInfo
+        # 获取上传的压缩包文件
+        compressed_file = request.FILES.get('compressed_file')
+
+        # 解压缩压缩包到指定文件夹下
+        if compressed_file:
+            with zipfile.ZipFile(compressed_file, 'r') as zip_ref:
+                zip_ref.extractall(folder_name)
+
+
+    return JsonResponse({'message': 'Upload successful'}, status=200)
+
+def process_upload(upload_record, folder_name, files_data):
+    for file_name, file_content in files_data.items():
+        # 保存文件到本地
+        file_path = os.path.join(folder_name, file_name)
+        with open(file_path, 'wb+') as destination:
+
+            destination.write(file_content)
+
+
+        # 将文件上传到云存储
+        file_url = handle_uploaded_images(file_content, file_path, settings.MINIO_STORAGE_BUCKET_NAME)
+        print("上传服务器url:",file_url)
+
+    # 执行预测任务
+    try:
+        predictions = predict(user=upload_record.uploader_id, time=upload_record.upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
+        print("predictions:",predictions)
+        for file_name, result in predictions.items():
+            classification_int = classification_mapping.get(result['class'], -1)
+
+            FileUpload.objects.create(
+                upload=upload_record,
+                file_url=os.path.join(folder_name, file_name),
+                classification_result=classification_int,
+                confidence=result['probability']
+
+
+            )
+    except Exception as e:
+        print("预测错误：",e)
+    print('fesfff')
+
+def upload(request):
+    if request.method == 'POST':
+        user_role = UserRole.objects.get(user=request.user)
+        user_id = user_role.id
+        tz = pytz.timezone('Asia/Shanghai')
+        upload_time = timezone.now().astimezone(tz)
+        folder_name = f'uploads/{user_id}/{upload_time.strftime("%Y%m%d%H%M%S")}'
+
+        os.makedirs(folder_name, exist_ok=True)
+
         image_info = {
             'title': request.POST.get('title', ''),
             'road': request.POST.get('road', '')
         }
 
-        upload_count = sum(len(request.FILES.getlist(field_name)) for field_name in request.FILES)
+        files_data = {}  # 用于保存文件内容的字典
+        for file in request.FILES.getlist('files'):
+            file_name = file.name
+            file_content = file.read()  # 读取文件内容到内存中
+            files_data[file_name] = file_content  # 将文件内容保存到字典中
+            
+        print(request.FILES.getlist('files'))
+        upload_count = len(files_data)
 
         upload_record = UploadRecord.objects.create(
             upload_time=upload_time,
@@ -319,35 +444,16 @@ def upload(request):
             selected_model=user_role.selected_model,
         )
 
-        for field_name, files in request.FILES.lists():
-            for file in files:
-                original_name = file.name
-                # file_name = uuid.uuid4().hex                    # 使用uuid作为文件名
-                file_name = os.path.splitext(original_name)[0]  # 使用上传的文件的原始文件名
-                extension = os.path.splitext(original_name)[1]  # 提取文件后缀
-                file_path = os.path.join(folder_name, file_name + extension)  # 使用上传的文件的原始文件名
 
-                handle_uploaded_file(file, file_path)
-                # 上传到本地服务器
-                # 获取文件 URL，保存到数据库
-                file_url = handle_uploaded_images(file, file_path, settings.MINIO_STORAGE_BUCKET_NAME)
-                # print("dev: 检查上传文件：",file_url)
+        # 创建一个新的线程来处理文件上传和预测任务
+        t = threading.Thread(target=process_upload, args=(upload_record, folder_name, files_data))
+        t.start()
+        # t.join() # 手动阻塞
+
+        # 立即返回响应给前端
+        return JsonResponse({'message': 'Upload record created, processing files in the background'}, status=200)
 
 
-        # TODO:并发处理/并行
-        # predictions = {}
-        predictions = predict(user=user_id, time=upload_time.strftime("%Y%m%d%H%M%S"), model='swin')
-        for file_name, result in predictions.items():
-            classification_int = classification_mapping.get(result['class'], -1)
-            FileUpload.objects.create(
-                upload=upload_record,
-                file_url=os.path.join(folder_name, file_name),
-                # file_url=file_url,
-                classification_result=classification_int,
-                confidence=result['probability']
-            )
-
-        return JsonResponse({'message': 'Upload successful'}, status=200)
 
 
 def handle_uploaded_file(f, file_name):
@@ -357,8 +463,8 @@ def handle_uploaded_file(f, file_name):
 
 
 
-
-def handle_uploaded_images(f, file_name, bucket_name):
+def handle_uploaded_images(file_content, file_name, bucket_name):
+    print("将要上传到：",file_name)
     # 初始化 MinIO 客户端
     minio_client = Minio(
         os.getenv('MINIO_ENDPOINT', 'localhost:9000'),
@@ -367,30 +473,32 @@ def handle_uploaded_images(f, file_name, bucket_name):
         secure=settings.MINIO_STORAGE_USE_HTTPS
     )
 
-    # 打印文件类型
-
     # 将文件上传到 MinIO
     try:
-        # minio_client.fput_object(bucket_name, file_name, f.temporary_file_path())
-        if hasattr(f, 'temporary_file_path'):
-            # 使用文件路径
-            file_path = f.temporary_file_path()
-            minio_client.fput_object(bucket_name, file_name, file_path)
-        else:
-            # 从内存中读取数据并创建一个 BytesIO 对象
-            f.seek(0)
-            data = f.read()
-            data_stream = io.BytesIO(data)  # 创建一个支持 'read' 方法的流对象
-            minio_client.put_object(bucket_name, file_name, data_stream, length=len(data))
+        # 将文件内容包装成 BytesIO 对象
+        data_stream = io.BytesIO(file_content)
+        # 打印文件类型
 
+        data_size = data_stream.getbuffer().nbytes  # 获取数据大小
+                # 打印文件类型和数据大小
+        print(f"File type: application/octet-stream, Data size: {data_size} bytes")
+        # 将文件上传到云存储
+        # minio_client.put_object(bucket_name, file_name, data_stream, len(file_content))
+        data_stream.seek(0)  # 确保流的指针在开始位置
 
-    except S3Error as exc:
+        minio_client.put_object(bucket_name, file_name, data_stream, length=len(file_content),content_type="application/octet-stream", metadata=None)
+        print("上传结束")
+
+        # 获取文件的 URL
+        file_url = minio_client.presigned_get_object(bucket_name, file_name)
+        return file_url
+
+    except S3Error as s3_error:
+        print(f"S3 Error occurred: {s3_error}")
+        return None
+    except Exception as exc:
         print(f"Error occurred: {exc}")
-
-    # 获取文件的 URL
-    file_url = minio_client.presigned_get_object(bucket_name, file_name)
-    return file_url
-
+        return None
 
 # # 自定义签名文件url
 # def get_signed_url(bucket_name, object_name):
@@ -401,48 +509,56 @@ def handle_uploaded_images(f, file_name, bucket_name):
 @require_http_methods(["GET"])
 def get_result(request):
     upload_ids = request.GET.getlist('upload_id')
+    print("请求upload_id:",upload_ids)
+
     # print(upload_ids)
     response_data = {}
     request_user = request.user
     # TODO: 类供
     minio_client = Minio(
-        os.getenv('MINIO_ENDPOINT', 'localhost:9000'),
+        os.getenv('MINIO_ENDPOINT', 'minio:9000'),
         access_key=settings.MINIO_STORAGE_ROOT_USER,
         secret_key=settings.MINIO_STORAGE_ROOT_PASSWORD,
         secure=settings.MINIO_STORAGE_USE_HTTPS
     )
 
-    public_url_base = os.getenv('MINIO_PUBLIC_URL', 'http://localhost:9000')
-
+    # public_url_base = os.getenv('MINIO_PUBLIC_URL', 'http://irdip.com.cn:9000')
+    public_url_base = "https://irdip.com.cn"
     upload_records = UploadRecord.objects.filter(upload_id__in=upload_ids).select_related('uploader', 'road')
+    print("upload_records:",upload_records)
     for upload_record in upload_records:
         uploader = upload_record.uploader.user
+    
 
         # 检查是否有权访问此上传记录
         if not is_upload_accessible_by_user(uploader, request_user):
-            # print("unable to access")
+            print("unable to access")
             continue
 
         files = FileUpload.objects.filter(upload=upload_record).select_related('upload')
+        print("getresultWENJIAN:",files)
         files_data = []
         for file in files:
             object_name = file.file_url  # 确保 file_url 存储对象的路径
             try:
                 # 生成minio预签名 URL,加密包含了endpoint，不可以使用bridge桥接网络。
-                presigned_url = minio_client.presigned_get_object(settings.MINIO_STORAGE_BUCKET_NAME, object_name,
-                                                                  expires=timedelta(days=7))
-
+                # presigned_url = minio_client.presigned_get_object(settings.MINIO_STORAGE_BUCKET_NAME, object_name,
+                #                                                   expires=timedelta(days=7))
+            
+                public_url = f"{public_url_base}/{settings.MINIO_STORAGE_BUCKET_NAME}/{object_name}"
+                print("public_url:",public_url)
+                
                 # print("dev: presigned_url:", presigned_url)
                 files_data.append({
                     "file_id": file.file_id,
                     "file_name": os.path.basename(file.file_url),
                     "classification_result": file.classification_result,
                     "confidence": float(file.confidence),
-                    "img_url": presigned_url
+                    "img_url": public_url
                 })
+
             except S3Error as e:
                 print(f"Error generating URL for {file.file_url}: {e}")
-
         # 构建响应数据
         upload_data = {
             "uploader": upload_record.uploader.user.username,
@@ -462,6 +578,25 @@ def get_result(request):
         response_data[missing_id] = "Upload record not found"
 
     return JsonResponse(response_data)
+
+
+def check_upload_status(request):
+    upload_ids = request.GET.getlist('upload_id')
+    print("请求upload_id:", upload_ids)
+
+    # 查询数据库中是否存在这些upload_id的记录
+    upload_records = UploadRecord.objects.filter(upload_id__in=upload_ids)
+    
+    # 构建返回结果
+    status_dict = {}
+    for upload_record in upload_records:
+        # 检查FileUpload表中是否存在对应的upload_id的记录
+        file_exists = FileUpload.objects.filter(upload=upload_record).exists()
+        status_dict[str(upload_record.upload_id)] = file_exists
+    
+    return JsonResponse(status_dict)
+    
+
 
 
 def is_upload_accessible_by_user(upload_user, request_user):
@@ -575,6 +710,40 @@ def road_registration(request):
         return JsonResponse({'status': 'error', 'message': '无效的请求类型。'}, status=400)
 
 
+# def get_road_info(request):
+#     user = request.user
+
+#     # 检查用户是否存在
+#     if not user.is_authenticated:
+#         return JsonResponse({'error': '用户未登录'}, status=401)
+
+#     try:
+#         user_role = UserRole.objects.get(user=user)
+
+#         # 获取用户所属公司ID
+#         company_id = user_role.company.company_id
+
+#         roads = Road.objects.filter(company_id=company_id)
+
+#         # 构造道路信息列表
+#         road_list = [
+#             {
+#                 'road_id': str(road.road_id),
+#                 'road_name': road.road_name,
+#                 'gps_longitude': float(road.gps_longitude),
+#                 'gps_latitude': float(road.gps_latitude),
+#                 'administrative_province': road.administrative_province,
+#                 'administrative_city': road.administrative_city,
+#                 'administrative_district': road.administrative_district
+#             } for road in roads
+#         ]
+
+#         return JsonResponse(road_list, safe=False)
+
+#     except UserRole.DoesNotExist:
+#         return JsonResponse({'error': '用户角色信息不存在'}, status=444)
+
+# 有缓存
 def get_road_info(request):
     user = request.user
 
@@ -588,20 +757,32 @@ def get_road_info(request):
         # 获取用户所属公司ID
         company_id = user_role.company.company_id
 
-        roads = Road.objects.filter(company_id=company_id)
+        # 构造缓存键
+        cache_key = f"road_info_{company_id}"
+        # 检查缓存中是否有数据
+        road_list = cache.get(cache_key)
+        # if road_list:
+        #     print("缓存有")
+        if not road_list:
+            print("缓存没有")
+            roads = Road.objects.filter(company_id=company_id)
 
-        # 构造道路信息列表
-        road_list = [
-            {
-                'road_id': str(road.road_id),
-                'road_name': road.road_name,
-                'gps_longitude': float(road.gps_longitude),
-                'gps_latitude': float(road.gps_latitude),
-                'administrative_province': road.administrative_province,
-                'administrative_city': road.administrative_city,
-                'administrative_district': road.administrative_district
-            } for road in roads
-        ]
+
+            # 构造道路信息列表
+            road_list = [
+                {
+                    'road_id': str(road.road_id),
+                    'road_name': road.road_name,
+                    'gps_longitude': float(road.gps_longitude),
+                    'gps_latitude': float(road.gps_latitude),
+                    'administrative_province': road.administrative_province,
+                    'administrative_city': road.administrative_city,
+                    'administrative_district': road.administrative_district
+                } for road in roads
+            ]
+
+            # 将数据存储到缓存中
+            cache.set(cache_key, road_list, timeout=300)  # 300秒过期时间（5分钟）
 
         return JsonResponse(road_list, safe=False)
 
@@ -836,6 +1017,82 @@ def get_employee_number_length(request):
 #         return JsonResponse({"error": "无效的员工号码长度"}, status=400)
 
 
+# def get_upload_records(request):
+#     current_user = request.user
+    
+
+#     try:
+#         user_role = UserRole.objects.get(user=current_user)
+#     except UserRole.DoesNotExist:
+#         return JsonResponse({'error': '用户角色未找到'}, status=404)
+
+#     # 获取当前用户及其下属用户的ID
+#     user_ids = [user_role.id] + get_subordinate_user_ids(user_role)
+
+
+#     # 查询对应的上传记录
+#     records = UploadRecord.objects.filter(uploader_id__in=user_ids).annotate(
+#         intact_count=Count('fileupload', filter=Q(fileupload__classification_result=6))
+#     ).order_by('-upload_time').values(
+#         'upload_id', 'upload_time', 'uploader__user__username',
+#         'road__road_id', 'road__road_name', 'upload_name', 'upload_count',
+#         'road__gps_longitude', 'road__gps_latitude', 'selected_model', 'intact_count'
+#     )
+    
+
+#     print(records)
+
+#     # 将查询结果转换为列表并更新模型名称，同时计算完好比例（integrity）
+#     records_list = list(records)
+#     for record in records_list:
+#         upload_record_instance = UploadRecord.objects.get(upload_id=record['upload_id'])
+#         record['selected_model'] = upload_record_instance.get_selected_model_display()
+#         record['integrity'] = (record['intact_count'] / record['upload_count'] * 100) if record[
+#                                                                                              'upload_count'] > 0 else -1
+#     return JsonResponse(records_list, safe=False)
+
+# def get_upload_records(request):
+#     current_user = request.user
+
+#     try:
+#         user_role = UserRole.objects.get(user=current_user)
+#     except UserRole.DoesNotExist:
+#         return JsonResponse({'error': '用户角色未找到'}, status=404)
+
+#     # 获取当前用户及其下属用户的ID
+#     user_ids = [user_role.id] + get_subordinate_user_ids(user_role)
+
+#     # 查询对应的上传记录
+#     records = UploadRecord.objects.filter(uploader_id__in=user_ids).annotate(
+#         intact_count=Count('fileupload', filter=Q(fileupload__classification_result=6))
+#     ).order_by('-upload_time').values(
+#         'upload_id', 'upload_time', 'uploader__user__username',
+#         'road__road_id', 'road__road_name', 'upload_name', 'upload_count',
+#         'road__gps_longitude', 'road__gps_latitude', 'selected_model', 'intact_count'
+#     )
+
+#     # 将查询结果转换为列表并更新模型名称，同时计算完好比例（integrity）
+#     records_list = list(records)
+#     for record in records_list:
+#         upload_record_instance = UploadRecord.objects.get(upload_id=record['upload_id'])
+#         record['selected_model'] = upload_record_instance.get_selected_model_display()
+        
+#         if record['intact_count'] == 0:
+#             fileupload_exists = FileUpload.objects.filter(upload=upload_record_instance).exists()
+#             if not fileupload_exists:
+#                 # record['upload_count'] = -1
+#                 record['integrity'] = -1
+#             else:
+#                 record['integrity'] = (record['intact_count'] / record['upload_count'] * 100) if record[
+#                                                                                              'upload_count'] > 0 else 0
+
+#         else: 
+#             record['integrity'] = (record['intact_count'] / record['upload_count'] * 100) if record[
+#                                                                                              'upload_count'] > 0 else 0
+
+#     return JsonResponse(records_list, safe=False)
+
+# 有缓存
 def get_upload_records(request):
     current_user = request.user
 
@@ -855,17 +1112,50 @@ def get_upload_records(request):
         'road__road_id', 'road__road_name', 'upload_name', 'upload_count',
         'road__gps_longitude', 'road__gps_latitude', 'selected_model', 'intact_count'
     )
-
     # 将查询结果转换为列表并更新模型名称，同时计算完好比例（integrity）
     records_list = list(records)
     for record in records_list:
+        # cache_key = f"integrity_{record['upload_id']}"
+        # integrity = cache.get(cache_key)
+
+        # if integrity is None or integrity == -1:
+        #     upload_record_instance = UploadRecord.objects.get(upload_id=record['upload_id'])
+        #     record['selected_model'] = upload_record_instance.get_selected_model_display()
+            
+        #     if record['intact_count'] == 0:
+        #         fileupload_exists = FileUpload.objects.filter(upload=upload_record_instance).exists()
+        #         if not fileupload_exists:
+        #             record['integrity'] = -1
+        #         else:
+        #             record['integrity'] = (record['intact_count'] / record['upload_count'] * 100) if record['upload_count'] > 0 else 0
+        #     else: 
+        #         record['integrity'] = (record['intact_count'] / record['upload_count'] * 100) if record['upload_count'] > 0 else 0
+
+
+
+        #     # 将计算的完好比例存入缓存
+        #     cache.set(cache_key, record['integrity'], timeout=3600)  # 缓存时间设置为1小时
+        # else:
+        #     record['integrity'] = integrity
+        #     for record in records_list:
         upload_record_instance = UploadRecord.objects.get(upload_id=record['upload_id'])
         record['selected_model'] = upload_record_instance.get_selected_model_display()
-        record['integrity'] = (record['intact_count'] / record['upload_count'] * 100) if record[
-                                                                                             'upload_count'] > 0 else 0
+        
+        if record['intact_count'] == 0:
+            fileupload_exists = FileUpload.objects.filter(upload=upload_record_instance).exists()
+            if not fileupload_exists:
+                # record['upload_count'] = -1
+                record['integrity'] = -1
+            else:
+                record['integrity'] = (record['intact_count'] / record['upload_count'] * 100) if record[
+                                                                                                'upload_count'] > 0 else 0
+
+        else: 
+            record['integrity'] = (record['intact_count'] / record['upload_count'] * 100) if record[
+                                                                                                'upload_count'] > 0 else 0
 
     return JsonResponse(records_list, safe=False)
-
+    
 
 @require_http_methods(["DELETE"])
 def delete_upload_record(request, upload_id):
@@ -1164,6 +1454,7 @@ def generate_report(request):
 
         # 准备报告所需的信息
         report_data = []
+
         for upload_id, info in prior_information.items():
             if info != "Upload record not found":
                 report_data.append({
@@ -1192,8 +1483,18 @@ def generate_report(request):
         combined_response = report_data + formatted_report
 
         # 返回成功响应
+
         return JsonResponse(combined_response, safe=False)
 
     except Exception as e:
         error_message = {"error": str(e)}
         return JsonResponse(error_message, status=500)
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_user_id(request):
+    # 从请求中获取用户 ID，可以根据具体情况从请求头、请求参数或者其他途径获取
+    user_id = request.user.id
+
+    # 将用户 ID 返回给调用方
+    return JsonResponse({'user_id': user_id})

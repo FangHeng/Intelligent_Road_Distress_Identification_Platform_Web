@@ -1,7 +1,7 @@
 // UploadFolder.js: 上传文件夹组件，用于上传文件夹中的图片
 import React, { useState } from 'react';
 import { VerticalAlignTopOutlined} from '@ant-design/icons';
-import {message, Upload, Spin, Space, Input, Select, Button} from 'antd';
+import {Upload, Spin, Space, Input, Select, Button, App, Alert, Typography} from 'antd';
 import {ProCard} from "@ant-design/pro-components";
 import imageStore from "../../../store/ImgStore";
 import roadStore from "../../../store/RoadStore";
@@ -9,8 +9,10 @@ import RcResizeObserver from "rc-resize-observer";
 import {useNavigate} from "react-router-dom";
 import {observer} from "mobx-react-lite";
 import { ReactComponent as CompressedPackage } from '../../../assets/icons/compressedPackage.svg';
+import '../css/checkbox.css'
 
 const { Dragger } = Upload;
+const { Paragraph } = Typography;
 
 const UploadCompressed = observer(() => {
     const [fileList, setFileList] = useState([]);
@@ -18,6 +20,7 @@ const UploadCompressed = observer(() => {
     const [imageInfo, setImageInfo] = useState({title: '', road: ''});
 
     const navigate = useNavigate();
+    const {message} = App.useApp();
 
     const props = {
         name: 'file',
@@ -69,8 +72,8 @@ const UploadCompressed = observer(() => {
             return;
         }
 
-        // 调用 store 的 uploadImages 方法
-        await imageStore.uploadImages(fileList, imageInfo);
+        // 调用 store 的 uploadCompressed 方法
+        await imageStore.uploadCompressed(fileList, imageInfo);
 
         // 显示提示信息
         if (imageStore.uploadHint.status === 'success') {
@@ -83,6 +86,7 @@ const UploadCompressed = observer(() => {
 
 
     return (
+        <App>
         <RcResizeObserver
             key="resize-observer"
             onResize={(offset) => {
@@ -96,8 +100,8 @@ const UploadCompressed = observer(() => {
             >
                 <ProCard colSpan="75%">
                     <div style={{height: '70vh', overflow: 'auto'}}>
-                        {imageStore.uploadHint.isProcessing ? <div className="spin"><Spin tip="处理中...">
-                            <div className='content'></div>
+                        {imageStore.uploadHint.isProcessing ? <div className="result-wait-spin"><Spin tip="处理中...">
+                            <div className='tip-content'></div>
                         </Spin></div> : null}
                         <div style={{ height: '40vh' }}>
                             <Dragger {...props}>
@@ -109,7 +113,26 @@ const UploadCompressed = observer(() => {
                             </Dragger>
                         </div>
                         {/*{renderFileList()}*/}
+                        <div style={{
+                            margin: '20px 0',
+                        }}>
+                            <Alert
+                                message="注意"
+                                description={
+                                    <Paragraph>
+                                        <ul>
+                                            <li>请确保上传的图片压缩包中直接以图片文件为内容，不要包含文件夹。</li>
+                                            <li>我们推荐大量图片上传使用压缩包的方式，以提高上传速度。</li>
+                                        </ul>
+                                    </Paragraph>
+                                }
+                                type="warning"
+                                showIcon
+                                closable={true}
+                            />
+                        </div>
                     </div>
+
                 </ProCard>
                 <ProCard title="图片信息填写">
                     <div style={{height: '70vh'}}>
@@ -146,6 +169,7 @@ const UploadCompressed = observer(() => {
                 </ProCard>
             </ProCard>
         </RcResizeObserver>
+        </App>
     );
 });
 

@@ -44,12 +44,12 @@ const ClassRadarGraph = observer(() => {
 
     const radarData = processData(resultData);
 
-    console.log(radarData)
+    const isAllScoresZero = radarData.every(item => item.score === 0);
 
     const maxScore = Math.max(...radarData.map(item => item.score));
 
     const config = {
-        data: radarData,
+        data: isAllScoresZero ? [] : radarData,
         xField: 'item',
         yField: 'score',
         colorField: 'type',

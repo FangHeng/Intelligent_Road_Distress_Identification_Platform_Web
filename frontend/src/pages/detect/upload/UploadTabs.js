@@ -8,6 +8,8 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faRoad} from "@fortawesome/free-solid-svg-icons";
 import {useNavigate} from "react-router-dom";
 import UploadCompressed from "./UploadCompressed";
+import '../css/checkbox.css'
+
 const items = [
     {
         key: '1',

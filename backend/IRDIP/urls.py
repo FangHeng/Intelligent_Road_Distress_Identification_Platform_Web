@@ -21,7 +21,9 @@ urlpatterns = [
     path("get_subordinates_info/", views.get_subordinates_info, name="get_subordinates_info"),
     path("get_company_info/", views.get_company_info, name="get_company_info"),
     path("upload/", views.upload, name="upload"),
+    path("upload_compressed/", views.upload_compressed, name="upload_compressed"),
     path("get_result/", views.get_result, name="get_result"),
+    path('check_upload_status/', views.check_upload_status, name='check_upload_status'),
     path("get_lasted_upload_id/", views.get_lasted_upload_id, name="get_lasted_upload_id"),
     path("road_registration/", views.road_registration, name="road_registration"),
     path("get_road_info/", views.get_road_info, name="get_road_info"),
@@ -39,5 +41,5 @@ urlpatterns = [
     path("change_password_with_email_verification/", views.change_password_with_email_verification, name="change_password_with_email_verification"),
     path("export_to_excel/", views.export_to_excel, name="export_to_excel"),
     path("generate_report/", views.generate_report, name="generate_report"),
-
+    path('get_user_id/', views.get_user_id, name='get_user_id'),
 ]

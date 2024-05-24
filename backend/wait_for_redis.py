@@ -7,6 +7,7 @@ import sys
 REDIS_HOST = os.getenv('REDIS_HOST', 'redis')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', None)
+print(REDIS_PASSWORD)
 
 # 超时和重试间隔
 TIMEOUT = 30  # 总超时时间，秒
@@ -39,4 +40,3 @@ def wait_for_redis():
 
 if __name__ == "__main__":
     wait_for_redis()
-    print("Bravo!!")

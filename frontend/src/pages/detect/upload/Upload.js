@@ -1,5 +1,5 @@
 // Upload.js: 上传图片的页面，包括图片上传和图片信息填写
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Upload, Button, Input, Select, Space, Modal, Spin, App} from 'antd';
 import {PlusOutlined, VerticalAlignTopOutlined} from '@ant-design/icons';
 import {observer} from 'mobx-react-lite'
@@ -10,6 +10,7 @@ import '../css/ImageList.css'
 import {useNavigate} from "react-router-dom";
 import {ProCard} from "@ant-design/pro-components";
 import RcResizeObserver from 'rc-resize-observer';
+import historyStore from "../../../store/HistoryStore";
 
 const getBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -79,14 +80,17 @@ const ImageUpload = observer(() => {
             return;
         }
 
+        // // 跳转到检测记录
+        // navigate('/pages/detect/Detect');
+
         // 调用 store 的 uploadImages 方法
         await imageStore.uploadImages(fileList, imageInfo);
 
-        // 显示提示信息
-
         if (imageStore.uploadHint.status === 'success') {
             message.success(imageStore.uploadHint.message);
-            navigate('/pages/visualize/ImgVisualize');
+            // navigate('/pages/visualize/ImgVisualize');
+            navigate('/pages/detect/Detect')
+            historyStore.setCameFromUpload(true);
         } else if (imageStore.uploadHint.status === 'error') {
             message.error(imageStore.uploadHint.message);
         }
@@ -116,9 +120,9 @@ const ImageUpload = observer(() => {
                 >
                     <ProCard colSpan="75%">
                         <div style={{height: '80vh', overflow: 'auto', minHeight: '700px'}}>
-                            {imageStore.uploadHint.isProcessing ? <div className='result-wait-spin'><Spin tip="处理中...">
-                                <div className='tip-content'></div>
-                            </Spin></div> : null}
+                            {/*{imageStore.uploadHint.isProcessing ? <div className='result-wait-spin'><Spin tip="处理中...">*/}
+                            {/*    <div className='tip-content'></div>*/}
+                            {/*</Spin></div> : null}*/}
                             <Upload
                                 className="custom-upload"
                                 listType="picture-card"

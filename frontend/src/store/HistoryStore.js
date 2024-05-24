@@ -3,6 +3,7 @@ import axiosInstance from "../utils/AxiosInstance";
 
 class HistoryStore {
     cameFromDetect = false;
+    cameFromUpload = false;
     uploadRecords = [];
     isLoading = true;
     dataLoaded = false;
@@ -10,6 +11,7 @@ class HistoryStore {
     constructor() {
         makeObservable(this, {
             uploadRecords: observable,
+            cameFromUpload: observable,
             isLoading: observable,
             dataLoaded: observable,
             cameFromDetect: observable,
@@ -36,7 +38,7 @@ class HistoryStore {
             .then(response => {
                 console.log('获取历史数据成功:', response.data);
                 this.uploadRecords = response.data;
-                console.log('修改dataLoaded为true')
+                // console.log('修改dataLoaded为true')
                 this.setIsLoading(false);
                 this.setDataLoaded(true);
 
@@ -53,6 +55,10 @@ class HistoryStore {
 
     setCameFromDetect(value) {
         this.cameFromDetect = value;
+    }
+
+    setCameFromUpload(value) {
+        this.cameFromUpload = value;
     }
 
 

@@ -3,6 +3,7 @@ version: '3'
 services:
   backend:
     build: ./backend
+    runtime: nvidia
     volumes:
       - ./backend/backend:/backend
       - ./backend/uploads:/uploads
@@ -10,7 +11,13 @@ services:
       - ./backend/homepage:/homepage
       - ./backend/PDC_predict:/PDC_predict
       - ./backend/avatars:/avatars
-#      - uploads:/uploads
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     ports:
       - "8000:8000"
     depends_on:
@@ -37,25 +44,25 @@ services:
   frontend:
     build: ./frontend
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./frontend/build:/usr/share/nginx/html
+      - ./frontend:/app
     ports:
       - "3000:80"
+      - "443:443"
     environment:
-      - Map_Key=${Map_Key}
-
-  redis:
-    build:
-      context: ./redis  # 指定Dockerfile的位置
-    command: redis-server --requirepass "${REDIS_PASSWORD}"
-    ports:
-      - "6379:6379"  # 映射Redis的默认端口 <主机端口>：<容器端口>
-    volumes:
-      - redis-data:/var/lib/redis-server/  # 将持久化卷映射到工作目录
+      - REACT_APP_OPENAI_API_KEY=${REACT_APP_OPENAI_API_KEY}
+      - REACT_APP_GAODE_MAP_KEY=${REACT_APP_GAODE_MAP_KEY}
+      - REACT_APP_TENCENT_MAP_KEY=${REACT_APP_TENCENT_MAP_KEY}
+    depends_on:
+      - backend
     networks:
       - my_network
 
-
+  homepage:
+    build: ./homepage
+    ports:
+      - "3001:3001"
+    networks:
+      - my_network
 
   db:
     image: mysql:8.0
@@ -74,12 +81,12 @@ services:
       retries: 10
     networks:
       - my_network
-
   minio:
     build:
-      context: ./nginx  # Dockerfile 所在的目录
+      context: ./minio  # Dockerfile 所在的目录
     volumes:
       - minio_data:/data  # 映射命名卷到 MinIO 的数据目录
+      - ./minio/ssl:/root/.minio
 #      - minio_config:/root/.minio  # 映射命名卷到 MinIO 的配置目录
     ports:
       - "9000:9000"
@@ -87,13 +94,24 @@ services:
     environment:
       MINIO_ROOT_USER: "MINIOROOT"
       MINIO_ROOT_PASSWORD: "root1234@"
+      MINIO_SERVER_URL : "http://irdip.com.cn:9000"
+      MINIO_BROWSER_REDIRECT_URL: "http://irdip.com.cn:9001"
 #      MINIO_ACCESS_KEY 控制权限是用这个
     privileged: true
     command: server --console-address ":9001" /data
-#    networks:
-#      - my_network
-
-
+    networks:
+      - my_network
+    
+  redis:
+    build:
+      context: ./redis  # 指定Dockerfile的位置
+    command: redis-server --requirepass "${REDIS_PASSWORD}"
+    ports:
+      - "6379:6379"  # 映射Redis的默认端口 <主机端口>：<容器端口>
+    volumes:
+      - redis-data:/var/lib/redis-server/  # 将持久化卷映射到工作目录
+    networks:
+      - my_network
 
 volumes:
   redis-data: # 定义持久化卷

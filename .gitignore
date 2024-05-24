@@ -25,14 +25,15 @@ yarn-error.log*
 
 frontend/.idea/
 backend/.idea/
-homepage/.idea/
 
 backend/IRDIP/__pycache__/
 
 backend/backend/__pycache__/
+backend/IRDIP/migrations/__pycache__/
+backend/PDC_predict/__pycache__/
+backend/PDC_predict/swin/__pycache__/
+backend/homepage/migrations/__pycache__/
 
 .idea/
 
-
-backend/IRDIP/migrations/__pycache__/
-nginx/Dockerfile
+frontend/ssl/

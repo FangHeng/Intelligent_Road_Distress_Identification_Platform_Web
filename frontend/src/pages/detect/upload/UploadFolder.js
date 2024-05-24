@@ -92,8 +92,8 @@ const UploadFolder = observer(() => {
             >
                 <ProCard colSpan="75%">
                     <div style={{height: '70vh', overflow: 'auto'}}>
-                        {imageStore.uploadHint.isProcessing ? <div className="spin"><Spin tip="处理中...">
-                            <div className='content'></div>
+                        {imageStore.uploadHint.isProcessing ? <div className="result-wait-spin"><Spin tip="处理中...">
+                            <div className='tip-content'></div>
                         </Spin></div> : null}
                         <div style={{ height: '40vh' }}>
                         <Dragger {...props} >

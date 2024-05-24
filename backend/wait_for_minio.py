@@ -15,23 +15,22 @@ def main():
     client = Minio(
         # endpoint=os.environ.get('MINIO_ENDPOINT','minio:9000'),
         # os.getenv('MINIO_ENDPOINT'),
-        '10.234.114.29:9000',
+        'minio:9000',
         # access_key=os.environ.get('MINIO_ROOT_USER'),
         # secret_key=os.environ.get('MINIO_ROOT_PASSWORD'),
         access_key='MINIOROOT',
         secret_key='root1234@',
         secure=False
     )
-
     bucket_name = BUCKET_NAME
     if not client.bucket_exists(bucket_name):
         client.make_bucket(bucket_name)
-
+    print("minioclient over")
     local_folder = UPLOAD_DIR
     for root, _, files in os.walk(local_folder):
         for file_name in files:
             local_path = os.path.join(root, file_name)
-            remote_path = 'uploads/'+os.path.relpath(local_path, local_folder) #目录位置是单个构建的
+            remote_path = 'uploads/'+os.path.relpath(local_path, local_folder) #目录位置是单个构建的d
             stat_info = os.stat(local_path)
             try:
                 obj = client.stat_object(bucket_name, remote_path)

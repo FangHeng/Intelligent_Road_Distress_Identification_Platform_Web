@@ -19,7 +19,6 @@ const About = () => {
                 </Card>
                 <Card id="technology" title="技术展示">
                     技术展示内容
-
                 </Card>
             </div>
             <div style={{ marginLeft: '20px' }}>

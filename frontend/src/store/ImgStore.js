@@ -94,15 +94,15 @@ class ImageStore {
             formData.append(key, imageInfo[key]);
         }
 
-        // 日志记录，用于调试
-        for (let [key, value] of formData.entries()) {
-            console.log(key + ':', value);
-            if (value instanceof File) {
-                console.log('File Name:', value.name);
-                console.log('File Size:', value.size);
-                console.log('File Type:', value.type);
-            }
-        }
+        // // 日志记录，用于调试
+        // for (let [key, value] of formData.entries()) {
+        //     console.log(key + ':', value);
+        //     if (value instanceof File) {
+        //         console.log('File Name:', value.name);
+        //         console.log('File Size:', value.size);
+        //         console.log('File Type:', value.type);
+        //     }
+        // }
 
         try {
             this.setUploadHint({
@@ -115,7 +115,7 @@ class ImageStore {
 
             this.setUploadHint({
                 status: 'success',
-                message: '处理成功！',
+                message: '上传成功！',
                 isProcessing: false,
             })
             this.setSelectedUploadId([]);
@@ -123,7 +123,48 @@ class ImageStore {
         } catch (error) {
             this.setUploadHint({
                 status: 'error',
-                message: '处理失败，请稍后再试！',
+                message: '上传失败，请稍后再试！',
+                isProcessing: false,
+            })
+            console.error('Error during image upload:', error);
+        } finally {
+            this.setUploadHint({
+                isProcessing: false,
+            })
+        }
+    }
+
+    async uploadCompressed(fileList, imageInfo) {
+        const formData = new FormData();
+
+        // 将压缩文件添加到 FormData
+        formData.append('compressed_file', fileList[0].originFileObj);
+
+        // 添加其他表单数据到 FormData
+        for (const key in imageInfo) {
+            formData.append(key, imageInfo[key]);
+        }
+
+        try {
+            this.setUploadHint({
+                status: 'processing',
+                message: '正在处理图片，请稍后...',
+                isProcessing: true,
+            })
+            const response = await axiosInstance.post('/irdip/upload_compressed/', formData);
+            const responseData = response.data;
+
+            this.setUploadHint({
+                status: 'success',
+                message: '上传成功！',
+                isProcessing: false,
+            })
+            this.setSelectedUploadId([]);
+            return responseData;
+        } catch (error) {
+            this.setUploadHint({
+                status: 'error',
+                message: '上传失败，请稍后再试！',
                 isProcessing: false,
             })
             console.error('Error during image upload:', error);
