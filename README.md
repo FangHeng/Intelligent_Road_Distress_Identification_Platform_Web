@@ -1,6 +1,12 @@
 # 纹影探路
 
-[![Version](https://img.shields.io/badge/Version-v1.0.0-blue.svg)](https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web)[![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web)[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web)
+<div align="center">
+  <a   					href="https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web"><img src="https://img.shields.io/badge/Version-v1.0.0-blue.svg" alt="Version"></a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web"><img src="https://img.shields.io/badge/Build-Passing-brightgreen.svg" alt="Build"></a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
+</div>
 
 🛣️ **纹影探路**是一个创新的工业软件平台，旨在通过先进的深度学习技术，提供精确的道路病害检测和分析。它能自动识别道路裂缝、修补等常见问题，并生成详尽的状况报告，极大地提升道路维护的效率和准确性。
 
@@ -22,7 +28,7 @@
 
 ## 依赖与工具
 
-- 💻**前端**：
+- **前端**：
   
   - 使用了 [React](https://reactjs.org/) 构建的应用（基于 create-react-app）。
   - 使用了 [Ant Design](https://ant.design/) 作为 UI 组件库，包括 [Ant Design Pro Components](https://procomponents.ant.design/)，使用了 [AntV](https://antv.antgroup.com/) 作为可视化图表。
