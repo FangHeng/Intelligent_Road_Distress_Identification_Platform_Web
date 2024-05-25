@@ -1,6 +1,16 @@
-## 项目简介
+# 纹影探路
 
-本项目旨在开发一个名为“智能道路病害分析平台”的先进系统，专注于提高道路质量的评估与病害检测效率。该平台适用于城市道路、高速公路和乡村道路等的病害检测，尤其适用于道路维护和修复工作。利用先进的深度学习技术，系统能够分析上传的道路图像，准确识别出如裂缝、坑洼等病害，为平台目标用户提供关键的维修指导。这些用户通常需要快速、准确地评估路面状况，以便制定出高效的道路维护和修复策略。通过提供深入而准确的病害分析结果，保障道路的安全和持续性，显著减少传统维护工作的人力资源消耗。平台提供了丰富的数据分析功能，使得维护决策不再是基于经验，而是基于真实的路面数据与智能分析。
+[![Version](https://img.shields.io/badge/Version-v1.0.0-blue.svg)](https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web)[![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web)[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web)
+
+🛣️ **纹影探路**是一个创新的工业软件平台，旨在通过先进的深度学习技术，提供精确的道路病害检测和分析。它能自动识别道路裂缝、修补等常见问题，并生成详尽的状况报告，极大地提升道路维护的效率和准确性。
+
+我们的目标是让深度学习对工业路面病害检测技术对每个人都更加开放和易用，纹影探路具有以下几个特点：
+
+- 🧪 精准 - 对道路状况进行细致的分析和检测。根据模型训练的标签，将检测结果进行细化，方便用户查看。
+- 🛠️ 道路管理更方便 - 开启道路维护的新方式。使用平台管理路面信息，更好地维护道路，提高管理效率。
+- 🤝 自动化 - 让纹影探路为您工作，将您的想法变为现实。内置AI助手，方便用户与平台进行交流，提供更好的使用体验。大模型助力报告生成，提供更加精细的报告内容。
+
+加入我们的行列！纹影探路将持续引领深度学习技术在道路维护领域的创新。
 
 ## 功能特性
 
@@ -12,10 +22,10 @@
 
 ## 依赖与工具
 
-- **前端**：
+- 💻**前端**：
   
   - 使用了 [React](https://reactjs.org/) 构建的应用（基于 create-react-app）。
-  - 使用了 [Ant Design](https://ant.design/) 作为 UI 组件库，包括 [Ant Design Pro Component](https://antv.antgroup.com/)，使用了[AntV](https://procomponents.ant.design/)作为可视化图表。
+  - 使用了 [Ant Design](https://ant.design/) 作为 UI 组件库，包括 [Ant Design Pro Components](https://procomponents.ant.design/)，使用了 [AntV](https://antv.antgroup.com/) 作为可视化图表。
   - 使用了 [React Router](https://reactrouter.com/) 进行导航。
 - **后端**：
   
@@ -120,5 +130,5 @@ docker compose up --build
 
 - [Fangheng (方珩)](https://github.com/FangHeng)
 - [Mr-lander (嵇禄)](https://github.com/Mr-lander)
-- [HJingVheng (rui huang)](https://github.com/HJingCheng)
+- [HJingCheng (rui huang)](https://github.com/HJingCheng)
 - [DearCaat (Wenhao Tang)](https://github.com/DearCaat)
