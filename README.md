@@ -7,6 +7,9 @@
   &nbsp;&nbsp;&nbsp;
   <a href="https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
 </div>
+## 纹影探路 - 智能道路病害分析平台
+
+<img src="doc/logo.png" alt="logo" style="zoom: 25%;" />
 
 🛣️ **纹影探路**是一个创新的工业软件平台，旨在通过先进的深度学习技术，提供精确的道路病害检测和分析。它能自动识别道路裂缝、修补等常见问题，并生成详尽的状况报告，极大地提升道路维护的效率和准确性。
 
@@ -24,7 +27,7 @@
 
 ![vis](doc/vis.jpg)
 
-更完整的功能演示视频请参考：[智能路面病害分析平台功能演示](https://s0sf8djhx3.feishu.cn/file/BPKzbkMZ2oqqpRxkI7ictEULnCc)
+更完整的功能演示视频请参考：[智能道路病害分析平台功能演示](https://s0sf8djhx3.feishu.cn/file/BPKzbkMZ2oqqpRxkI7ictEULnCc)
 
 项目PPT请参考：[项目PPT](doc/PPT-GitHub.pdf)
 
