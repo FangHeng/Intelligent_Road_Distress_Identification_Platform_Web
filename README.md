@@ -169,4 +169,5 @@ docker compose up --build
 
 更多我们团队关于道路病害分类的任务可以参考：[Pavement-Distress-Classification](https://github.com/DearCaat/Pavement-Distress-Classification)
 
-如果您对我们的项目感兴趣，欢迎邮件联系：[Email](fangheng@cqu.edu.cn)
+如果您对我们的项目感兴趣，欢迎邮件联系：[Email](mailto:fangheng@cqu.edu.cn)
+
