@@ -18,6 +18,24 @@
 
 加入我们的行列！纹影探路将持续引领深度学习技术在道路维护领域的创新。
 
+## 运行界面
+
+![home](doc/home.jpg)
+
+![vis](doc/vis.jpg)
+
+更完整的功能演示视频请参考：[智能路面病害分析平台功能演示](https://s0sf8djhx3.feishu.cn/file/BPKzbkMZ2oqqpRxkI7ictEULnCc)
+
+项目PPT请参考：[项目PPT](doc/PPT-GitHub.pdf)
+
+## TODO List
+
+- [x] 完善README
+- [x] 添加项目的PPT
+- [x] 添加项目演示视频
+- [ ] 提供更多的演示
+- [ ] 代码优化
+
 ## 功能特性
 
 - 自动化病害检测与识别：传统的路面病害检测主要依靠人工巡检或简单的设备，效率低下且容易漏检。本平台通过使用一些深度学习模型，高效地自动检测和识别路面病害，如裂缝、坑洼等，并对病害区域做出标记，提高检测效率和精度。
@@ -138,3 +156,13 @@ docker compose up --build
 - [Mr-lander (嵇禄)](https://github.com/Mr-lander)
 - [HJingCheng (rui huang)](https://github.com/HJingCheng)
 - [DearCaat (Wenhao Tang)](https://github.com/DearCaat)
+
+## 致谢
+
+在此，谨向重庆大学大数据与软件学院的[黄晟](http://www.cse.cqu.edu.cn/info/2095/7375.htm)教授致以诚挚的感谢。感谢黄教授在项目开发过程中给予的宝贵帮助和支持，使我们能够顺利完成本开源项目。
+
+---
+
+更多我们团队关于道路病害分类的任务可以参考：[Pavement-Distress-Classification](https://github.com/DearCaat/Pavement-Distress-Classification)
+
+如果您对我们的项目感兴趣，欢迎邮件联系：[Email](fangheng@cqu.edu.cn)
