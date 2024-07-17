@@ -1,4 +1,4 @@
-# 纹影探路
+# 纹影探路-智能道路病害分析平台
 
 <div align="center">
   <a   					href="https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web"><img src="https://img.shields.io/badge/Version-v1.0.0-blue.svg" alt="Version"></a>
@@ -8,7 +8,6 @@
   <a href="https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
 </div>
 
-## 纹影探路-智能道路病害分析平台
 
 <img src="doc/logo.png" alt="logo" width="30%" />
 
