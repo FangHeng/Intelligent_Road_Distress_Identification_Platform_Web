@@ -149,7 +149,7 @@ docker compose up --build
 
 ## 许可证
 
-该项目采用 MIT 许可证 - 请参阅 [LICENSE](LICENSE) 文件了解更多信息。
+该项目采用 Apache-2.0 许可证 - 请参阅 [LICENSE](LICENSE) 文件了解更多信息。
 
 ## 贡献者
 
