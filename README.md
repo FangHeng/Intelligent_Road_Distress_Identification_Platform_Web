@@ -5,7 +5,7 @@
   &nbsp;&nbsp;&nbsp;
   <a href="https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web"><img src="https://img.shields.io/badge/Build-Passing-brightgreen.svg" alt="Build"></a>
   &nbsp;&nbsp;&nbsp;
-  <a href="https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
+  <a href="https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web"><img src="https://img.shields.io/badge/License-Apache 2.0-green.svg" alt="License"></a>
 </div>
 
 
