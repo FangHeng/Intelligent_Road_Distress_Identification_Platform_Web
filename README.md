@@ -137,6 +137,10 @@
 docker compose up --build
 ```
 
+### 求助与支持
+
+如果你在项目部署或使用过程中遇到任何问题，欢迎在项目的GitHub仓库中提出[issue](https://github.com/FangHeng/Intelligent_Road_Distress_Identification_Platform_Web/issues)。我们非常高兴收到您的任何反馈，建议，或者问题报告。你的每一个问题和建议都是推动项目进步的重要力量。
+
 ## 贡献
 
 我们欢迎并感谢您对该项目的贡献！如果您有任何建议、bug 报告或者想要参与项目的开发，请通过以下方式进行贡献：
