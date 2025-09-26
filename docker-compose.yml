@@ -57,12 +57,16 @@ services:
     networks:
       - my_network
 
-  homepage:
-    build: ./homepage
-    ports:
-      - "3001:3001"
-    networks:
-      - my_network
+  # homepage部分并未进行测试和调试，基于的代码比较老，相关docker实现可以参考frontend部分，可能会存在一些bug
+  # 推荐两种部署方式：
+  # 1. docker部署时，取消注释后复制frontend中的DOCKERFILE到homepage目录下，然后进行调试
+  # 2. 也可以单独配置环境来实现homepage的部署
+  # homepage:
+  #   build: ./homepage
+  #   ports:
+  #     - "3001:3001"
+  #   networks:
+  #     - my_network
 
   db:
     image: mysql:8.0
